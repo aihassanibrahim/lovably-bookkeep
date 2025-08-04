@@ -1,45 +1,43 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, TrendingDown, DollarSign, Users, Receipt, Building2 } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Users, Receipt, Building2, Plus } from "lucide-react";
+import { ProfitCard } from "@/components/dashboard/ProfitCard";
+import { VatCard } from "@/components/dashboard/VatCard";
+import { ExportButton } from "@/components/export/ExportButton";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { OrderForm } from "@/components/orders/OrderForm";
+import { ExpenseForm } from "@/components/expenses/ExpenseForm";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function Dashboard() {
+  const [showOrderForm, setShowOrderForm] = useState(false);
+  const [showExpenseForm, setShowExpenseForm] = useState(false);
+
   return (
     <div className="space-y-6">
-      <div>
+      <div className="flex justify-between items-center">
+        <div>
         <h1 className="text-3xl font-bold">Översikt</h1>
         <p className="text-muted-foreground">
           Välkommen till ditt bokföringssystem
         </p>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={() => setShowOrderForm(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Ny intäkt
+          </Button>
+          <Button variant="outline" onClick={() => setShowExpenseForm(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Ny utgift
+          </Button>
+          <ExportButton />
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Totala tillgångar</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">0 kr</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600 flex items-center gap-1">
-                <TrendingUp className="h-3 w-3" />
-                Ingen förändring
-              </span>
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Skulder</CardTitle>
-            <TrendingDown className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">0 kr</div>
-            <p className="text-xs text-muted-foreground">
-              Totala skulder
-            </p>
-          </CardContent>
-        </Card>
+        <ProfitCard />
+        <VatCard />
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -124,6 +122,30 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={showOrderForm} onOpenChange={setShowOrderForm}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Skapa ny intäkt/order</DialogTitle>
+          </DialogHeader>
+          <OrderForm 
+            onSuccess={() => setShowOrderForm(false)}
+            onCancel={() => setShowOrderForm(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showExpenseForm} onOpenChange={setShowExpenseForm}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Registrera ny utgift</DialogTitle>
+          </DialogHeader>
+          <ExpenseForm 
+            onSuccess={() => setShowExpenseForm(false)}
+            onCancel={() => setShowExpenseForm(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

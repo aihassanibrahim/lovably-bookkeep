@@ -6,9 +6,12 @@ import {
   Building2, 
   TrendingUp,
   Settings,
-  BookOpen
+  BookOpen,
+  LogOut
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -19,6 +22,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
+  SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
 
@@ -33,6 +37,7 @@ const navigation = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
+  const { signOut, user } = useAuth();
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -70,6 +75,20 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      
+      <SidebarFooter>
+        <div className="p-2">
+          {state !== "collapsed" && (
+            <p className="text-xs text-muted-foreground mb-2">
+              Inloggad som: {user?.email}
+            </p>
+          )}
+          <Button variant="ghost" size="sm" onClick={signOut} className="w-full justify-start">
+            <LogOut className="h-4 w-4 mr-2" />
+            {state !== "collapsed" && <span>Logga ut</span>}
+          </Button>
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }
