@@ -1,58 +1,58 @@
-# Welcome to your Lovable project
+# BizPal - Företagsledning
 
-## Project info
+## Projektinfo
 
 **URL**: https://lovable.dev/projects/1a61262d-ac94-4f9a-a332-d76573fbd82d
 
-## How can I edit this code?
+## Hur kan jag redigera denna kod?
 
-There are several ways of editing your application.
+Det finns flera sätt att redigera din applikation.
 
-**Use Lovable**
+**Använd Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1a61262d-ac94-4f9a-a332-d76573fbd82d) and start prompting.
+Besök bara [Lovable Project](https://lovable.dev/projects/1a61262d-ac94-4f9a-a332-d76573fbd82d) och börja prompta.
 
 Changes made via Lovable will be committed automatically to this repo.
 
-**Use your preferred IDE**
+**Använd din föredragna IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Om du vill arbeta lokalt med din egen IDE kan du klona detta repo och pusha ändringar. Pushade ändringar kommer också att reflekteras i Lovable.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Det enda kravet är att ha Node.js & npm installerat - [installera med nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-Follow these steps:
+Följ dessa steg:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Steg 1: Klona repository med projektets Git URL.
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Steg 2: Navigera till projektkatalogen.
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
+# Steg 3: Installera nödvändiga beroenden.
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Steg 4: Starta utvecklingsservern med auto-reloading och en omedelbar förhandsvisning.
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+**Redigera en fil direkt i GitHub**
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Navigera till önskad(e) fil(er).
+- Klicka på "Edit"-knappen (penna-ikon) uppe till höger i filvyn.
+- Gör dina ändringar och committa ändringarna.
 
-**Use GitHub Codespaces**
+**Använd GitHub Codespaces**
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- Navigera till huvudsidan av ditt repository.
+- Klicka på "Code"-knappen (grön knapp) nära uppe till höger.
+- Välj "Codespaces"-fliken.
+- Klicka på "New codespace" för att starta en ny Codespace-miljö.
+- Redigera filer direkt inom Codespace och committa och pusha dina ändringar när du är klar.
 
-## What technologies are used for this project?
+## Vilka teknologier används för detta projekt?
 
-This project is built with:
+Detta projekt är byggt med:
 
 - Vite
 - TypeScript
@@ -60,14 +60,14 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Hur kan jag deploya detta projekt?
 
-Simply open [Lovable](https://lovable.dev/projects/1a61262d-ac94-4f9a-a332-d76573fbd82d) and click on Share -> Publish.
+Öppna bara [Lovable](https://lovable.dev/projects/1a61262d-ac94-4f9a-a332-d76573fbd82d) och klicka på Share -> Publish.
 
-## Can I connect a custom domain to my Lovable project?
+## Kan jag ansluta en anpassad domän till mitt Lovable-projekt?
 
-Yes, you can!
+Ja, det kan du!
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+För att ansluta en domän, navigera till Project > Settings > Domains och klicka Connect Domain.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Läs mer här: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)

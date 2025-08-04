@@ -1,13 +1,10 @@
 import { 
   Home, 
-  Users, 
-  Receipt, 
-  CreditCard, 
-  Building2, 
   TrendingUp,
+  TrendingDown,
   Settings,
-  BookOpen,
-  LogOut
+  LogOut,
+  Scissors
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -27,12 +24,11 @@ import {
 } from "@/components/ui/sidebar";
 
 const navigation = [
-  { title: "Översikt", url: "/", icon: Home },
-  { title: "Kontoplan", url: "/accounts", icon: BookOpen },
-  { title: "Transaktioner", url: "/transactions", icon: Receipt },
-  { title: "Kunder", url: "/customers", icon: Users },
-  { title: "Leverantörer", url: "/suppliers", icon: Building2 },
-  { title: "Rapporter", url: "/reports", icon: TrendingUp },
+  { title: "Dashboard", url: "/", icon: Home },
+  { title: "Intäkter", url: "/orders", icon: TrendingUp },
+  { title: "Utgifter", url: "/expenses", icon: TrendingDown },
+  { title: "Produktion", url: "/production", icon: Scissors },
+  { title: "Inställningar", url: "/settings", icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -49,7 +45,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <div className="p-4 border-b">
         <div className="flex items-center gap-2">
-          <CreditCard className="h-6 w-6 text-primary" />
+          <Home className="h-6 w-6 text-primary" />
           {state !== "collapsed" && <span className="font-semibold text-lg">Bokföring</span>}
         </div>
       </div>
