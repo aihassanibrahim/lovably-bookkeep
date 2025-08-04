@@ -7,10 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useBizPal } from "@/context/BizPalContext";
 import { Calendar, Package, User, DollarSign, Instagram, Phone, MapPin, Clock } from 'lucide-react';
 
 const Orders = () => {
-  const [orders, setOrders] = useState([]);
+  const { orders, addOrder, updateOrder, deleteOrder, stats } = useBizPal();
   const [showNewOrderDialog, setShowNewOrderDialog] = useState(false);
   const [newOrder, setNewOrder] = useState({
     customer: { name: "", socialMedia: "", phone: "", address: "" },
@@ -30,9 +31,10 @@ const Orders = () => {
   const statusOptions = ["Beställd", "Pågående", "Klar", "Skickad"];
 
   const updateOrderStatus = (orderId, newStatus) => {
-    setOrders(orders.map(order => 
-      order.id === orderId ? { ...order, status: newStatus } : order
-    ));
+    const orderToUpdate = orders.find(order => order.id === orderId);
+    if (orderToUpdate) {
+      updateOrder({ ...orderToUpdate, status: newStatus });
+    }
   };
 
   const addNewOrder = () => {
@@ -51,7 +53,7 @@ const Orders = () => {
       notes: newOrder.notes
     };
 
-    setOrders([...orders, order]);
+    addOrder(order);
     setShowNewOrderDialog(false);
     setNewOrder({
       customer: { name: "", socialMedia: "", phone: "", address: "" },
@@ -61,9 +63,6 @@ const Orders = () => {
       notes: ""
     });
   };
-
-  const totalValue = orders.reduce((sum, order) => sum + order.price, 0);
-  const activeOrders = orders.filter(order => order.status !== "Skickad").length;
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -227,7 +226,7 @@ const Orders = () => {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{activeOrders}</div>
+            <div className="text-2xl font-bold">{stats.orders.active}</div>
           </CardContent>
         </Card>
         
@@ -237,7 +236,7 @@ const Orders = () => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalValue.toLocaleString()} SEK</div>
+            <div className="text-2xl font-bold">{stats.orders.revenue.toLocaleString()} SEK</div>
           </CardContent>
         </Card>
         
@@ -248,7 +247,7 @@ const Orders = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {orders.length > 0 ? Math.round(totalValue / orders.length).toLocaleString() : 0} SEK
+              {orders.length > 0 ? Math.round(stats.orders.revenue / orders.length).toLocaleString() : 0} SEK
             </div>
           </CardContent>
         </Card>

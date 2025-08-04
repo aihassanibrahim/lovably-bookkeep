@@ -8,10 +8,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useBizPal } from "@/context/BizPalContext";
 import { Calendar, Clock, AlertTriangle, CheckCircle, Plus, Scissors, Package } from 'lucide-react';
 
 const Production = () => {
-  const [productionTasks, setProductionTasks] = useState([]);
+  const { productionTasks, addProductionTask, updateProductionTask, deleteProductionTask, stats } = useBizPal();
   const [showNewTaskDialog, setShowNewTaskDialog] = useState(false);
   const [newTask, setNewTask] = useState({
     orderId: "",
@@ -35,26 +36,24 @@ const Production = () => {
     "Klar": "bg-green-100 text-green-800"
   };
 
-  const toggleTaskCompletion = (taskId, subtaskId) => {
-    setProductionTasks(tasks => 
-      tasks.map(task => 
-        task.id === taskId 
-          ? {
-              ...task,
-              tasks: task.tasks.map(subtask =>
-                subtask.id === subtaskId 
-                  ? { ...subtask, completed: !subtask.completed }
-                  : subtask
-              )
-            }
-          : task
-      )
-    );
+    const toggleTaskCompletion = (taskId, subtaskId) => {
+    const taskToUpdate = productionTasks.find(task => task.id === taskId);
+    if (taskToUpdate) {
+      const updatedTask = {
+        ...taskToUpdate,
+        tasks: taskToUpdate.tasks.map(subtask =>
+          subtask.id === subtaskId
+            ? { ...subtask, completed: !subtask.completed }
+            : subtask
+        )
+      };
+      updateProductionTask(updatedTask);
+    }
   };
 
   const addNewTask = () => {
     const nextId = Math.max(0, ...productionTasks.map(t => t.id)) + 1;
-    
+
     const task = {
       id: nextId,
       orderId: newTask.orderId,
@@ -76,7 +75,7 @@ const Production = () => {
       notes: newTask.notes
     };
 
-    setProductionTasks([...productionTasks, task]);
+    addProductionTask(task);
     setShowNewTaskDialog(false);
     setNewTask({
       orderId: "",
@@ -89,14 +88,7 @@ const Production = () => {
     });
   };
 
-  const activeTasks = productionTasks.filter(task => task.status !== "Klar").length;
   const totalHours = productionTasks.reduce((sum, task) => sum + task.estimatedHours, 0);
-  const urgentTasks = productionTasks.filter(task => {
-    const today = new Date();
-    const dueDate = new Date(task.dueDate);
-    const daysUntilDue = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
-    return daysUntilDue <= 3 && task.status !== "Klar";
-  }).length;
 
   return (
     <div className="p-6 space-y-6">
@@ -203,35 +195,35 @@ const Production = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Aktiva uppgifter</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{activeTasks}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Totalt timmar</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalHours}h</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Brådskande</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">{urgentTasks}</div>
-            </CardContent>
-          </Card>
+                  <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Aktiva uppgifter</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.production.active}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Totalt timmar</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalHours}h</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Brådskande</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{stats.production.urgent}</div>
+          </CardContent>
+        </Card>
         </div>
 
         {/* Production Tasks */}

@@ -7,10 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useBizPal } from "@/context/BizPalContext";
 import { Plus, Edit, Trash2, Tag, DollarSign, Package, Image } from 'lucide-react';
 
 const Products = () => {
-  const [products, setProducts] = useState([]);
+  const { products, addProduct, updateProduct, deleteProduct, stats } = useBizPal();
   const [showNewProductDialog, setShowNewProductDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [newProduct, setNewProduct] = useState({
@@ -43,15 +44,11 @@ const Products = () => {
 
   const addOrEditProduct = () => {
     if (editingProduct) {
-      setProducts(products.map(p => 
-        p.id === editingProduct.id 
-          ? { ...newProduct, id: editingProduct.id }
-          : p
-      ));
+      updateProduct({ ...newProduct, id: editingProduct.id });
       setEditingProduct(null);
     } else {
       const nextId = Math.max(0, ...products.map(p => p.id)) + 1;
-      setProducts([...products, { ...newProduct, id: nextId }]);
+      addProduct({ ...newProduct, id: nextId });
     }
     
     setShowNewProductDialog(false);
@@ -77,7 +74,7 @@ const Products = () => {
   };
 
   const deleteProduct = (productId) => {
-    setProducts(products.filter(p => p.id !== productId));
+    deleteProduct(productId);
   };
 
   const toggleSize = (size) => {
@@ -317,7 +314,7 @@ const Products = () => {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{products.length}</div>
+            <div className="text-2xl font-bold">{stats.products.total}</div>
           </CardContent>
         </Card>
         
@@ -338,7 +335,7 @@ const Products = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {new Set(products.map(p => p.category)).size}
+              {stats.products.categories}
             </div>
           </CardContent>
         </Card>

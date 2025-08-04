@@ -7,10 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useBizPal } from "@/context/BizPalContext";
 import { Plus, Edit, Trash2, AlertTriangle, Package, DollarSign, TrendingDown } from 'lucide-react';
 
 const Inventory = () => {
-  const [inventoryItems, setInventoryItems] = useState([]);
+  const { inventoryItems, addInventoryItem, updateInventoryItem, deleteInventoryItem, stats } = useBizPal();
   const [showNewItemDialog, setShowNewItemDialog] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [newItem, setNewItem] = useState({
@@ -45,19 +46,15 @@ const Inventory = () => {
 
   const units = ["st", "m", "m²", "cm", "kg", "g", "liter", "ml", "paket", "rulle", "ark"];
 
-  const addOrEditItem = () => {
+    const addOrEditItem = () => {
     if (editingItem) {
-      setInventoryItems(items => items.map(item => 
-        item.id === editingItem.id 
-          ? { ...newItem, id: editingItem.id }
-          : item
-      ));
+      updateInventoryItem({ ...newItem, id: editingItem.id });
       setEditingItem(null);
     } else {
       const nextId = Math.max(0, ...inventoryItems.map(item => item.id)) + 1;
-      setInventoryItems([...inventoryItems, { ...newItem, id: nextId }]);
+      addInventoryItem({ ...newItem, id: nextId });
     }
-    
+
     setShowNewItemDialog(false);
     setNewItem({
       name: "",
@@ -79,15 +76,14 @@ const Inventory = () => {
   };
 
   const deleteItem = (itemId) => {
-    setInventoryItems(inventoryItems.filter(item => item.id !== itemId));
+    deleteInventoryItem(itemId);
   };
 
   const updateStock = (itemId, newStock) => {
-    setInventoryItems(items => items.map(item =>
-      item.id === itemId 
-        ? { ...item, currentStock: newStock }
-        : item
-    ));
+    const itemToUpdate = inventoryItems.find(item => item.id === itemId);
+    if (itemToUpdate) {
+      updateInventoryItem({ ...itemToUpdate, currentStock: newStock });
+    }
   };
 
   const addNewCategory = () => {
@@ -98,12 +94,8 @@ const Inventory = () => {
     }
   };
 
-  const lowStockItems = inventoryItems.filter(item => 
+    const lowStockItems = inventoryItems.filter(item =>
     parseFloat(item.currentStock) <= parseFloat(item.minStock)
-  );
-
-  const totalValue = inventoryItems.reduce((sum, item) => 
-    sum + (parseFloat(item.currentStock) * parseFloat(item.costPerUnit) || 0), 0
   );
 
   const getStockStatus = (item) => {
@@ -286,33 +278,33 @@ const Inventory = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+                <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Antal material</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{inventoryItems.length}</div>
+            <div className="text-2xl font-bold">{stats.inventory.totalItems}</div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Lagervärde</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalValue.toLocaleString()} SEK</div>
+            <div className="text-2xl font-bold">{stats.inventory.totalValue.toLocaleString()} SEK</div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Låga lager</CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{lowStockItems.length}</div>
+            <div className="text-2xl font-bold text-red-600">{stats.inventory.lowStock}</div>
           </CardContent>
         </Card>
       </div>

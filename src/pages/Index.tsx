@@ -3,12 +3,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { 
-  Package, 
-  ShoppingBag, 
-  Users, 
-  DollarSign, 
-  Calendar, 
+import { useBizPal } from "@/context/BizPalContext";
+import {
+  Package,
+  ShoppingBag,
+  Users,
+  DollarSign,
+  Calendar,
   AlertTriangle,
   TrendingUp,
   Clock,
@@ -18,29 +19,7 @@ import {
 } from 'lucide-react';
 
 const Index = () => {
-  // Placeholder data - i verkligheten skulle detta komma från din state/database
-  const stats = {
-    orders: {
-      total: 0,
-      active: 0,
-      completed: 0,
-      revenue: 0
-    },
-    production: {
-      active: 0,
-      urgent: 0,
-      completed: 0
-    },
-    inventory: {
-      totalItems: 0,
-      lowStock: 0,
-      totalValue: 0
-    },
-    products: {
-      total: 0,
-      categories: 0
-    }
-  };
+  const { stats } = useBizPal();
 
   const quickActions = [
     {
