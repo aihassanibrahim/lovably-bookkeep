@@ -7,11 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useBizPal } from "@/context/BizPalContext";
 import { Plus, Edit, Trash2, AlertTriangle, Package, DollarSign, TrendingDown } from 'lucide-react';
+import { useBizPal } from "@/context/BizPalContext";
 
 const Inventory = () => {
+  // Use global state instead of local state
   const { inventoryItems, addInventoryItem, updateInventoryItem, deleteInventoryItem, stats } = useBizPal();
+  
   const [showNewItemDialog, setShowNewItemDialog] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [newItem, setNewItem] = useState({
@@ -46,7 +48,7 @@ const Inventory = () => {
 
   const units = ["st", "m", "m²", "cm", "kg", "g", "liter", "ml", "paket", "rulle", "ark"];
 
-    const addOrEditItem = () => {
+  const handleAddOrEditItem = () => {
     if (editingItem) {
       updateInventoryItem({ ...newItem, id: editingItem.id });
       setEditingItem(null);
@@ -54,8 +56,22 @@ const Inventory = () => {
       const nextId = Math.max(0, ...inventoryItems.map(item => item.id)) + 1;
       addInventoryItem({ ...newItem, id: nextId });
     }
-
+    
     setShowNewItemDialog(false);
+    resetForm();
+  };
+
+  const handleEditItem = (item) => {
+    setNewItem(item);
+    setEditingItem(item);
+    setShowNewItemDialog(true);
+  };
+
+  const handleDeleteItem = (itemId) => {
+    deleteInventoryItem(itemId);
+  };
+
+  const resetForm = () => {
     setNewItem({
       name: "",
       category: "",
@@ -69,20 +85,10 @@ const Inventory = () => {
     });
   };
 
-  const editItem = (item) => {
-    setNewItem(item);
-    setEditingItem(item);
-    setShowNewItemDialog(true);
-  };
-
-  const deleteItem = (itemId) => {
-    deleteInventoryItem(itemId);
-  };
-
   const updateStock = (itemId, newStock) => {
-    const itemToUpdate = inventoryItems.find(item => item.id === itemId);
-    if (itemToUpdate) {
-      updateInventoryItem({ ...itemToUpdate, currentStock: newStock });
+    const item = inventoryItems.find(i => i.id === itemId);
+    if (item) {
+      updateInventoryItem({ ...item, currentStock: newStock });
     }
   };
 
@@ -94,13 +100,13 @@ const Inventory = () => {
     }
   };
 
-    const lowStockItems = inventoryItems.filter(item =>
-    parseFloat(item.currentStock) <= parseFloat(item.minStock)
+  const lowStockItems = inventoryItems.filter(item => 
+    parseFloat(item.currentStock || 0) <= parseFloat(item.minStock || 0)
   );
 
   const getStockStatus = (item) => {
-    const current = parseFloat(item.currentStock);
-    const min = parseFloat(item.minStock);
+    const current = parseFloat(item.currentStock || 0);
+    const min = parseFloat(item.minStock || 0);
     
     if (current <= min) return { status: "Låg", color: "bg-red-100 text-red-800" };
     if (current <= min * 1.5) return { status: "Varning", color: "bg-yellow-100 text-yellow-800" };
@@ -253,21 +259,11 @@ const Inventory = () => {
                 <Button variant="outline" onClick={() => {
                   setShowNewItemDialog(false);
                   setEditingItem(null);
-                  setNewItem({
-                    name: "",
-                    category: "",
-                    currentStock: "",
-                    minStock: "",
-                    unit: "",
-                    costPerUnit: "",
-                    supplier: "",
-                    description: "",
-                    location: ""
-                  });
+                  resetForm();
                 }}>
                   Avbryt
                 </Button>
-                <Button onClick={addOrEditItem} className="bg-emerald-600 hover:bg-emerald-700">
+                <Button onClick={handleAddOrEditItem} className="bg-emerald-600 hover:bg-emerald-700">
                   {editingItem ? "Uppdatera" : "Lägg till"}
                 </Button>
               </div>
@@ -276,9 +272,9 @@ const Inventory = () => {
         </Dialog>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards - Now using real data from context */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card>
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Antal material</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
@@ -287,7 +283,7 @@ const Inventory = () => {
             <div className="text-2xl font-bold">{stats.inventory.totalItems}</div>
           </CardContent>
         </Card>
-
+        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Lagervärde</CardTitle>
@@ -297,14 +293,14 @@ const Inventory = () => {
             <div className="text-2xl font-bold">{stats.inventory.totalValue.toLocaleString()} SEK</div>
           </CardContent>
         </Card>
-
+        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Låga lager</CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.inventory.lowStock}</div>
+            <div className="text-2xl font-bold text-red-600">{lowStockItems.length}</div>
           </CardContent>
         </Card>
       </div>
@@ -354,7 +350,7 @@ const Inventory = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {inventoryItems.map((item) => {
               const stockStatus = getStockStatus(item);
-              const itemValue = (parseFloat(item.currentStock) * parseFloat(item.costPerUnit)) || 0;
+              const itemValue = (parseFloat(item.currentStock || 0) * parseFloat(item.costPerUnit || 0)) || 0;
               
               return (
                 <Card key={item.id} className="hover:shadow-md transition-shadow">
@@ -373,14 +369,14 @@ const Inventory = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => editItem(item)}
+                          onClick={() => handleEditItem(item)}
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => deleteItem(item.id)}
+                          onClick={() => handleDeleteItem(item.id)}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -395,7 +391,7 @@ const Inventory = () => {
                           <Input
                             type="number"
                             step="0.1"
-                            value={item.currentStock}
+                            value={item.currentStock || ""}
                             onChange={(e) => updateStock(item.id, e.target.value)}
                             className="w-20"
                           />
@@ -414,7 +410,7 @@ const Inventory = () => {
                       <div>
                         <Label className="text-sm text-gray-600">Kostnad per enhet</Label>
                         <p className="text-lg font-medium">
-                          {parseFloat(item.costPerUnit).toLocaleString()} SEK
+                          {parseFloat(item.costPerUnit || 0).toLocaleString()} SEK
                         </p>
                       </div>
                       <div>

@@ -4,8 +4,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/components/auth/AuthProvider";
-import { BizPalProvider } from "@/context/BizPalContext";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { BizPalProvider } from "@/context/BizPalContext";
+import { ThemeProvider } from "@/components/theme-provider";
 import Navigation from "@/components/Navigation";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -27,10 +28,10 @@ const AppContent = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Laddar...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 dark:border-indigo-400 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Laddar...</p>
         </div>
       </div>
     );
@@ -38,7 +39,7 @@ const AppContent = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <LoginForm />
       </div>
     );
@@ -46,7 +47,7 @@ const AppContent = () => {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Navigation />
         
         {/* Main content area */}
@@ -55,7 +56,7 @@ const AppContent = () => {
             <Routes>
               <Route path="/" element={<Index />} />
               
-                                        {/* BIZPAL - HUVUDFUNKTIONER */}
+              {/* BIZPAL - HUVUDFUNKTIONER */}
               <Route path="/orders" element={<Orders />} />
               <Route path="/production" element={<Production />} />
               <Route path="/products" element={<Products />} />
@@ -82,15 +83,17 @@ const AppContent = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <BizPalProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <AppContent />
-        </TooltipProvider>
-      </BizPalProvider>
-    </AuthProvider>
+    <ThemeProvider defaultTheme="system" storageKey="bizpal-ui-theme">
+      <AuthProvider>
+        <BizPalProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <AppContent />
+          </TooltipProvider>
+        </BizPalProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

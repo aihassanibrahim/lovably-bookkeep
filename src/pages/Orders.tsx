@@ -7,12 +7,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Calendar, Package, User, DollarSign, Instagram, Phone, MapPin, Clock, Trash2, Edit } from 'lucide-react';
 import { useBizPal } from "@/context/BizPalContext";
-import { Calendar, Package, User, DollarSign, Instagram, Phone, MapPin, Clock } from 'lucide-react';
 
 const Orders = () => {
+  // Use global state instead of local state
   const { orders, addOrder, updateOrder, deleteOrder, stats } = useBizPal();
+  
   const [showNewOrderDialog, setShowNewOrderDialog] = useState(false);
+  const [editingOrder, setEditingOrder] = useState(null);
   const [newOrder, setNewOrder] = useState({
     customer: { name: "", socialMedia: "", phone: "", address: "" },
     product: { name: "", details: "", customizations: "" },
@@ -22,10 +26,10 @@ const Orders = () => {
   });
 
   const statusColors = {
-    "Beställd": "bg-blue-100 text-blue-800",
-    "Pågående": "bg-yellow-100 text-yellow-800", 
-    "Klar": "bg-green-100 text-green-800",
-    "Skickad": "bg-gray-100 text-gray-800"
+    "Beställd": "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300",
+    "Pågående": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300", 
+    "Klar": "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300",
+    "Skickad": "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
   };
 
   const statusOptions = ["Beställd", "Pågående", "Klar", "Skickad"];
@@ -37,24 +41,55 @@ const Orders = () => {
     }
   };
 
-  const addNewOrder = () => {
-    const nextId = Math.max(0, ...orders.map(o => o.id)) + 1;
-    const orderNumber = `ORD-${String(nextId).padStart(3, '0')}`;
-    
-    const order = {
-      id: nextId,
-      orderNumber,
-      customer: newOrder.customer,
-      product: newOrder.product,
-      price: parseFloat(newOrder.price),
-      status: "Beställd",
-      orderDate: new Date().toISOString().split('T')[0],
-      estimatedCompletion: newOrder.estimatedCompletion,
-      notes: newOrder.notes
-    };
+  const handleAddOrEditOrder = () => {
+    if (editingOrder) {
+      updateOrder({
+        ...newOrder,
+        id: editingOrder.id,
+        orderNumber: editingOrder.orderNumber,
+        orderDate: editingOrder.orderDate
+      });
+      setEditingOrder(null);
+    } else {
+      const nextId = Math.max(0, ...orders.map(o => o.id)) + 1;
+      const orderNumber = `ORD-${String(nextId).padStart(3, '0')}`;
+      
+      const order = {
+        id: nextId,
+        orderNumber,
+        customer: newOrder.customer,
+        product: newOrder.product,
+        price: parseFloat(newOrder.price) || 0,
+        status: "Beställd",
+        orderDate: new Date().toISOString().split('T')[0],
+        estimatedCompletion: newOrder.estimatedCompletion,
+        notes: newOrder.notes
+      };
 
-    addOrder(order);
+      addOrder(order);
+    }
+    
     setShowNewOrderDialog(false);
+    resetForm();
+  };
+
+  const handleEditOrder = (order) => {
+    setNewOrder({
+      customer: order.customer,
+      product: order.product,
+      price: order.price.toString(),
+      estimatedCompletion: order.estimatedCompletion,
+      notes: order.notes
+    });
+    setEditingOrder(order);
+    setShowNewOrderDialog(true);
+  };
+
+  const handleDeleteOrder = (orderId) => {
+    deleteOrder(orderId);
+  };
+
+  const resetForm = () => {
     setNewOrder({
       customer: { name: "", socialMedia: "", phone: "", address: "" },
       product: { name: "", details: "", customizations: "" },
@@ -64,27 +99,33 @@ const Orders = () => {
     });
   };
 
+  // Filter options
+  const [statusFilter, setStatusFilter] = useState("all");
+  const filteredOrders = statusFilter === "all" 
+    ? orders 
+    : orders.filter(order => order.status === statusFilter);
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Ordrar</h1>
-          <p className="text-gray-600 mt-1">Hantera alla beställningar från sociala medier</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Ordrar</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Hantera alla beställningar från sociala medier</p>
         </div>
         
         <Dialog open={showNewOrderDialog} onOpenChange={setShowNewOrderDialog}>
           <DialogTrigger asChild>
-            <Button className="bg-pink-600 hover:bg-pink-700">
+            <Button className="bg-pink-600 hover:bg-pink-700 dark:bg-pink-700 dark:hover:bg-pink-600">
               <Package className="w-4 h-4 mr-2" />
-              Ny Order
+              {editingOrder ? "Redigera Order" : "Ny Order"}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Lägg till ny order</DialogTitle>
+              <DialogTitle>{editingOrder ? "Redigera order" : "Lägg till ny order"}</DialogTitle>
               <DialogDescription>
-                Fyll i orderdetaljer från sociala medier
+                {editingOrder ? "Uppdatera orderdetaljer" : "Fyll i orderdetaljer från sociala medier"}
               </DialogDescription>
             </DialogHeader>
             
@@ -206,11 +247,15 @@ const Orders = () => {
               </div>
 
               <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setShowNewOrderDialog(false)}>
+                <Button variant="outline" onClick={() => {
+                  setShowNewOrderDialog(false);
+                  setEditingOrder(null);
+                  resetForm();
+                }}>
                   Avbryt
                 </Button>
-                <Button onClick={addNewOrder} className="bg-pink-600 hover:bg-pink-700">
-                  Lägg till order
+                <Button onClick={handleAddOrEditOrder} className="bg-pink-600 hover:bg-pink-700 dark:bg-pink-700 dark:hover:bg-pink-600">
+                  {editingOrder ? "Uppdatera order" : "Lägg till order"}
                 </Button>
               </div>
             </div>
@@ -218,66 +263,94 @@ const Orders = () => {
         </Dialog>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards - Now using real data from context */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+        <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Aktiva ordrar</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100">Aktiva ordrar</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground dark:text-gray-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.orders.active}</div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.orders.active}</div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Totalt ordervärde</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100">Totalt ordervärde</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground dark:text-gray-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.orders.revenue.toLocaleString()} SEK</div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.orders.revenue.toLocaleString()} SEK</div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Genomsnittspris</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100">Genomsnittspris</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground dark:text-gray-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {orders.length > 0 ? Math.round(stats.orders.revenue / orders.length).toLocaleString() : 0} SEK
+            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              {orders.length > 0 ? Math.round(orders.reduce((sum, o) => sum + o.price, 0) / orders.length).toLocaleString() : 0} SEK
             </div>
           </CardContent>
         </Card>
       </div>
 
+      {/* Filter Controls */}
+      <div className="flex items-center gap-4">
+        <Label className="text-sm font-medium text-gray-900 dark:text-gray-100">Filtrera efter status:</Label>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-40">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Alla ordrar</SelectItem>
+            {statusOptions.map(status => (
+              <SelectItem key={status} value={status}>{status}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <span className="text-sm text-gray-500 dark:text-gray-400">
+          Visar {filteredOrders.length} av {orders.length} ordrar
+        </span>
+      </div>
+
       {/* Orders List */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Alla ordrar</h2>
-        {orders.length === 0 ? (
-          <Card>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+          {statusFilter === "all" ? "Alla ordrar" : `${statusFilter} ordrar`}
+        </h2>
+        {filteredOrders.length === 0 ? (
+          <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <Package className="h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Inga ordrar ännu</h3>
-              <p className="text-gray-500 text-center mb-4">
-                Lägg till din första order för att komma igång
+              <Package className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                {statusFilter === "all" ? "Inga ordrar ännu" : `Inga ${statusFilter.toLowerCase()} ordrar`}
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 text-center mb-4">
+                {statusFilter === "all" 
+                  ? "Lägg till din första order för att komma igång"
+                  : "Inga ordrar matchar det valda filtret"
+                }
               </p>
-              <Button onClick={() => setShowNewOrderDialog(true)} className="bg-pink-600 hover:bg-pink-700">
-                <Package className="w-4 h-4 mr-2" />
-                Lägg till order
-              </Button>
+              {statusFilter === "all" && (
+                <Button onClick={() => setShowNewOrderDialog(true)} className="bg-pink-600 hover:bg-pink-700 dark:bg-pink-700 dark:hover:bg-pink-600">
+                  <Package className="w-4 h-4 mr-2" />
+                  Lägg till order
+                </Button>
+              )}
             </CardContent>
           </Card>
         ) : (
-          orders.map((order) => (
-            <Card key={order.id} className="hover:shadow-md transition-shadow">
+          filteredOrders.map((order) => (
+            <Card key={order.id} className="hover:shadow-md transition-shadow border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-lg">{order.orderNumber}</CardTitle>
-                    <CardDescription className="flex items-center gap-2 mt-1">
+                    <CardTitle className="text-lg text-gray-900 dark:text-gray-100">{order.orderNumber}</CardTitle>
+                    <CardDescription className="flex items-center gap-2 mt-1 text-gray-600 dark:text-gray-400">
                       <User className="w-4 h-4" />
                       {order.customer.name}
                       <Instagram className="w-4 h-4 ml-2" />
@@ -301,41 +374,78 @@ const Orders = () => {
                     <Badge className={statusColors[order.status]}>
                       {order.status}
                     </Badge>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleEditOrder(order)}
+                      className="border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-red-300 dark:border-red-600 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Ta bort order</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Är du säker på att du vill ta bort order <strong>{order.orderNumber}</strong> för {order.customer.name}? 
+                            Denna åtgärd kan inte ångras.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteOrder(order.id)}
+                            className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600"
+                          >
+                            Ta bort
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <h4 className="font-medium mb-2">Produktinfo</h4>
+                    <h4 className="font-medium mb-2 text-gray-900 dark:text-gray-100">Produktinfo</h4>
                     <div className="text-sm space-y-1">
-                      <p><strong>Produkt:</strong> {order.product.name}</p>
+                      <p className="text-gray-700 dark:text-gray-300"><strong>Produkt:</strong> {order.product.name}</p>
                       {order.product.details && (
-                        <p><strong>Detaljer:</strong> {order.product.details}</p>
+                        <p className="text-gray-700 dark:text-gray-300"><strong>Detaljer:</strong> {order.product.details}</p>
                       )}
                       {order.product.customizations && (
-                        <p><strong>Anpassningar:</strong> {order.product.customizations}</p>
+                        <p className="text-gray-700 dark:text-gray-300"><strong>Anpassningar:</strong> {order.product.customizations}</p>
                       )}
-                      <p><strong>Pris:</strong> {order.price.toLocaleString()} SEK</p>
+                      <p className="text-gray-700 dark:text-gray-300"><strong>Pris:</strong> {order.price.toLocaleString()} SEK</p>
                     </div>
                   </div>
                   
                   <div>
-                    <h4 className="font-medium mb-2">Kundinfo & Datum</h4>
+                    <h4 className="font-medium mb-2 text-gray-900 dark:text-gray-100">Kundinfo & Datum</h4>
                     <div className="text-sm space-y-1">
-                      <p className="flex items-center gap-1">
+                      <p className="flex items-center gap-1 text-gray-700 dark:text-gray-300">
                         <Phone className="w-3 h-3" />
                         {order.customer.phone}
                       </p>
-                      <p className="flex items-center gap-1">
+                      <p className="flex items-center gap-1 text-gray-700 dark:text-gray-300">
                         <MapPin className="w-3 h-3" />
                         {order.customer.address}
                       </p>
-                      <p className="flex items-center gap-1">
+                      <p className="flex items-center gap-1 text-gray-700 dark:text-gray-300">
                         <Calendar className="w-3 h-3" />
                         Beställd: {order.orderDate}
                       </p>
-                      <p className="flex items-center gap-1">
+                      <p className="flex items-center gap-1 text-gray-700 dark:text-gray-300">
                         <Clock className="w-3 h-3" />
                         Klardatum: {order.estimatedCompletion}
                       </p>
@@ -345,8 +455,8 @@ const Orders = () => {
                 
                 {order.notes && (
                   <div>
-                    <h4 className="font-medium mb-1">Anteckningar</h4>
-                    <p className="text-sm text-gray-600">{order.notes}</p>
+                    <h4 className="font-medium mb-1 text-gray-900 dark:text-gray-100">Anteckningar</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{order.notes}</p>
                   </div>
                 )}
               </CardContent>

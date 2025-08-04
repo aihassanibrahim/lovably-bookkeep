@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { useBizPal } from "@/context/BizPalContext";
-import {
-  Package,
-  ShoppingBag,
-  Users,
-  DollarSign,
-  Calendar,
+import { 
+  Package, 
+  ShoppingBag, 
+  Users, 
+  DollarSign, 
+  Calendar, 
   AlertTriangle,
   TrendingUp,
   Clock,
@@ -19,45 +19,67 @@ import {
 } from 'lucide-react';
 
 const Index = () => {
-  const { stats } = useBizPal();
+  // Get real data from context
+  const { stats, orders, productionTasks, inventoryItems } = useBizPal();
 
   const quickActions = [
     {
       title: "Ny Order",
       description: "Lägg till beställning från sociala medier",
       icon: <Plus className="h-5 w-5" />,
-      color: "bg-pink-600 hover:bg-pink-700",
+      color: "bg-pink-600 hover:bg-pink-700 dark:bg-pink-700 dark:hover:bg-pink-600",
       link: "/orders"
     },
     {
       title: "Produktionsstatus",
       description: "Se vad som behöver göras",
       icon: <Clock className="h-5 w-5" />,
-      color: "bg-purple-600 hover:bg-purple-700",
+      color: "bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600",
       link: "/production"
     },
     {
       title: "Ny Produkt",
       description: "Lägg till produkt i katalogen",
       icon: <Package className="h-5 w-5" />,
-      color: "bg-indigo-600 hover:bg-indigo-700",
+      color: "bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-600",
       link: "/products"
     },
     {
       title: "Hantera Lager",
       description: "Uppdatera material och komponenter",
       icon: <ShoppingBag className="h-5 w-5" />,
-      color: "bg-emerald-600 hover:bg-emerald-700",
+      color: "bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600",
       link: "/inventory"
     }
   ];
+
+  // Get recent orders (last 3)
+  const recentOrders = orders
+    .sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate))
+    .slice(0, 3);
+
+  // Get urgent production tasks
+  const urgentProductionTasks = productionTasks
+    .filter(task => {
+      if (task.status === "Klar" || !task.dueDate) return false;
+      const today = new Date();
+      const dueDate = new Date(task.dueDate);
+      const daysUntilDue = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+      return daysUntilDue <= 3;
+    })
+    .slice(0, 3);
+
+  // Get low stock items
+  const lowStockItems = inventoryItems
+    .filter(item => parseFloat(item.currentStock || 0) <= parseFloat(item.minStock || 0))
+    .slice(0, 3);
 
   return (
     <div className="container mx-auto p-6 space-y-8">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
+        <p className="text-gray-600 dark:text-gray-400">
           Översikt av din verksamhet - {new Date().toLocaleDateString('sv-SE')}
         </p>
       </div>
@@ -66,15 +88,15 @@ const Index = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {quickActions.map((action, index) => (
           <Link key={index} to={action.link}>
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
                   <div className={`p-3 rounded-full ${action.color} text-white`}>
                     {action.icon}
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">{action.title}</h3>
-                    <p className="text-sm text-gray-600">{action.description}</p>
+                    <h3 className="font-medium text-gray-900 dark:text-gray-100">{action.title}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{action.description}</p>
                   </div>
                 </div>
               </CardContent>
@@ -85,42 +107,42 @@ const Index = () => {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Aktiva ordrar</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100">Aktiva ordrar</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground dark:text-gray-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.orders.active}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.orders.active}</div>
+            <p className="text-xs text-muted-foreground dark:text-gray-400">
               {stats.orders.total} totalt
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Månadens intäkter</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100">Månadens intäkter</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground dark:text-gray-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.orders.revenue.toLocaleString()} SEK</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.orders.revenue.toLocaleString()} SEK</div>
+            <p className="text-xs text-muted-foreground dark:text-gray-400">
               {stats.orders.completed} slutförda ordrar
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Produktionsuppgifter</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100">Produktionsuppgifter</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground dark:text-gray-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.production.active}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.production.active}</div>
+            <p className="text-xs text-muted-foreground dark:text-gray-400">
               {stats.production.urgent > 0 ? (
-                <span className="text-red-600">{stats.production.urgent} brådskande</span>
+                <span className="text-red-600 dark:text-red-400">{stats.production.urgent} brådskande</span>
               ) : (
                 "Allt under kontroll"
               )}
@@ -128,16 +150,16 @@ const Index = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Lagervärde</CardTitle>
-            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100">Lagervärde</CardTitle>
+            <ShoppingBag className="h-4 w-4 text-muted-foreground dark:text-gray-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.inventory.totalValue.toLocaleString()} SEK</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.inventory.totalValue.toLocaleString()} SEK</div>
+            <p className="text-xs text-muted-foreground dark:text-gray-400">
               {stats.inventory.lowStock > 0 ? (
-                <span className="text-amber-600">{stats.inventory.lowStock} låga lager</span>
+                <span className="text-amber-600 dark:text-amber-400">{stats.inventory.lowStock} låga lager</span>
               ) : (
                 `${stats.inventory.totalItems} material`
               )}
@@ -149,158 +171,189 @@ const Index = () => {
       {/* Main Content Areas */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Orders */}
-        <Card>
+        <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Senaste ordrar</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-gray-100">Senaste ordrar</CardTitle>
               <Link to="/orders">
-                <Button variant="outline" size="sm">
-                  Se alla <ArrowRight className="ml-2 h-4 w-4" />
+                <Button variant="outline" size="sm" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                  Se alla
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
             </div>
-            <CardDescription>
+            <CardDescription className="text-gray-600 dark:text-gray-400">
               Dina senaste beställningar från sociala medier
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {stats.orders.total === 0 ? (
+            {recentOrders.length === 0 ? (
               <div className="text-center py-8">
-                <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Inga ordrar ännu</h3>
-                <p className="text-gray-500 mb-4">
+                <Package className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Inga ordrar ännu</h3>
+                <p className="text-gray-500 dark:text-gray-400 mb-4">
                   Lägg till din första order för att komma igång
                 </p>
                 <Link to="/orders">
-                  <Button className="bg-pink-600 hover:bg-pink-700">
+                  <Button className="bg-pink-600 hover:bg-pink-700 dark:bg-pink-700 dark:hover:bg-pink-600">
                     <Plus className="w-4 h-4 mr-2" />
                     Lägg till order
                   </Button>
                 </Link>
               </div>
             ) : (
-              <div className="space-y-4">
-                <p className="text-sm text-gray-500">
-                  Här visas dina senaste ordrar när du har lagt till några
-                </p>
+              <div className="space-y-3">
+                {recentOrders.map((order) => (
+                  <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div>
+                      <p className="font-medium text-sm text-gray-900 dark:text-gray-100">{order.orderNumber}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{order.customer.name}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium text-sm text-gray-900 dark:text-gray-100">{order.price.toLocaleString()} SEK</p>
+                      <Badge className="text-xs" variant={order.status === "Klar" ? "default" : "secondary"}>
+                        {order.status}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
         </Card>
 
         {/* Production Status */}
-        <Card>
+        <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Produktionsstatus</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-gray-100">Produktionsstatus</CardTitle>
               <Link to="/production">
-                <Button variant="outline" size="sm">
-                  Se alla <ArrowRight className="ml-2 h-4 w-4" />
+                <Button variant="outline" size="sm" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                  Se alla
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
             </div>
-            <CardDescription>
+            <CardDescription className="text-gray-600 dark:text-gray-400">
               Vad som behöver göras denna vecka
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {stats.production.active === 0 ? (
+            {urgentProductionTasks.length === 0 ? (
               <div className="text-center py-8">
-                <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Inga aktiva uppgifter</h3>
-                <p className="text-gray-500 mb-4">
-                  Skapa produktionsuppgifter för dina ordrar
+                <Clock className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                  {stats.production.active === 0 ? "Inga aktiva uppgifter" : "Inga brådskande uppgifter"}
+                </h3>
+                <p className="text-gray-500 dark:text-gray-400 mb-4">
+                  {stats.production.active === 0 ? "Skapa produktionsuppgifter för dina ordrar" : "Alla uppgifter är under kontroll"}
                 </p>
                 <Link to="/production">
-                  <Button className="bg-purple-600 hover:bg-purple-700">
+                  <Button className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600">
                     <Plus className="w-4 h-4 mr-2" />
-                    Lägg till uppgift
+                    {stats.production.active === 0 ? "Lägg till uppgift" : "Visa alla"}
                   </Button>
                 </Link>
               </div>
             ) : (
-              <div className="space-y-4">
-                <p className="text-sm text-gray-500">
-                  Här visas dina produktionsuppgifter när du har skapat några
-                </p>
+              <div className="space-y-3">
+                {urgentProductionTasks.map((task) => (
+                  <div key={task.id} className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border-l-4 border-red-500">
+                    <div>
+                      <p className="font-medium text-sm text-gray-900 dark:text-gray-100">{task.productName}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{task.customerName}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-red-600 dark:text-red-400 font-medium">Brådskande</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{task.dueDate}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
         </Card>
 
         {/* Inventory Alerts */}
-        <Card>
+        <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Lagervarningar</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-gray-100">Lagervarningar</CardTitle>
               <Link to="/inventory">
-                <Button variant="outline" size="sm">
-                  Hantera lager <ArrowRight className="ml-2 h-4 w-4" />
+                <Button variant="outline" size="sm" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                  Hantera lager
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
             </div>
-            <CardDescription>
+            <CardDescription className="text-gray-600 dark:text-gray-400">
               Material som snart tar slut
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {stats.inventory.lowStock === 0 ? (
+            {lowStockItems.length === 0 ? (
               <div className="text-center py-8">
-                <CheckCircle className="h-12 w-12 text-green-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <CheckCircle className="h-12 w-12 text-green-400 dark:text-green-500 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
                   {stats.inventory.totalItems === 0 ? "Inga material ännu" : "Alla lager OK"}
                 </h3>
-                <p className="text-gray-500 mb-4">
-                  {stats.inventory.totalItems === 0 
-                    ? "Lägg till dina första material"
-                    : "Inga material behöver påfyllning just nu"
-                  }
+                <p className="text-gray-500 dark:text-gray-400 mb-4">
+                  {stats.inventory.totalItems === 0 ? "Lägg till dina första material" : "Inga material behöver påfyllning just nu"}
                 </p>
                 <Link to="/inventory">
-                  <Button className="bg-emerald-600 hover:bg-emerald-700">
+                  <Button className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600">
                     <Plus className="w-4 h-4 mr-2" />
                     {stats.inventory.totalItems === 0 ? "Lägg till material" : "Visa lager"}
                   </Button>
                 </Link>
               </div>
             ) : (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-amber-600">
-                  <AlertTriangle className="h-4 w-4" />
-                  <span className="text-sm font-medium">
-                    {stats.inventory.lowStock} material behöver påfyllning
-                  </span>
-                </div>
+              <div className="space-y-3">
+                {lowStockItems.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border-l-4 border-amber-500">
+                    <div>
+                      <p className="font-medium text-sm text-gray-900 dark:text-gray-100">{item.name}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{item.category}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">Lågt lager</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {item.currentStock} {item.unit} kvar
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
         </Card>
 
         {/* Products Overview */}
-        <Card>
+        <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Produktkatalog</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-gray-100">Produktkatalog</CardTitle>
               <Link to="/products">
-                <Button variant="outline" size="sm">
-                  Se katalog <ArrowRight className="ml-2 h-4 w-4" />
+                <Button variant="outline" size="sm" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                  Se katalog
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
             </div>
-            <CardDescription>
+            <CardDescription className="text-gray-600 dark:text-gray-400">
               Dina produkter och tjänster
             </CardDescription>
           </CardHeader>
           <CardContent>
             {stats.products.total === 0 ? (
               <div className="text-center py-8">
-                <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Ingen produktkatalog</h3>
-                <p className="text-gray-500 mb-4">
+                <Package className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Ingen produktkatalog</h3>
+                <p className="text-gray-500 dark:text-gray-400 mb-4">
                   Lägg till dina produkter för att bygga din katalog
                 </p>
                 <Link to="/products">
-                  <Button className="bg-indigo-600 hover:bg-indigo-700">
+                  <Button className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-600">
                     <Plus className="w-4 h-4 mr-2" />
                     Lägg till produkt
                   </Button>
@@ -309,12 +362,18 @@ const Index = () => {
             ) : (
               <div className="space-y-4">
                 <div className="flex justify-between text-sm">
-                  <span>Totalt produkter:</span>
-                  <span className="font-medium">{stats.products.total}</span>
+                  <span className="text-gray-600 dark:text-gray-400">Totalt produkter:</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">{stats.products.total}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span>Kategorier:</span>
-                  <span className="font-medium">{stats.products.categories}</span>
+                  <span className="text-gray-600 dark:text-gray-400">Kategorier:</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">{stats.products.categories}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Genomsnittspris:</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                    {stats.products.total > 0 ? "Se katalog" : "—"}
+                  </span>
                 </div>
               </div>
             )}
@@ -323,11 +382,11 @@ const Index = () => {
       </div>
 
       {/* Quick Tips */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 dark:from-blue-900/20 dark:to-indigo-900/20 dark:border-blue-700">
         <CardHeader>
-          <CardTitle className="text-blue-800">💡 Tips för att komma igång</CardTitle>
+          <CardTitle className="text-blue-800 dark:text-blue-300">💡 Tips för att komma igång</CardTitle>
         </CardHeader>
-        <CardContent className="text-blue-700">
+        <CardContent className="text-blue-700 dark:text-blue-300">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
               <h4 className="font-medium mb-2">1. Skapa din produktkatalog</h4>
