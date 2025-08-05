@@ -4,7 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useAuth } from './AuthProvider';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
 import { CreditCard } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -13,6 +15,9 @@ export const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
   const { signIn, signUp } = useAuth();
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -49,6 +54,29 @@ export const LoginForm: React.FC = () => {
     }
     
     setLoading(false);
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetLoading(true);
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    
+    if (error) {
+      toast.error('Återställning misslyckades', {
+        description: error.message,
+      });
+    } else {
+      toast.success('Återställningslänk skickad!', {
+        description: 'Kontrollera din e-post för instruktioner.',
+      });
+      setShowResetDialog(false);
+      setResetEmail('');
+    }
+    
+    setResetLoading(false);
   };
 
   return (
@@ -110,6 +138,37 @@ export const LoginForm: React.FC = () => {
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? 'Loggar in...' : 'Logga in'}
                   </Button>
+                  
+                  <div className="text-center">
+                    <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+                      <DialogTrigger asChild>
+                        <Button variant="link" className="text-sm">
+                          Glömt lösenord?
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Återställ lösenord</DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={handlePasswordReset} className="space-y-4">
+                          <div>
+                            <Label htmlFor="reset-email">E-post</Label>
+                            <Input
+                              id="reset-email"
+                              type="email"
+                              value={resetEmail}
+                              onChange={(e) => setResetEmail(e.target.value)}
+                              required
+                              placeholder="din@email.se"
+                            />
+                          </div>
+                          <Button type="submit" className="w-full" disabled={resetLoading}>
+                            {resetLoading ? 'Skickar...' : 'Skicka återställningslänk'}
+                          </Button>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </form>
               </CardContent>
             </TabsContent>

@@ -1,709 +1,921 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { 
-  ShoppingCart, 
-  Clock, 
-  Package, 
-  Warehouse, 
-  Users, 
-  Truck, 
-  CreditCard, 
-  BarChart3, 
-  Home,
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { MobileNav } from "@/components/ui/mobile-nav";
+import { toast } from "sonner";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  ShoppingCart,
+  Clock,
+  Package,
+  Warehouse,
+  Users,
+  CreditCard,
   Check,
-  Star,
   ArrowRight,
-  Menu,
-  X,
-  Zap,
-  Shield,
-  TrendingUp,
-  Building2
-} from 'lucide-react';
+  ChevronDown,
+  Mail,
+  Lock,
+  User,
+} from "lucide-react";
 
-const LandingPage: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+const emailSchema = z.object({
+  email: z.string().email("Ange en giltig e-postadress"),
+});
+
+const loginSchema = z.object({
+  email: z.string().email("Ange en giltig e-postadress"),
+  password: z.string().min(6, "Lösenordet måste vara minst 6 tecken"),
+});
+
+const signupSchema = z.object({
+  email: z.string().email("Ange en giltig e-postadress"),
+  password: z.string().min(6, "Lösenordet måste vara minst 6 tecken"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Lösenorden matchar inte",
+  path: ["confirmPassword"],
+});
+
+type EmailFormData = z.infer<typeof emailSchema>;
+type LoginFormData = z.infer<typeof loginSchema>;
+type SignupFormData = z.infer<typeof signupSchema>;
+
+export default function Landing() {
+  const [isHeaderVisible, setIsHeaderVisible] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isLoginMode, setIsLoginMode] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsLoading(false);
-    // Here you would typically handle the signup
-    console.log('Signup with email:', email);
+  const { signIn, signUp } = useAuth();
+
+  const emailForm = useForm<EmailFormData>({
+    resolver: zodResolver(emailSchema),
+    defaultValues: {
+      email: "",
+    },
+  });
+
+  const loginForm = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const signupForm = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsHeaderVisible(window.scrollY > 100);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
-  const features = [
-    {
-      icon: ShoppingCart,
-      title: "Orderhantering",
-      description: "Ta emot och hantera beställningar från sociala medier enkelt",
-      color: "text-pink-600"
-    },
-    {
-      icon: Clock,
-      title: "Produktionsplanering",
-      description: "Planera och följa upp alla produktionsuppgifter",
-      color: "text-purple-600"
-    },
-    {
-      icon: Package,
-      title: "Produktkatalog",
-      description: "Hantera produkter, priser och variationer",
-      color: "text-indigo-600"
-    },
-    {
-      icon: Warehouse,
-      title: "Lagerhantering",
-      description: "Håll koll på material, komponenter och lagervärde",
-      color: "text-emerald-600"
-    },
-    {
-      icon: Users,
-      title: "Kundregister",
-      description: "Samla all kundinfo och orderhistorik på ett ställe",
-      color: "text-blue-600"
-    },
-    {
-      icon: Truck,
-      title: "Leverantörer",
-      description: "Hantera leverantörer och inköpshistorik",
-      color: "text-orange-600"
-    },
-    {
-      icon: CreditCard,
-      title: "Ekonomi & Bokföring",
-      description: "Transaktioner, konton och automatisk momsberäkning",
-      color: "text-green-600"
-    },
-    {
-      icon: BarChart3,
-      title: "Rapporter & Analys",
-      description: "Få insikter om din verksamhet med detaljerade rapporter",
-      color: "text-cyan-600"
-    }
-  ];
+  const onEmailSubmit = async (data: EmailFormData) => {
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  const steps = [
-    {
-      number: "01",
-      title: "Registrera dig",
-      description: "Kom igång på 2 minuter - ingen kreditkort krävs",
-      icon: Zap
-    },
-    {
-      number: "02", 
-      title: "Lägg till produkter",
-      description: "Bygg din produktkatalog med priser och material",
-      icon: Package
-    },
-    {
-      number: "03",
-      title: "Ta emot ordrar",
-      description: "Hantera hela flödet från order till leverans",
-      icon: TrendingUp
-    }
-  ];
+      toast({
+        title: "Tack för ditt intresse!",
+        description: "Vi hör av oss inom kort med mer information.",
+      });
 
-  const faqs = [
-    {
-      question: "Kan jag importera från andra system?",
-      answer: "Ja, vi hjälper dig att migrera data från Excel, andra bokföringssystem och e-handelslösningar. Kontakta vår support så guidar vi dig genom processen."
-    },
-    {
-      question: "Fungerar det för alla typer av företag?",
-      answer: "BizPal är perfekt för småföretag som säljer produkter - särskilt handgjorda varor, konst, smycken och andra fysiska produkter. Fungerar för både enskild firma och aktiebolag."
-    },
-    {
-      question: "Vad händer med min data om jag säger upp?",
-      answer: "Du äger din data. Vid uppsägning kan du exportera all information och vi raderar dina uppgifter enligt GDPR. Inga dolda avgifter eller låsningar."
-    },
-    {
-      question: "Får jag support på svenska?",
-      answer: "Absolut! Vi erbjuder support på svenska via e-post och chat. Vårt team hjälper dig att komma igång och svarar på alla frågor om systemet."
-    },
-    {
-      question: "Kan jag hantera både produkter och tjänster?",
-      answer: "Ja, BizPal hanterar både fysiska produkter och tjänster. Du kan sätta upp olika prissättningsmodeller och hantera både lager och tjänstebaserade ordrar."
+      emailForm.reset();
+    } catch (error) {
+      toast({
+        title: "Något gick fel",
+        description: "Försök igen senare eller kontakta oss direkt.",
+        variant: "destructive",
+      });
     }
-  ];
+  };
+
+  const onLoginSubmit = async (data: LoginFormData) => {
+    setIsLoading(true);
+    try {
+      await signIn(data.email, data.password);
+      toast({
+        title: "Välkommen tillbaka!",
+        description: "Du är nu inloggad.",
+      });
+      setShowLoginModal(false);
+      navigate("/");
+    } catch (error) {
+      toast({
+        title: "Inloggning misslyckades",
+        description: "Kontrollera din e-post och lösenord.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onSignupSubmit = async (data: SignupFormData) => {
+    setIsLoading(true);
+    try {
+      await signUp(data.email, data.password);
+      toast({
+        title: "Konto skapat!",
+        description: "Kontrollera din e-post för verifiering.",
+      });
+      setShowLoginModal(false);
+      navigate("/");
+    } catch (error) {
+      toast({
+        title: "Registrering misslyckades",
+        description: "Försök igen eller kontakta support.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCTAClick = () => {
+    setShowLoginModal(true);
+    setIsLoginMode(true);
+  };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Building2 className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-              <span className="ml-2 text-xl font-bold text-gray-900 dark:text-gray-100">BizPal</span>
-            </div>
-            
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Funktioner</a>
-              <a href="#pricing" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Priser</a>
-              <a href="#faq" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">FAQ</a>
-              <ThemeToggle />
-              <Button variant="outline" size="sm">Logga in</Button>
-              <Button size="sm" className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700">
-                Prova gratis
-              </Button>
-            </div>
-
-            {/* Mobile menu button */}
-            <div className="md:hidden flex items-center gap-2">
-              <ThemeToggle />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </Button>
-            </div>
-          </div>
-
-          {/* Mobile Navigation */}
-          {isMenuOpen && (
-            <div className="md:hidden border-t border-gray-200 dark:border-gray-700 py-4">
-              <div className="flex flex-col space-y-4">
-                <a href="#features" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Funktioner</a>
-                <a href="#pricing" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Priser</a>
-                <a href="#faq" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">FAQ</a>
-                <div className="flex flex-col gap-2">
-                  <Button variant="outline" size="sm">Logga in</Button>
-                  <Button size="sm" className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700">
-                    Prova gratis
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </nav>
-
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
-                  Nyhet: Nu med AI-assisterad orderhantering
-                </Badge>
-                <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
-                  Allt ditt företag behöver - 
-                  <span className="bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent"> i ett system</span>
-                </h1>
-                <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-                  Från order till leverans. Hantera kunder, lager och ekonomi enkelt. 
-                  Slipp jonglera mellan olika system - allt på ett ställe.
+    <div className="min-h-screen bg-white text-black">
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md">
+            <CardContent className="p-6">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold mb-2">
+                  {isLoginMode ? "Logga in" : "Skapa konto"}
+                </h2>
+                <p className="text-gray-600">
+                  {isLoginMode 
+                    ? "Välkommen tillbaka till BizPal" 
+                    : "Skapa ditt BizPal-konto"
+                  }
                 </p>
               </div>
 
-              <form onSubmit={handleSignup} className="flex flex-col sm:flex-row gap-4 max-w-md">
-                <Input
-                  type="email"
-                  placeholder="din@email.se"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1"
-                  required
-                />
-                <Button 
-                  type="submit" 
-                  disabled={isLoading}
-                  className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 px-8"
-                >
-                  {isLoading ? 'Laddar...' : 'Prova gratis i 30 dagar'}
-                </Button>
-              </form>
+              {isLoginMode ? (
+                <Form {...loginForm}>
+                  <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                    <FormField
+                      control={loginForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <div className="relative">
+                              <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                              <Input
+                                placeholder="E-post"
+                                className="pl-10"
+                                {...field}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={loginForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <div className="relative">
+                              <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                              <Input
+                                type="password"
+                                placeholder="Lösenord"
+                                className="pl-10"
+                                {...field}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Loggar in..." : "Logga in"}
+                    </Button>
+                  </form>
+                </Form>
+              ) : (
+                <Form {...signupForm}>
+                  <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4">
+                    <FormField
+                      control={signupForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <div className="relative">
+                              <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                              <Input
+                                placeholder="E-post"
+                                className="pl-10"
+                                {...field}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={signupForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <div className="relative">
+                              <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                              <Input
+                                type="password"
+                                placeholder="Lösenord"
+                                className="pl-10"
+                                {...field}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={signupForm.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <div className="relative">
+                              <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                              <Input
+                                type="password"
+                                placeholder="Bekräfta lösenord"
+                                className="pl-10"
+                                {...field}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Skapar konto..." : "Skapa konto"}
+                    </Button>
+                  </form>
+                </Form>
+              )}
 
-              <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
-                <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                  <span>Endast 79kr/månad</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                  <span>Ingen bindningstid</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                  <span>Svensk support</span>
-                </div>
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => setIsLoginMode(!isLoginMode)}
+                  className="text-sm text-gray-600 hover:text-black transition-colors"
+                >
+                  {isLoginMode 
+                    ? "Har du inget konto? Skapa ett här" 
+                    : "Har du redan ett konto? Logga in här"
+                  }
+                </button>
+              </div>
+
+              <button
+                onClick={() => setShowLoginModal(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+        {/* Header */}
+      <header
+        className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+          isHeaderVisible
+            ? "bg-white/98 backdrop-blur-sm border-b border-gray-200"
+            : "bg-white/95 backdrop-blur-sm border-b border-gray-200"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="font-bold text-xl" data-testid="text-logo">
+              BizPal
+            </div>
+
+            <nav className="hidden md:flex space-x-8">
+              <button
+                onClick={() => scrollToSection("funktioner")}
+                className="text-gray-600 hover:text-black transition-colors"
+                data-testid="link-funktioner"
+              >
+                Funktioner
+              </button>
+              <button
+                onClick={() => scrollToSection("priser")}
+                className="text-gray-600 hover:text-black transition-colors"
+                data-testid="link-priser"
+              >
+                Priser
+              </button>
+              <button
+                onClick={() => scrollToSection("faq")}
+                className="text-gray-600 hover:text-black transition-colors"
+                data-testid="link-faq"
+              >
+                FAQ
+              </button>
+            </nav>
+
+            <div className="flex items-center space-x-4">
+              <Button
+                onClick={handleCTAClick}
+                className="hidden md:flex bg-black text-white px-6 py-2 font-medium hover:bg-gray-800 transition-colors"
+                data-testid="button-cta-header"
+              >
+                Kom igång gratis
+              </Button>
+              <MobileNav onNavigate={scrollToSection} />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8">
+              <div className="space-y-6">
+                <h1
+                  className="text-5xl lg:text-7xl font-black leading-tight"
+                  data-testid="text-hero-title"
+                >
+                  Allt ditt företag behöver
+                  <br />
+                  <span className="font-light">i ett system</span>
+          </h1>
+                <p
+                  className="text-xl text-gray-600 leading-relaxed max-w-lg"
+                  data-testid="text-hero-subtitle"
+                >
+                  Från order till leverans. Hantera kunder, lager och ekonomi
+                  enkelt.
+          </p>
+        </div>
+
+              <div className="space-y-4">
+                <Button
+                  size="lg"
+                  onClick={handleCTAClick}
+                  className="bg-black text-white px-8 py-4 text-lg font-semibold hover:bg-gray-800 transition-colors"
+                  data-testid="button-cta-hero"
+                >
+                  Prova gratis i 30 dagar
+                </Button>
+                <p
+                  className="text-sm text-gray-600"
+                  data-testid="text-pricing-info"
+                >
+                  Endast 79kr/månad - ingen bindningstid
+                </p>
               </div>
             </div>
 
+            {/* Dashboard Mockup */}
             <div className="relative">
-              <div className="bg-gradient-to-br from-blue-600 to-emerald-600 rounded-2xl p-8 shadow-2xl">
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">Dashboard Översikt</h3>
-                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">Live</Badge>
+              <Card className="bg-gray-50 border-2 border-gray-200 p-6 space-y-4">
+                <div className="flex justify-between items-center pb-4 border-b border-gray-200">
+                  <div
+                    className="font-semibold"
+                    data-testid="text-dashboard-title"
+                  >
+                    Dashboard
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">12</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Aktiva ordrar</div>
-                    </div>
-                    <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-lg">
-                      <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">45k</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Månadens intäkter</div>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">Keramikskål - Anna A.</span>
-                      <span className="font-medium text-gray-900 dark:text-gray-100">299 kr</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">Halsband Silver - Erik E.</span>
-                      <span className="font-medium text-gray-900 dark:text-gray-100">599 kr</span>
-                    </div>
-                  </div>
+                  <div className="w-8 h-8 bg-black rounded"></div>
                 </div>
-              </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <Card className="bg-white border border-gray-200 p-4">
+                    <CardContent className="p-0 space-y-2">
+                      <div className="w-6 h-6 bg-gray-200 rounded"></div>
+                      <div className="text-xs text-gray-600">Ordrar</div>
+                      <div
+                        className="font-bold text-lg"
+                        data-testid="text-orders-count"
+                      >
+                        47
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-white border border-gray-200 p-4">
+                    <CardContent className="p-0 space-y-2">
+                      <div className="w-6 h-6 bg-gray-200 rounded"></div>
+                      <div className="text-xs text-gray-600">Produkter</div>
+                      <div
+                        className="font-bold text-lg"
+                        data-testid="text-products-count"
+                      >
+                        128
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-white border border-gray-200 p-4">
+                    <CardContent className="p-0 space-y-2">
+                      <div className="w-6 h-6 bg-gray-200 rounded"></div>
+                      <div className="text-xs text-gray-600">Kunder</div>
+                      <div
+                        className="font-bold text-lg"
+                        data-testid="text-customers-count"
+                      >
+                        93
+                      </div>
+            </CardContent>
+          </Card>
+                </div>
+                <div className="space-y-2">
+                  <Card className="bg-white border border-gray-200 p-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm">Senaste order #1247</span>
+                      <span className="text-sm font-medium">2,450 kr</span>
+                    </div>
+                  </Card>
+                  <Card className="bg-white border border-gray-200 p-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm">Senaste order #1246</span>
+                      <span className="text-sm font-medium">890 kr</span>
+                    </div>
+                  </Card>
+                </div>
+              </Card>
             </div>
           </div>
         </div>
       </section>
 
       {/* Problem & Solution */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Slipp krångla med flera system
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Många småföretag använder Excel för ordrar, ett annat system för lager, 
-              och ett tredje för bokföring. BizPal samlar allt på ett ställe.
-            </p>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Innan BizPal:</h3>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mt-1">
-                    <X className="h-4 w-4 text-red-600 dark:text-red-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Flera olika system</h4>
-                    <p className="text-gray-600 dark:text-gray-400">Excel för ordrar, annat system för lager, tredje för bokföring</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mt-1">
-                    <X className="h-4 w-4 text-red-600 dark:text-red-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Manuell dataöverföring</h4>
-                    <p className="text-gray-600 dark:text-gray-400">Kopiera samma info mellan olika program</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mt-1">
-                    <X className="h-4 w-4 text-red-600 dark:text-red-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Dålig överblick</h4>
-                    <p className="text-gray-600 dark:text-gray-400">Svårt att se helheten och fatta rätt beslut</p>
-                  </div>
-                </div>
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2
+            className="text-4xl font-bold mb-8"
+            data-testid="text-problem-title"
+          >
+            Slipp jonglera mellan olika system
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            <div className="space-y-3">
+              <div className="text-2xl font-light">Innan</div>
+              <div className="space-y-2 text-gray-600">
+                <div>5 olika system</div>
+                <div>Krånglig administration</div>
+                <div>Dålig överblick</div>
               </div>
             </div>
-
-            <div className="space-y-6">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Med BizPal:</h3>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mt-1">
-                    <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Ett komplett system</h4>
-                    <p className="text-gray-600 dark:text-gray-400">Allt från order till bokföring i samma plattform</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mt-1">
-                    <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Automatisk synkronisering</h4>
-                    <p className="text-gray-600 dark:text-gray-400">Data uppdateras automatiskt mellan alla moduler</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mt-1">
-                    <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Komplett överblick</h4>
-                    <p className="text-gray-600 dark:text-gray-400">Se hela verksamheten på en dashboard</p>
-                  </div>
-                </div>
+            <div className="flex items-center justify-center">
+              <ArrowRight className="w-8 h-8 text-black" />
+            </div>
+            <div className="space-y-3">
+              <div className="text-2xl font-bold">Med BizPal</div>
+              <div className="space-y-2">
+                <div className="font-medium">Ett system</div>
+                <div className="font-medium">Enkel hantering</div>
+                <div className="font-medium">Total kontroll</div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-20 bg-white dark:bg-gray-900">
+      {/* Features */}
+      <section id="funktioner" className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Allt du behöver för att driva ditt företag
+            <h2
+              className="text-4xl font-bold mb-4"
+              data-testid="text-features-title"
+            >
+              Allt du behöver på ett ställe
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              BizPal är inte bara bokföring - det är ett komplett affärssystem 
-              som växer med ditt företag.
+            <p className="text-xl text-gray-600">
+              Hantera hela din verksamhet med ett komplett affärssystem
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                <CardHeader className="text-center">
-                  <div className={`w-12 h-12 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                    <feature.icon className={`h-6 w-6 ${feature.color}`} />
-                  </div>
-                  <CardTitle className="text-lg text-gray-900 dark:text-gray-100">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-center text-gray-600 dark:text-gray-400">
-                    {feature.description}
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Card className="border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              <CardContent className="p-0 space-y-4">
+                <ShoppingCart className="w-8 h-8" strokeWidth={1.5} />
+                <h3 className="text-xl font-semibold">Beställningar</h3>
+                <p className="text-gray-600">
+                  Ta emot och hantera ordrar från sociala medier och webben.
+                </p>
+              </CardContent>
+            </Card>
 
-      {/* How it works */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Så enkelt kommer du igång
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300">
-              Tre enkla steg till ett mer organiserat företag
-            </p>
-          </div>
+            <Card className="border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              <CardContent className="p-0 space-y-4">
+                <Clock className="w-8 h-8" strokeWidth={1.5} />
+                <h3 className="text-xl font-semibold">Produktion</h3>
+                <p className="text-gray-600">
+                  Planera och följa upp produktionsuppgifter enkelt.
+                </p>
+              </CardContent>
+            </Card>
 
-          <div className="grid lg:grid-cols-3 gap-8">
-            {steps.map((step, index) => (
-              <div key={index} className="relative">
-                <Card className="text-center h-full border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                  <CardHeader>
-                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-600 to-emerald-600 rounded-full flex items-center justify-center">
-                      <step.icon className="h-8 w-8 text-white" />
-                    </div>
-                    <div className="text-4xl font-bold text-gray-300 dark:text-gray-600 mb-2">{step.number}</div>
-                    <CardTitle className="text-xl text-gray-900 dark:text-gray-100">{step.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-gray-600 dark:text-gray-400">
-                      {step.description}
-                    </CardDescription>
-                  </CardContent>
-                </Card>
-                {index < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2">
-                    <ArrowRight className="h-6 w-6 text-gray-400 dark:text-gray-500" />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            <Card className="border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              <CardContent className="p-0 space-y-4">
+                <Package className="w-8 h-8" strokeWidth={1.5} />
+                <h3 className="text-xl font-semibold">Produktkatalog</h3>
+                <p className="text-gray-600">
+                  Hantera produkter och komponenter med full översikt.
+                </p>
+              </CardContent>
+            </Card>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="py-20 bg-white dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Enkel prissättning som växer med dig
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300">
-              En prismodell, alla funktioner inkluderade
-            </p>
-          </div>
+            <Card className="border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              <CardContent className="p-0 space-y-4">
+                <Warehouse className="w-8 h-8" strokeWidth={1.5} />
+                <h3 className="text-xl font-semibold">Lager</h3>
+                <p className="text-gray-600">
+                  Håll koll på material och lagervärde i realtid.
+                </p>
+              </CardContent>
+            </Card>
 
-          <div className="max-w-lg mx-auto">
-            <Card className="relative border-2 border-blue-200 dark:border-blue-700 bg-white dark:bg-gray-800 shadow-xl">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-gradient-to-r from-blue-600 to-emerald-600 text-white px-4 py-1">
-                  Mest populär
-                </Badge>
-              </div>
-              <CardHeader className="text-center pt-8">
-                <CardTitle className="text-2xl text-gray-900 dark:text-gray-100">BizPal Komplett</CardTitle>
-                <div className="mt-4">
-                  <span className="text-5xl font-bold text-gray-900 dark:text-gray-100">79</span>
-                  <span className="text-xl text-gray-600 dark:text-gray-400">kr/månad</span>
-                </div>
-                <CardDescription className="text-gray-600 dark:text-gray-400">
-                  Allt du behöver för att driva ditt företag
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  {[
-                    "Obegränsat antal ordrar",
-                    "Komplett lagerhantering", 
-                    "Produktionsplanering",
-                    "Kund- och leverantörsregister",
-                    "Automatisk bokföring",
-                    "Rapporter och analys",
-                    "Svensk support",
-                    "Säker molnlagring"
-                  ].map((feature, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <Check className="h-5 w-5 text-green-600 dark:text-green-400" />
-                      <span className="text-gray-700 dark:text-gray-300">{feature}</span>
-                    </div>
-                  ))}
-                </div>
+            <Card className="border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              <CardContent className="p-0 space-y-4">
+                <Users className="w-8 h-8" strokeWidth={1.5} />
+                <h3 className="text-xl font-semibold">Kunder & Leverantörer</h3>
+                <p className="text-gray-600">
+                  Samla all kontaktinfo och orderhistorik på ett ställe.
+                </p>
+            </CardContent>
+          </Card>
 
-                <div className="space-y-4">
-                  <Button className="w-full bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-lg py-6">
-                    Starta 30 dagars gratis testperiod
-                  </Button>
-                  <div className="text-center space-y-2">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      <strong>30 dagar gratis</strong> - ingen kreditkort krävs
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Sedan endast 79kr/månad - avsluta när du vill
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                  <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Jämför med separata system:</h4>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                    <div className="flex justify-between">
-                      <span>Bokföringssystem:</span>
-                      <span>~200kr/mån</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>E-handelslösning:</span>
-                      <span>~300kr/mån</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Lagersystem:</span>
-                      <span>~150kr/mån</span>
-                    </div>
-                    <div className="border-t pt-2 mt-2 flex justify-between font-medium">
-                      <span>Totalt:</span>
-                      <span className="text-red-600 dark:text-red-400">~650kr/mån</span>
-                    </div>
-                  </div>
-                </div>
+            <Card className="border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              <CardContent className="p-0 space-y-4">
+                <CreditCard className="w-8 h-8" strokeWidth={1.5} />
+                <h3 className="text-xl font-semibold">Ekonomi</h3>
+                <p className="text-gray-600">
+                  Transaktioner, konton och rapporter för full ekonomisk
+                  kontroll.
+                </p>
               </CardContent>
             </Card>
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section id="faq" className="py-20 bg-gray-50 dark:bg-gray-800">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Vanliga frågor
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300">
-              Svar på det du undrar över
-            </p>
+      {/* How it works */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2
+            className="text-4xl font-bold mb-16"
+            data-testid="text-process-title"
+          >
+            Så här fungerar det
+          </h2>
+
+          <div className="grid md:grid-cols-3 gap-12">
+            <div className="space-y-4">
+              <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center font-bold text-xl mx-auto">
+                1
+              </div>
+              <h3 className="text-xl font-semibold">Registrera dig</h3>
+              <p className="text-gray-600">
+                Kom igång på 2 minuter - ingen kreditkort krävs
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center font-bold text-xl mx-auto">
+                2
+              </div>
+              <h3 className="text-xl font-semibold">Lägg till produkter</h3>
+              <p className="text-gray-600">
+                Bygg din produktkatalog och ställ in lager
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center font-bold text-xl mx-auto">
+                3
+              </div>
+              <h3 className="text-xl font-semibold">Ta emot ordrar</h3>
+              <p className="text-gray-600">
+                Hantera hela flödet från order till leverans
+              </p>
+            </div>
           </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="priser" className="py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2
+            className="text-4xl font-bold mb-8"
+            data-testid="text-pricing-title"
+          >
+            En enkel prismodell
+          </h2>
+
+          <Card className="bg-gray-50 border-2 border-gray-200 p-12 max-w-md mx-auto">
+            <CardContent className="p-0 space-y-6">
+              <div>
+                <div className="text-6xl font-black" data-testid="text-price">
+                  79kr
+                </div>
+                <div className="text-gray-600">/månad</div>
+              </div>
+
+              <div className="space-y-3 text-left">
+                <div className="flex items-center space-x-3">
+                  <Check className="w-5 h-5" strokeWidth={1.5} />
+                  <span>30 dagar gratis testperiod</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Check className="w-5 h-5" strokeWidth={1.5} />
+                  <span>Ingen bindningstid</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Check className="w-5 h-5" strokeWidth={1.5} />
+                  <span>Allt inkluderat</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Check className="w-5 h-5" strokeWidth={1.5} />
+                  <span>Support på svenska</span>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleCTAClick}
+                className="w-full bg-black text-white py-4 font-semibold hover:bg-gray-800 transition-colors"
+                data-testid="button-cta-pricing"
+              >
+                Starta gratis testperiod
+              </Button>
+            </CardContent>
+          </Card>
+
+          <p className="mt-8 text-gray-600">
+            Jämför med kostnaden för flera separata system - spara tusentals
+            kronor årligen
+          </p>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="py-20 bg-gray-50">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2
+            className="text-4xl font-bold text-center mb-12"
+            data-testid="text-faq-title"
+          >
+            Vanliga frågor
+          </h2>
 
           <Accordion type="single" collapsible className="space-y-4">
-            {faqs.map((faq, index) => (
-              <AccordionItem key={index} value={`item-${index}`} className="border border-gray-200 dark:border-gray-700 rounded-lg px-6 bg-white dark:bg-gray-800">
-                <AccordionTrigger className="text-left font-medium text-gray-900 dark:text-gray-100 hover:no-underline">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-600 dark:text-gray-400 pb-4">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
+            <AccordionItem
+              value="import"
+              className="bg-white border border-gray-200 rounded-lg px-6"
+            >
+              <AccordionTrigger className="text-left font-semibold hover:no-underline py-6">
+                Kan jag importera från andra system?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 pb-6">
+                Ja, vi hjälper dig att importera data från de flesta
+                bokföringssystem och Excel-filer. Vår support guidar dig genom
+                processen.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem
+              value="business-types"
+              className="bg-white border border-gray-200 rounded-lg px-6"
+            >
+              <AccordionTrigger className="text-left font-semibold hover:no-underline py-6">
+                Fungerar det för alla typer av företag?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 pb-6">
+                BizPal är perfekt för småföretag inom tillverkning, handel och
+                tjänster. Systemet anpassar sig efter din bransch och dina
+                behov.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem
+              value="data-retention"
+              className="bg-white border border-gray-200 rounded-lg px-6"
+            >
+              <AccordionTrigger className="text-left font-semibold hover:no-underline py-6">
+                Vad händer med min data om jag säger upp?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 pb-6">
+                Du kan exportera all din data när som helst. Vi sparar dina
+                uppgifter i 30 dagar efter uppsägning så du hinner ladda ner
+                allt.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem
+              value="support"
+              className="bg-white border border-gray-200 rounded-lg px-6"
+            >
+              <AccordionTrigger className="text-left font-semibold hover:no-underline py-6">
+                Får jag support på svenska?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 pb-6">
+                Ja, vi erbjuder fullständig support på svenska via e-post och
+                telefon. Vårt team hjälper dig att komma igång och löser alla
+                frågor.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem
+              value="services"
+              className="bg-white border border-gray-200 rounded-lg px-6"
+            >
+              <AccordionTrigger className="text-left font-semibold hover:no-underline py-6">
+                Kan jag hantera både produkter och tjänster?
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 pb-6">
+                Absolut! BizPal hanterar både fysiska produkter med lager och
+                tjänster med tidsrapportering. Du kan kombinera båda i samma
+                system.
+              </AccordionContent>
+            </AccordionItem>
           </Accordion>
         </div>
       </section>
 
-      {/* Social Proof */}
-      <section className="py-20 bg-white dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Företagare älskar BizPal
-            </h2>
-            <div className="flex justify-center items-center gap-2 mb-8">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="h-6 w-6 text-yellow-400 fill-current" />
-              ))}
-              <span className="ml-2 text-gray-600 dark:text-gray-400">4.9/5 baserat på 200+ recensioner</span>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Anna Svensson",
-                business: "Keramikstudio",
-                quote: "Äntligen slipper jag Excel! BizPal har gjort min administration så mycket enklare.",
-                avatar: "AS"
-              },
-              {
-                name: "Erik Johansson", 
-                business: "Smyckesdesign",
-                quote: "Perfekt för mitt småföretag. Allt jag behöver finns här och priset är rättvist.",
-                avatar: "EJ"
-              },
-              {
-                name: "Maria Lindberg",
-                business: "Textildesign",
-                quote: "Lagerhanteringen sparar mig timmar varje vecka. Kan inte tänka mig att jobba utan BizPal nu.",
-                avatar: "ML"
-              }
-            ].map((testimonial, index) => (
-              <Card key={index} className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-emerald-600 rounded-full flex items-center justify-center">
-                      <span className="text-white font-medium">{testimonial.avatar}</span>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-900 dark:text-gray-100">{testimonial.name}</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{testimonial.business}</p>
-                    </div>
-                  </div>
-                  <p className="text-gray-700 dark:text-gray-300 italic">"{testimonial.quote}"</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Final CTA */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 to-emerald-600">
+      <section className="py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-            Redo att förenkla ditt företag?
+          <h2
+            className="text-5xl font-bold mb-6"
+            data-testid="text-final-cta-title"
+          >
+            Redo att förenkla din verksamhet?
           </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Gå med i hundratals företagare som redan använder BizPal för att 
-            hantera sina affärer mer effektivt.
+          <p className="text-xl text-gray-600 mb-8">
+            Gör som hundratals andra småföretag - slipp krånglet med flera
+            system
           </p>
 
-          <form onSubmit={handleSignup} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto mb-8">
-            <Input
-              type="email"
-              placeholder="din@email.se"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 bg-white dark:bg-gray-800"
-              required
-            />
-            <Button 
-              type="submit" 
-              disabled={isLoading}
-              className="bg-white text-blue-600 hover:bg-gray-100 dark:bg-gray-800 dark:text-blue-400 dark:hover:bg-gray-700 px-8"
-            >
-              {isLoading ? 'Laddar...' : 'Prova gratis i 30 dagar'}
-            </Button>
-          </form>
+          <div className="space-y-6">
+              <Button 
+                size="lg"
+              onClick={handleCTAClick}
+              className="bg-black text-white px-12 py-4 text-xl font-semibold hover:bg-gray-800 transition-colors"
+              data-testid="button-cta-final"
+              >
+              Prova BizPal gratis i 30 dagar
+              </Button>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-blue-100">
-            <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              <span>Ingen bindningstid</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="h-5 w-5" />
-              <span>Endast 79kr/månad sedan</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Star className="h-5 w-5" />
-              <span>Svensk support</span>
+            <div className="flex justify-center space-x-8 text-sm text-gray-600">
+              <div className="flex items-center space-x-2">
+                <Check className="w-4 h-4" strokeWidth={1.5} />
+                <span>Ingen bindningstid</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Check className="w-4 h-4" strokeWidth={1.5} />
+                <span>Endast 79kr/månad sedan</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Check className="w-4 h-4" strokeWidth={1.5} />
+                <span>GDPR-kompatibel</span>
+              </div>
             </div>
           </div>
+
+          {/* Email signup form */}
+          <div className="mt-12 max-w-md mx-auto">
+            <p className="text-sm text-gray-600 mb-4">
+              Eller lämna din e-post så hör vi av oss:
+            </p>
+            <Form {...emailForm}>
+              <form
+                onSubmit={emailForm.handleSubmit(onEmailSubmit)}
+                className="flex space-x-3"
+              >
+                <FormField
+                  control={emailForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormControl>
+                        <Input
+                          placeholder="din@e-post.se"
+                          className="px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-black transition-colors"
+                          data-testid="input-email"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  type="submit"
+                  disabled={emailForm.formState.isSubmitting}
+                  className="bg-black text-white px-6 py-3 font-medium rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                  data-testid="button-email-submit"
+                >
+                  {emailForm.formState.isSubmitting ? "Skickar..." : "Skicka"}
+                </Button>
+              </form>
+            </Form>
+              </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 dark:bg-gray-950 text-white py-12">
+        {/* Footer */}
+      <footer className="border-t border-gray-200 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <Building2 className="h-8 w-8 text-blue-400" />
-                <span className="ml-2 text-xl font-bold">BizPal</span>
-              </div>
-              <p className="text-gray-400">
-                Komplett affärssystem för småföretag. 
-                Enkel, kraftfull och prisvärd.
-              </p>
+          <div className="text-center space-y-4">
+            <div className="font-bold text-2xl" data-testid="text-footer-logo">
+              BizPal
             </div>
-            
-            <div>
-              <h4 className="font-medium mb-4">Produkt</h4>
-              <div className="space-y-2 text-gray-400">
-                <a href="#features" className="block hover:text-white transition-colors">Funktioner</a>
-                <a href="#pricing" className="block hover:text-white transition-colors">Priser</a>
-                <a href="#" className="block hover:text-white transition-colors">Säkerhet</a>
-                <a href="#" className="block hover:text-white transition-colors">Integrationer</a>
-              </div>
+            <p className="text-gray-600">Affärssystem för småföretag</p>
+            <div className="flex justify-center space-x-6 text-gray-600">
+              <a
+                href="#"
+                className="hover:text-black transition-colors"
+                data-testid="link-privacy"
+              >
+                Integritet
+              </a>
+              <a
+                href="#"
+                className="hover:text-black transition-colors"
+                data-testid="link-terms"
+              >
+                Villkor
+              </a>
+              <a
+                href="#"
+                className="hover:text-black transition-colors"
+                data-testid="link-support"
+              >
+                Support
+              </a>
             </div>
-            
-            <div>
-              <h4 className="font-medium mb-4">Support</h4>
-              <div className="space-y-2 text-gray-400">
-                <a href="#" className="block hover:text-white transition-colors">Hjälpcenter</a>
-                <a href="#" className="block hover:text-white transition-colors">Kontakta oss</a>
-                <a href="#" className="block hover:text-white transition-colors">Guider</a>
-                <a href="#" className="block hover:text-white transition-colors">API Dokumentation</a>
-              </div>
-            </div>
-            
-            <div>
-              <h4 className="font-medium mb-4">Företag</h4>
-              <div className="space-y-2 text-gray-400">
-                <a href="#" className="block hover:text-white transition-colors">Om oss</a>
-                <a href="#" className="block hover:text-white transition-colors">Karriär</a>
-                <a href="#" className="block hover:text-white transition-colors">Integritetspolicy</a>
-                <a href="#" className="block hover:text-white transition-colors">Användarvillkor</a>
-              </div>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 BizPal. Alla rättigheter förbehållna. Utvecklat i Sverige.</p>
           </div>
         </div>
       </footer>
     </div>
   );
-};
-
-export default LandingPage;
+} 

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   TrendingUp, 
   Plus, 
@@ -15,10 +16,10 @@ import {
   Trash2, 
   DollarSign,
   Filter,
-  Calendar,
   ArrowUpRight,
   ArrowDownRight
 } from 'lucide-react';
+import BankImport from '@/components/BankImport';
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState([
@@ -43,17 +44,6 @@ const Transactions = () => {
       customer: "Silverleverantör AB",
       reference: "L-001",
       notes: "Inköp av silver för halsband"
-    },
-    {
-      id: 3,
-      date: "2024-01-13",
-      description: "Försäljning Halsband",
-      type: "income",
-      amount: 599,
-      account: "Försäljning",
-      customer: "Erik Eriksson",
-      reference: "F-002",
-      notes: "Försäljning på marknad"
     }
   ]);
 
@@ -71,8 +61,8 @@ const Transactions = () => {
     notes: ""
   });
 
-  const accounts = ["Försäljning", "Inköp av varor", "Kassa", "Bankkonto", "Leverantörsskulder"];
-  const customers = ["Anna Andersson", "Erik Eriksson", "Maria Svensson", "Johan Johansson"];
+  const accounts = ["Försäljning", "Inköp av varor", "Kassa", "Bankkonto"];
+  const customers = ["Anna Andersson", "Erik Eriksson", "Maria Svensson"];
 
   const addNewTransaction = () => {
     const transaction = {
@@ -120,7 +110,6 @@ const Transactions = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Transaktioner</h1>
@@ -238,149 +227,159 @@ const Transactions = () => {
         </Dialog>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Totalt Transaktioner</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalTransactions}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Totala Intäkter</CardTitle>
-            <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{totalIncome.toLocaleString()} kr</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Totala Utgifter</CardTitle>
-            <ArrowDownRight className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{totalExpenses.toLocaleString()} kr</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Nettoresultat</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${netIncome >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {netIncome.toLocaleString()} kr
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Tabs defaultValue="transactions" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="transactions">Transaktioner</TabsTrigger>
+          <TabsTrigger value="bankimport">Bankmatchning</TabsTrigger>
+        </TabsList>
 
-      {/* Search and Filter */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Sök transaktioner..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+        <TabsContent value="transactions" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Totalt Transaktioner</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{totalTransactions}</div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Totala Intäkter</CardTitle>
+                <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{totalIncome.toLocaleString()} kr</div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Totala Utgifter</CardTitle>
+                <ArrowDownRight className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">{totalExpenses.toLocaleString()} kr</div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Nettoresultat</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className={`text-2xl font-bold ${netIncome >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {netIncome.toLocaleString()} kr
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </div>
-        <div className="w-full sm:w-48">
-          <Select value={selectedType} onValueChange={setSelectedType}>
-            <SelectTrigger>
-              <Filter className="w-4 h-4 mr-2" />
-              <SelectValue placeholder="Alla typer" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Alla typer</SelectItem>
-              <SelectItem value="income">Intäkter</SelectItem>
-              <SelectItem value="expense">Utgifter</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
 
-      {/* Transactions List */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Transaktionslista</h2>
-        {filteredTransactions.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <TrendingUp className="h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Inga transaktioner</h3>
-              <p className="text-gray-500 text-center mb-4">
-                Lägg till din första transaktion för att komma igång
-              </p>
-              <Button onClick={() => setShowNewTransactionDialog(true)} className="bg-green-600 hover:bg-green-700">
-                <Plus className="w-4 h-4 mr-2" />
-                Lägg till transaktion
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Sök transaktioner..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div className="w-full sm:w-48">
+              <Select value={selectedType} onValueChange={setSelectedType}>
+                <SelectTrigger>
+                  <Filter className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Alla typer" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alla typer</SelectItem>
+                  <SelectItem value="income">Intäkter</SelectItem>
+                  <SelectItem value="expense">Utgifter</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           <div className="space-y-4">
-            {filteredTransactions.map((transaction) => (
-              <Card key={transaction.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">{transaction.description}</CardTitle>
-                      <CardDescription>
-                        {transaction.date} • {transaction.customer} • {transaction.reference}
-                      </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={transaction.type === "income" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
-                        {transaction.type === "income" ? "Intäkt" : "Utgift"}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">Belopp:</span>
-                      <p className={`font-semibold ${transaction.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {transaction.amount.toLocaleString()} kr
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Konto:</span>
-                      <p className="font-semibold">{transaction.account}</p>
-                    </div>
-                  </div>
-                  
-                  {transaction.notes && (
-                    <div>
-                      <p className="text-sm text-gray-600">{transaction.notes}</p>
-                    </div>
-                  )}
-                  
-                  <div className="flex justify-end space-x-2">
-                    <Button variant="outline" size="sm">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => deleteTransaction(transaction.id)}>
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
+            <h2 className="text-xl font-semibold">Transaktionslista</h2>
+            {filteredTransactions.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <TrendingUp className="h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Inga transaktioner</h3>
+                  <p className="text-gray-500 text-center mb-4">
+                    Lägg till din första transaktion för att komma igång
+                  </p>
+                  <Button onClick={() => setShowNewTransactionDialog(true)} className="bg-green-600 hover:bg-green-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Lägg till transaktion
+                  </Button>
                 </CardContent>
               </Card>
-            ))}
+            ) : (
+              <div className="space-y-4">
+                {filteredTransactions.map((transaction) => (
+                  <Card key={transaction.id} className="hover:shadow-md transition-shadow">
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg">{transaction.description}</CardTitle>
+                          <CardDescription>
+                            {transaction.date} • {transaction.customer} • {transaction.reference}
+                          </CardDescription>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={transaction.type === "income" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+                            {transaction.type === "income" ? "Intäkt" : "Utgift"}
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-500">Belopp:</span>
+                          <p className={`font-semibold ${transaction.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {transaction.amount.toLocaleString()} kr
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Konto:</span>
+                          <p className="font-semibold">{transaction.account}</p>
+                        </div>
+                      </div>
+                      
+                      {transaction.notes && (
+                        <div>
+                          <p className="text-sm text-gray-600">{transaction.notes}</p>
+                        </div>
+                      )}
+                      
+                      <div className="flex justify-end space-x-2">
+                        <Button variant="outline" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => deleteTransaction(transaction.id)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </TabsContent>
+
+        <TabsContent value="bankimport">
+          <BankImport />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

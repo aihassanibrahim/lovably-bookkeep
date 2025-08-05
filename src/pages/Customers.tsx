@@ -15,7 +15,8 @@ import {
   Mail,
   Phone,
   MapPin,
-  Calendar
+  Calendar,
+  MessageSquare
 } from 'lucide-react';
 
 const Customers = () => {
@@ -59,6 +60,8 @@ const Customers = () => {
   ]);
 
   const [showNewCustomerDialog, setShowNewCustomerDialog] = useState(false);
+  const [showNotesDialog, setShowNotesDialog] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [newCustomer, setNewCustomer] = useState({
@@ -96,6 +99,15 @@ const Customers = () => {
 
   const deleteCustomer = (id: number) => {
     setCustomers(customers.filter(c => c.id !== id));
+  };
+
+  const updateCustomerNotes = (customerId: number, notes: string) => {
+    setCustomers(customers.map(c => 
+      c.id === customerId ? { ...c, notes } : c
+    ));
+    setShowNotesDialog(false);
+    setSelectedCustomer(null);
+    toast.success('Anteckningar uppdaterade');
   };
 
   const filteredCustomers = customers.filter(customer => {
@@ -326,6 +338,41 @@ const Customers = () => {
                   )}
                   
                   <div className="flex justify-end space-x-2">
+                    <Dialog open={showNotesDialog} onOpenChange={setShowNotesDialog}>
+                      <DialogTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setSelectedCustomer(customer)}
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Anteckningar - {selectedCustomer?.name}</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Label>Anteckningar</Label>
+                            <Textarea
+                              value={selectedCustomer?.notes || ''}
+                              onChange={(e) => setSelectedCustomer({...selectedCustomer, notes: e.target.value})}
+                              placeholder="Lägg till anteckningar om kunden..."
+                              rows={4}
+                            />
+                          </div>
+                          <div className="flex justify-end space-x-2">
+                            <Button variant="outline" onClick={() => setShowNotesDialog(false)}>
+                              Avbryt
+                            </Button>
+                            <Button onClick={() => updateCustomerNotes(selectedCustomer.id, selectedCustomer.notes)}>
+                              Spara
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                     <Button variant="outline" size="sm">
                       <Edit className="w-4 h-4" />
                     </Button>

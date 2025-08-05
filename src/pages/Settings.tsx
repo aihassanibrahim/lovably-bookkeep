@@ -3,8 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Settings as SettingsIcon, Save, Percent } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Settings as SettingsIcon, Save, Percent, Smartphone } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useNavigation } from "@/context/NavigationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
 import { Layout } from "@/components/Layout";
@@ -22,6 +24,7 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { user } = useAuth();
+  const { mobileNavItems, updateMobileNavItems, saveMobileNavPreferences } = useNavigation();
 
   useEffect(() => {
     if (user) {
@@ -85,6 +88,22 @@ export default function Settings() {
       ...prev,
       [field]: numValue
     }));
+  };
+
+  const handleNavItemToggle = (itemName: string, enabled: boolean) => {
+    const updatedItems = mobileNavItems.map(item => 
+      item.name === itemName ? { ...item, enabled } : item
+    );
+    updateMobileNavItems(updatedItems);
+  };
+
+  const saveNavPreferences = async () => {
+    try {
+      await saveMobileNavPreferences();
+      toast.success('Navigationsinställningar sparade!');
+    } catch (error) {
+      toast.error('Kunde inte spara navigationsinställningar');
+    }
   };
 
   if (loading) {
@@ -218,6 +237,40 @@ export default function Settings() {
             </CardContent>
           </Card>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Smartphone className="h-5 w-5" />
+              Mobilnavigering
+            </CardTitle>
+            <CardDescription>
+              Anpassa vilka sidor som ska visas i den nedre menyn på mobil
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-3">
+              {mobileNavItems.map((item) => (
+                <div key={item.name} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <span className="font-medium">{item.name}</span>
+                  </div>
+                  <Switch
+                    checked={item.enabled}
+                    onCheckedChange={(enabled) => handleNavItemToggle(item.name, enabled)}
+                  />
+                </div>
+              ))}
+            </div>
+            <Button 
+              onClick={saveNavPreferences}
+              className="w-full"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Spara navigationsinställningar
+            </Button>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>
