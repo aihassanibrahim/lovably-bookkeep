@@ -9,6 +9,7 @@ import { BizPalProvider } from "@/context/BizPalContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import Navigation from "@/components/Navigation";
 import Index from "./pages/Index";
+import LandingPage from "./pages/LandingPage";
 import NotFound from "./pages/NotFound";
 import Accounts from "./pages/Accounts";
 import Transactions from "./pages/Transactions";
@@ -39,9 +40,17 @@ const AppContent = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <LoginForm />
-      </div>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+              <LoginForm />
+            </div>
+          } />
+          <Route path="*" element={<LandingPage />} />
+        </Routes>
+      </BrowserRouter>
     );
   }
 
