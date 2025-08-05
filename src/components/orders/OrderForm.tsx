@@ -5,21 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/sonner';
 import { useAuth } from '@/components/auth/AuthProvider';
-
-interface VatRate {
-  id: string;
-  name: string;
-  rate: number;
-}
-
-interface Customer {
-  id: string;
-  company_name: string;
-  customer_number: string;
-}
+import { useBizPal } from '@/context/BizPalContext';
 
 interface OrderFormProps {
   onSuccess?: () => void;
@@ -28,103 +15,34 @@ interface OrderFormProps {
 
 export const OrderForm: React.FC<OrderFormProps> = ({ onSuccess, onCancel }) => {
   const { user } = useAuth();
+  const { addOrder } = useBizPal();
   const [loading, setLoading] = useState(false);
-  const [vatRates, setVatRates] = useState<VatRate[]>([]);
-  const [customers, setCustomers] = useState<Customer[]>([]);
   
   const [formData, setFormData] = useState({
     order_number: '',
-    customer_id: '',
+    customer_name: '',
+    customer_social_media: '',
+    customer_phone: '',
+    customer_address: '',
+    product_name: '',
+    product_details: '',
+    product_customizations: '',
+    price: '',
+    status: 'Beställd',
     order_date: new Date().toISOString().split('T')[0],
-    description: '',
-    amount_excluding_vat: '',
-    vat_rate_id: '',
-  });
-
-  const [calculatedAmounts, setCalculatedAmounts] = useState({
-    vat_amount: 0,
-    total_amount: 0,
+    estimated_completion: '',
+    notes: ''
   });
 
   useEffect(() => {
-    fetchVatRates();
-    fetchCustomers();
     generateOrderNumber();
   }, []);
 
-  useEffect(() => {
-    calculateAmounts();
-  }, [formData.amount_excluding_vat, formData.vat_rate_id]);
-
-  const fetchVatRates = async () => {
-    const { data, error } = await supabase
-      .from('vat_rates')
-      .select('*')
-      .eq('is_active', true)
-      .order('rate', { ascending: true });
-
-    if (error) {
-      toast.error('Kunde inte hämta momsatser');
-      return;
-    }
-
-    setVatRates(data || []);
-  };
-
-  const fetchCustomers = async () => {
-    const { data, error } = await supabase
-      .from('customers')
-      .select('id, company_name, customer_number')
-      .eq('is_active', true)
-      .order('company_name');
-
-    if (error) {
-      toast.error('Kunde inte hämta kunder');
-      return;
-    }
-
-    setCustomers(data || []);
-  };
-
-  const generateOrderNumber = async () => {
-    const { data, error } = await supabase
-      .from('orders')
-      .select('order_number')
-      .order('created_at', { ascending: false })
-      .limit(1);
-
-    if (error) {
-      console.error('Error generating order number:', error);
-      setFormData(prev => ({ ...prev, order_number: 'ORD-001' }));
-      return;
-    }
-
-    let nextNumber = 1;
-    if (data && data.length > 0) {
-      const lastNumber = data[0].order_number.match(/\d+$/);
-      if (lastNumber) {
-        nextNumber = parseInt(lastNumber[0]) + 1;
-      }
-    }
-
-    setFormData(prev => ({ 
-      ...prev, 
-      order_number: `ORD-${nextNumber.toString().padStart(3, '0')}` 
-    }));
-  };
-
-  const calculateAmounts = () => {
-    const amount = parseFloat(formData.amount_excluding_vat) || 0;
-    const selectedVatRate = vatRates.find(rate => rate.id === formData.vat_rate_id);
-    const vatRate = selectedVatRate ? selectedVatRate.rate : 0;
-    
-    const vatAmount = (amount * vatRate) / 100;
-    const totalAmount = amount + vatAmount;
-
-    setCalculatedAmounts({
-      vat_amount: vatAmount,
-      total_amount: totalAmount,
-    });
+  const generateOrderNumber = () => {
+    // Simple number generation - in a real app you might want to get this from context
+    const timestamp = Date.now();
+    const randomNum = Math.floor(Math.random() * 1000);
+    setFormData(prev => ({ ...prev, order_number: `ORD-${timestamp}-${randomNum}` }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -134,29 +52,25 @@ export const OrderForm: React.FC<OrderFormProps> = ({ onSuccess, onCancel }) => 
     setLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('orders')
-        .insert({
-          user_id: user.id,
-          order_number: formData.order_number,
-          customer_id: formData.customer_id || null,
-          order_date: formData.order_date,
-          description: formData.description,
-          amount_excluding_vat: parseFloat(formData.amount_excluding_vat),
-          vat_rate_id: formData.vat_rate_id,
-          vat_amount: calculatedAmounts.vat_amount,
-          total_amount: calculatedAmounts.total_amount,
-          status: 'draft',
-        });
+      await addOrder({
+        order_number: formData.order_number,
+        customer_name: formData.customer_name,
+        customer_social_media: formData.customer_social_media,
+        customer_phone: formData.customer_phone,
+        customer_address: formData.customer_address,
+        product_name: formData.product_name,
+        product_details: formData.product_details,
+        product_customizations: formData.product_customizations,
+        price: parseFloat(formData.price) || 0,
+        status: formData.status,
+        order_date: formData.order_date,
+        estimated_completion: formData.estimated_completion || null,
+        notes: formData.notes
+      });
 
-      if (error) throw error;
-
-      toast.success('Order skapad!');
       onSuccess?.();
     } catch (error: any) {
-      toast.error('Kunde inte skapa order', {
-        description: error.message,
-      });
+      console.error('Error creating order:', error);
     } finally {
       setLoading(false);
     }
@@ -165,7 +79,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ onSuccess, onCancel }) => 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Skapa ny order</CardTitle>
+        <CardTitle>Skapa ny order från sociala medier</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -191,89 +105,143 @@ export const OrderForm: React.FC<OrderFormProps> = ({ onSuccess, onCancel }) => 
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="customer_id">Kund (valfritt)</Label>
-            <Select value={formData.customer_id} onValueChange={(value) => setFormData(prev => ({ ...prev, customer_id: value }))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Välj kund" />
-              </SelectTrigger>
-              <SelectContent>
-                {customers.map((customer) => (
-                  <SelectItem key={customer.id} value={customer.id}>
-                    {customer.company_name} ({customer.customer_number})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="customer_name">Kundnamn</Label>
+              <Input
+                id="customer_name"
+                value={formData.customer_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, customer_name: e.target.value }))}
+                required
+                placeholder="Kundens namn"
+              />
+            </div>
+            <div>
+              <Label htmlFor="customer_social_media">Sociala medier</Label>
+              <Input
+                id="customer_social_media"
+                value={formData.customer_social_media}
+                onChange={(e) => setFormData(prev => ({ ...prev, customer_social_media: e.target.value }))}
+                placeholder="Instagram, Facebook, etc."
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="customer_phone">Telefon</Label>
+              <Input
+                id="customer_phone"
+                value={formData.customer_phone}
+                onChange={(e) => setFormData(prev => ({ ...prev, customer_phone: e.target.value }))}
+                placeholder="070-123 45 67"
+              />
+            </div>
+            <div>
+              <Label htmlFor="price">Pris (SEK)</Label>
+              <Input
+                id="price"
+                type="number"
+                step="0.01"
+                value={formData.price}
+                onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                required
+                placeholder="0.00"
+              />
+            </div>
           </div>
 
           <div>
-            <Label htmlFor="description">Beskrivning</Label>
+            <Label htmlFor="customer_address">Adress</Label>
             <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              required
-              placeholder="Beskriv vad ordern gäller..."
+              id="customer_address"
+              value={formData.customer_address}
+              onChange={(e) => setFormData(prev => ({ ...prev, customer_address: e.target.value }))}
+              placeholder="Leveransadress"
+              rows={2}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="amount_excluding_vat">Belopp exkl. moms</Label>
+              <Label htmlFor="product_name">Produktnamn</Label>
               <Input
-                id="amount_excluding_vat"
-                type="number"
-                step="0.01"
-                value={formData.amount_excluding_vat}
-                onChange={(e) => setFormData(prev => ({ ...prev, amount_excluding_vat: e.target.value }))}
+                id="product_name"
+                value={formData.product_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, product_name: e.target.value }))}
                 required
-                placeholder="0.00"
+                placeholder="Vad kunden beställt"
               />
             </div>
             <div>
-              <Label htmlFor="vat_rate_id">Momssats</Label>
-              <Select value={formData.vat_rate_id} onValueChange={(value) => setFormData(prev => ({ ...prev, vat_rate_id: value }))}>
+              <Label htmlFor="status">Status</Label>
+              <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Välj momssats" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {vatRates.map((rate) => (
-                    <SelectItem key={rate.id} value={rate.id}>
-                      {rate.name} ({rate.rate}%)
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="Beställd">Beställd</SelectItem>
+                  <SelectItem value="I produktion">I produktion</SelectItem>
+                  <SelectItem value="Klar">Klar</SelectItem>
+                  <SelectItem value="Skickad">Skickad</SelectItem>
+                  <SelectItem value="Levererad">Levererad</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          {formData.amount_excluding_vat && formData.vat_rate_id && (
-            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-              <div className="flex justify-between">
-                <span>Belopp exkl. moms:</span>
-                <span>{parseFloat(formData.amount_excluding_vat).toFixed(2)} kr</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Moms:</span>
-                <span>{calculatedAmounts.vat_amount.toFixed(2)} kr</span>
-              </div>
-              <div className="flex justify-between font-bold border-t pt-2">
-                <span>Totalt inkl. moms:</span>
-                <span>{calculatedAmounts.total_amount.toFixed(2)} kr</span>
-              </div>
-            </div>
-          )}
+          <div>
+            <Label htmlFor="product_details">Produktdetaljer</Label>
+            <Textarea
+              id="product_details"
+              value={formData.product_details}
+              onChange={(e) => setFormData(prev => ({ ...prev, product_details: e.target.value }))}
+              placeholder="Beskrivning av produkten..."
+              rows={2}
+            />
+          </div>
 
-          <div className="flex gap-2">
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Skapar...' : 'Skapa order'}
+          <div>
+            <Label htmlFor="product_customizations">Anpassningar</Label>
+            <Textarea
+              id="product_customizations"
+              value={formData.product_customizations}
+              onChange={(e) => setFormData(prev => ({ ...prev, product_customizations: e.target.value }))}
+              placeholder="Specifika önskemål från kunden..."
+              rows={2}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="estimated_completion">Beräknad leverans</Label>
+              <Input
+                id="estimated_completion"
+                type="date"
+                value={formData.estimated_completion}
+                onChange={(e) => setFormData(prev => ({ ...prev, estimated_completion: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="notes">Anteckningar</Label>
+            <Textarea
+              id="notes"
+              value={formData.notes}
+              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+              placeholder="Övriga anteckningar..."
+              rows={2}
+            />
+          </div>
+
+          <div className="flex justify-end space-x-2">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Avbryt
             </Button>
-            {onCancel && (
-              <Button type="button" variant="outline" onClick={onCancel}>
-                Avbryt
-              </Button>
-            )}
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Skapar...' : 'Skapa Order'}
+            </Button>
           </div>
         </form>
       </CardContent>

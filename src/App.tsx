@@ -9,7 +9,7 @@ import { BizPalProvider } from "@/context/BizPalContext";
 import { NavigationProvider } from "@/context/NavigationContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import Navigation from "@/components/Navigation";
-import MobileBottomNav from "@/components/MobileBottomNav";
+import MobileNavigation from "@/components/MobileNavigation";
 import SupportButton from "@/components/SupportButton";
 
 import Dashboard from "./pages/Dashboard";
@@ -91,8 +91,8 @@ const AppContent = () => {
         </main>
       </div>
       
-      {/* Mobile Bottom Navigation */}
-      <MobileBottomNav />
+      {/* Mobile Navigation */}
+      <MobileNavigation />
       
       {/* Support Button */}
       <SupportButton />
