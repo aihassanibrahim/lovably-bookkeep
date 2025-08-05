@@ -9,8 +9,6 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useNavigation } from "@/context/NavigationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
-import { Layout } from "@/components/Layout";
-
 interface UserSettings {
   moms_sats: number;
   skatt_sats: number;
@@ -108,8 +106,7 @@ export default function Settings() {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="space-y-6">
+      <div className="space-y-6">
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold">Inställningar</h1>
@@ -121,15 +118,13 @@ export default function Settings() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
             </CardContent>
           </Card>
-        </div>
-      </Layout>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold">Inställningar</h1>
             <p className="text-muted-foreground">
@@ -308,6 +303,5 @@ export default function Settings() {
           </CardContent>
         </Card>
       </div>
-    </Layout>
   );
 } 

@@ -14,7 +14,10 @@ import {
   Building2,
   FileText,
   Truck,
-  LogOut
+  LogOut,
+  HelpCircle,
+  Info,
+  Settings
 } from 'lucide-react';
 
 const Navigation = () => {
@@ -87,6 +90,27 @@ const Navigation = () => {
       href: '/reports',
       icon: BarChart3,
       description: 'Statistik & rapporter'
+    },
+    {
+      name: 'FAQ',
+      href: '/faq',
+      icon: HelpCircle,
+      enabled: true,
+      category: 'settings'
+    },
+    {
+      name: 'Om oss',
+      href: '/about',
+      icon: Info,
+      enabled: true,
+      category: 'settings'
+    },
+    {
+      name: 'Inställningar',
+      href: '/settings',
+      icon: Settings,
+      enabled: true,
+      category: 'settings'
     }
   ];
 

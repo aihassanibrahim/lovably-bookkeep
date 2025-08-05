@@ -7,8 +7,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
-import { Layout } from "@/components/Layout";
-
 interface Expense {
   id: string;
   datum: string;
@@ -64,8 +62,7 @@ export default function Expenses() {
   const totalExpenseCount = expenses.length;
 
   return (
-    <Layout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold">Utgifter & Kostnader</h1>
@@ -204,6 +201,5 @@ export default function Expenses() {
           </DialogContent>
         </Dialog>
       </div>
-    </Layout>
   );
 } 

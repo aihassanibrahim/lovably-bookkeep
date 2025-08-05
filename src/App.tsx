@@ -10,6 +10,7 @@ import { NavigationProvider } from "@/context/NavigationContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import Navigation from "@/components/Navigation";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import SupportButton from "@/components/SupportButton";
 
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
@@ -18,6 +19,8 @@ import Transactions from "./pages/Transactions";
 import Customers from "./pages/Customers";
 import Suppliers from "./pages/Suppliers";
 import Reports from "./pages/Reports";
+import Settings from "./pages/Settings";
+import Expenses from "./pages/Expenses";
 // NYA SIDOR FÖR BIZPAL
 import Orders from "./pages/Orders";
 import Products from "./pages/Products";
@@ -25,6 +28,9 @@ import Production from "./pages/Production";
 import Inventory from "./pages/Inventory";
 import Receipts from "./pages/Receipts";
 import Invoices from "./pages/Invoices";
+// NYA SUPPORT-SIDOR
+import FAQ from "./pages/FAQ";
+import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
@@ -68,10 +74,16 @@ const AppContent = () => {
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/accounts" element={<Accounts />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/expenses" element={<Expenses />} />
             
             {/* KUNDER & LEVERANTÖRER */}
             <Route path="/customers" element={<Customers />} />
             <Route path="/suppliers" element={<Suppliers />} />
+            
+            {/* INSTÄLLNINGAR & SUPPORT */}
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/about" element={<About />} />
             
             {/* CATCH-ALL ROUTE */}
             <Route path="*" element={<NotFound />} />
@@ -81,6 +93,9 @@ const AppContent = () => {
       
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav />
+      
+      {/* Support Button */}
+      <SupportButton />
     </div>
   );
 };
