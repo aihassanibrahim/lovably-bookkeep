@@ -103,7 +103,7 @@ const AppContent = () => {
 const App = () => (
   <BrowserRouter>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="system" storageKey="bizpal-ui-theme">
+      <ThemeProvider defaultTheme="light" storageKey="bizpal-ui-theme">
         <AuthProvider>
           <BizPalProvider>
             <NavigationProvider>
