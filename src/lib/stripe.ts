@@ -47,6 +47,12 @@ export const PRICING_PLANS = {
   }
 };
 
+// Stripe configuration
+export const STRIPE_PUBLISHABLE_KEY = 'pk_live_51Rt4jwBK2aelwOoZSywqmWu1HwUXgggEnUuIB7RgX11jRv5owMJSC7uekpyVXrN2XlRChyGFrYnFZik30em1jfif00Sp4DWa9e';
+
+// Stripe Pricing Table ID
+export const STRIPE_PRICING_TABLE_ID = 'prctbl_1Rt5kxBK2aelwOoZMbCtsMWM';
+
 // Stripe price IDs - replace with your actual price IDs
 export const STRIPE_PRICE_IDS = {
   PRO_MONTHLY: 'price_1Rt5J1BK2aelwOoZwlbWikOe',
