@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Accordion,
@@ -12,13 +8,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
 import { MobileNav } from "@/components/ui/mobile-nav";
 import { toast } from "sonner";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -45,28 +34,6 @@ import {
   LogIn,
 } from "lucide-react";
 
-const emailSchema = z.object({
-  email: z.string().email("Ange en giltig e-postadress"),
-});
-
-const loginSchema = z.object({
-  email: z.string().email("Ange en giltig e-postadress"),
-  password: z.string().min(6, "Lösenordet måste vara minst 6 tecken"),
-});
-
-const signupSchema = z.object({
-  email: z.string().email("Ange en giltig e-postadress"),
-  password: z.string().min(6, "Lösenordet måste vara minst 6 tecken"),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Lösenorden matchar inte",
-  path: ["confirmPassword"],
-});
-
-type EmailFormData = z.infer<typeof emailSchema>;
-type LoginFormData = z.infer<typeof loginSchema>;
-type SignupFormData = z.infer<typeof signupSchema>;
-
 export default function Landing() {
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -81,23 +48,6 @@ export default function Landing() {
   const navigate = useNavigate();
 
   const { signIn, signUp, user } = useAuth();
-
-  const emailForm = useForm<EmailFormData>({
-    resolver: zodResolver(emailSchema),
-    defaultValues: {
-      email: "",
-    },
-  });
-
-  const loginForm = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  const signupForm = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
       email: "",
@@ -136,85 +86,7 @@ export default function Landing() {
     }
   };
 
-  const onEmailSubmit = async (data: EmailFormData) => {
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      toast({
-        title: "Tack för ditt intresse!",
-        description: "Vi hör av oss inom kort med mer information.",
-      });
-
-      emailForm.reset();
-    } catch (error) {
-      toast({
-        title: "Något gick fel",
-        description: "Försök igen senare eller kontakta oss direkt.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const onLoginSubmit = async (data: LoginFormData) => {
-    setIsLoading(true);
-    try {
-      await signIn(data.email, data.password);
-      toast({
-        title: "Välkommen tillbaka!",
-        description: "Du är nu inloggad och kommer att omdirigeras till betalningssidan.",
-      });
-      setShowLoginModal(false);
-      
-      // Redirect to Stripe checkout after successful login
-      setTimeout(async () => {
-        try {
-          await redirectToCheckout('pro', user?.id || '');
-        } catch (error) {
-          console.error('Error redirecting to checkout after login:', error);
-          navigate("/");
-        }
-      }, 1500);
-    } catch (error) {
-      toast({
-        title: "Inloggning misslyckades",
-        description: "Kontrollera din e-post och lösenord.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const onSignupSubmit = async (data: SignupFormData) => {
-    setIsLoading(true);
-    try {
-      await signUp(data.email, data.password);
-      toast({
-        title: "Konto skapat!",
-        description: "Du är nu registrerad och kommer att omdirigeras till betalningssidan.",
-      });
-      setShowLoginModal(false);
-      
-      // Redirect to Stripe checkout after successful signup
-      setTimeout(async () => {
-        try {
-          await redirectToCheckout('pro', user?.id || '');
-        } catch (error) {
-          console.error('Error redirecting to checkout after signup:', error);
-          navigate("/");
-        }
-      }, 1500);
-    } catch (error) {
-      toast({
-        title: "Registrering misslyckades",
-        description: "Försök igen eller kontakta support.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleCTAClick = async () => {
     if (user) {
