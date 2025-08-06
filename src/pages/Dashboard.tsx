@@ -15,7 +15,8 @@ import {
   BarChart3,
   ShoppingBag,
   Truck,
-  Receipt
+  Receipt,
+  Crown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
@@ -30,6 +31,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UsageTracker } from "@/components/PlanLimitBanner";
+import { redirectToCheckout } from "@/lib/stripe-client";
 
 interface FinancialData {
   totalIncome: number;
@@ -81,6 +85,7 @@ export default function Dashboard() {
   });
   const { user } = useAuth();
   const { orders, products, customers, suppliers, expenses, stats, loading, addOrder } = useBizPal();
+  const { subscription, usage, isFreePlan, isProPlan, getCurrentPlan } = useSubscription();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -157,6 +162,31 @@ export default function Dashboard() {
     const timestamp = Date.now();
     const randomNum = Math.floor(Math.random() * 1000);
     return `ORD-${timestamp}-${randomNum}`;
+  };
+
+  const handleUpgrade = async () => {
+    if (!user) {
+      toast({
+        title: 'Logga in först',
+        description: 'Du måste logga in för att uppgradera din plan.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      await redirectToCheckout('pro', user.id);
+      toast({
+        title: 'Omdirigerar till betalning',
+        description: 'Du kommer att skickas till Stripe för att slutföra din prenumeration.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Något gick fel',
+        description: 'Kunde inte starta uppgraderingen. Försök igen.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleOrderSubmit = async (e: React.FormEvent) => {
@@ -247,6 +277,52 @@ export default function Dashboard() {
         <div className="flex flex-wrap gap-2 lg:gap-3">
           <QuickActions />
         </div>
+      </div>
+
+      {/* Plan Information and Usage */}
+      <div className="grid gap-4 md:gap-6 md:grid-cols-1 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <UsageTracker />
+        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Crown className="h-5 w-5" />
+              Din plan
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="font-medium">Nuvarande plan:</span>
+              <Badge variant={isProPlan() ? "default" : "secondary"}>
+                {isProPlan() ? "Pro" : "Gratis"}
+              </Badge>
+            </div>
+            {isFreePlan() && (
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h4 className="font-semibold text-blue-800 mb-2">Uppgradera till Pro</h4>
+                <p className="text-sm text-blue-700 mb-3">
+                  Få tillgång till alla funktioner för endast 99kr/månad.
+                </p>
+                <Button 
+                  onClick={handleUpgrade}
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Uppgradera nu
+                </Button>
+              </div>
+            )}
+            {isProPlan() && (
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                <h4 className="font-semibold text-green-800 mb-2">Pro-funktioner aktiva</h4>
+                <p className="text-sm text-green-700">
+                  Du har tillgång till alla funktioner och obegränsad användning.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Quick Action Cards */}
