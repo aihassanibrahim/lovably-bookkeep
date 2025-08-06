@@ -23,6 +23,11 @@ import { MobileNav } from "@/components/ui/mobile-nav";
 import { toast } from "sonner";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
+import { PricingSection } from "@/components/PricingSection";
+import { FeaturesSection } from "@/components/FeaturesSection";
+import { FeedbackForm } from "@/components/FeedbackForm";
+import { GuestLoginButton } from "@/components/GuestLoginButton";
+import { mockCheckout } from "@/lib/stripe-client";
 import {
   ShoppingCart,
   Clock,
@@ -174,6 +179,30 @@ export default function Landing() {
   const handleCTAClick = () => {
     setShowLoginModal(true);
     setIsLoginMode(true);
+  };
+
+  const handleUpgrade = async (planId: string) => {
+    if (!user) {
+      setShowLoginModal(true);
+      setIsLoginMode(true);
+      return;
+    }
+
+    try {
+      if (planId === 'pro') {
+        await mockCheckout(planId);
+        toast({
+          title: 'Uppgradering påbörjad',
+          description: 'Du kommer att omdirigeras till betalningssidan.',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Något gick fel',
+        description: 'Kunde inte starta uppgraderingen. Försök igen.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -418,19 +447,22 @@ export default function Landing() {
         </div>
 
               <div className="space-y-4">
-                <Button
-                  size="lg"
-                  onClick={handleCTAClick}
-                  className="bg-black text-white px-8 py-4 text-lg font-semibold hover:bg-gray-800 transition-colors"
-                  data-testid="button-cta-hero"
-                >
-                  Prova gratis i 30 dagar
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button
+                    size="lg"
+                    onClick={handleCTAClick}
+                    className="bg-black text-white px-8 py-4 text-lg font-semibold hover:bg-gray-800 transition-colors"
+                    data-testid="button-cta-hero"
+                  >
+                    Prova gratis i 30 dagar
+                  </Button>
+                  <GuestLoginButton variant="button" />
+                </div>
                 <p
                   className="text-sm text-gray-600"
                   data-testid="text-pricing-info"
                 >
-                  Endast 79kr/månad - ingen bindningstid
+                  Endast 199kr/månad - ingen bindningstid
                 </p>
                 
                 {/* Quick Social Proof */}
@@ -777,60 +809,11 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="priser" className="py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2
-            className="text-4xl font-bold mb-8"
-            data-testid="text-pricing-title"
-          >
-            En enkel prismodell
-          </h2>
+      {/* Pricing Section */}
+      <PricingSection onUpgrade={handleUpgrade} />
 
-          <Card className="bg-gray-50 border-2 border-gray-200 p-12 max-w-md mx-auto">
-            <CardContent className="p-0 space-y-6">
-              <div>
-                <div className="text-6xl font-black" data-testid="text-price">
-                  79kr
-                </div>
-                <div className="text-gray-600">/månad</div>
-              </div>
-
-              <div className="space-y-3 text-left">
-                <div className="flex items-center space-x-3">
-                  <Check className="w-5 h-5" strokeWidth={1.5} />
-                  <span>30 dagar gratis testperiod</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Check className="w-5 h-5" strokeWidth={1.5} />
-                  <span>Ingen bindningstid</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Check className="w-5 h-5" strokeWidth={1.5} />
-                  <span>Allt inkluderat</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Check className="w-5 h-5" strokeWidth={1.5} />
-                  <span>Support på svenska</span>
-                </div>
-              </div>
-
-              <Button
-                onClick={handleCTAClick}
-                className="w-full bg-black text-white py-4 font-semibold hover:bg-gray-800 transition-colors"
-                data-testid="button-cta-pricing"
-              >
-                Starta gratis testperiod
-              </Button>
-            </CardContent>
-          </Card>
-
-          <p className="mt-8 text-gray-600">
-            Jämför med kostnaden för flera separata system - spara tusentals
-            kronor årligen
-          </p>
-        </div>
-      </section>
+      {/* Features Section */}
+      <FeaturesSection />
 
       {/* FAQ */}
       <section id="faq" className="py-20 bg-gray-50">
@@ -916,6 +899,49 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Feedback Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">
+              Hjälp oss bygga BizPal bättre
+            </h2>
+            <p className="text-lg text-gray-600">
+              Vi vill gärna höra vad du tycker och hur vi kan förbättra systemet
+            </p>
+          </div>
+          
+          <div className="grid lg:grid-cols-2 gap-8 items-start">
+            <div className="space-y-6">
+              <h3 className="text-xl font-semibold">Varför feedback är viktigt</h3>
+              <div className="space-y-4 text-gray-600">
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <p>Vi bygger BizPal tillsammans med användare som du</p>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <p>Din feedback hjälper oss att prioritera rätt funktioner</p>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <p>Vi implementerar förbättringar baserat på verkliga behov</p>
+                </div>
+              </div>
+              
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  <strong>Pro-tip:</strong> Ju mer specifik feedback du ger, 
+                  desto bättre kan vi hjälpa dig och andra användare.
+                </p>
+              </div>
+            </div>
+            
+            <FeedbackForm />
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -947,30 +973,12 @@ export default function Landing() {
               </div>
               <div className="flex items-center space-x-2">
                 <Check className="w-4 h-4" strokeWidth={1.5} />
-                <span>Endast 79kr/månad sedan</span>
+                <span>Endast 199kr/månad sedan</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Check className="w-4 h-4" strokeWidth={1.5} />
                 <span>GDPR-kompatibel</span>
               </div>
-            </div>
-
-            {/* Feedback CTA */}
-            <div className="pt-8 border-t border-gray-200">
-              <p className="text-gray-600 mb-4">Hjälp oss bygga BizPal bättre</p>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  // Öppna feedback-formuläret eller navigera till feedback-sida
-                  toast({
-                    title: "Tack för ditt intresse!",
-                    description: "Vi tar gärna emot din feedback för att göra BizPal ännu bättre.",
-                  });
-                }}
-                className="border-gray-300 text-gray-700 hover:bg-gray-50"
-              >
-                📢 Hjälp oss bygga BizPal – lämna feedback!
-              </Button>
             </div>
           </div>
 
