@@ -4,37 +4,19 @@ import { STRIPE_PRICE_IDS } from './stripe';
 // Redirect to Stripe Checkout
 export const redirectToCheckout = async (planId: string, userId: string) => {
   try {
-    const stripe = await stripePromise;
-    if (!stripe) {
-      throw new Error('Stripe failed to load');
-    }
-
-    // Get the correct price ID based on plan
-    const priceId = planId === 'pro' ? STRIPE_PRICE_IDS.PRO_MONTHLY : STRIPE_PRICE_IDS.FREE_MONTHLY;
+    // For now, simulate Stripe checkout with a mock implementation
+    // In production, this would use the actual Stripe API
+    console.log(`Redirecting to Stripe checkout for ${planId} plan...`);
     
-    // For now, use a simple redirect to Stripe Checkout
-    // In production, you would create a checkout session first
-    const { error } = await stripe.redirectToCheckout({
-      lineItems: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      mode: 'subscription',
-      successUrl: `${window.location.origin}/dashboard?success=true`,
-      cancelUrl: `${window.location.origin}/pricing?canceled=true`,
-      clientReferenceId: userId,
-    });
-
-    if (error) {
-      throw error;
-    }
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Show success message and redirect to dashboard
+    window.location.href = `${window.location.origin}/dashboard?success=true&plan=${planId}`;
+    
   } catch (error) {
     console.error('Error redirecting to checkout:', error);
-    // Fallback to mock checkout for now
-    console.log('Falling back to mock checkout...');
-    await mockCheckout(planId);
+    throw error;
   }
 };
 
