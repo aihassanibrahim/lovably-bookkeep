@@ -288,127 +288,63 @@ export default function Landing() {
               </div>
 
               {isLoginMode ? (
-                <Form {...loginForm}>
-                  <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-                    <FormField
-                      control={loginForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="relative">
-                              <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                              <Input
-                                placeholder="E-post"
-                                className="pl-10"
-                                {...field}
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                <div className="space-y-4">
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-20" />
+                    <input
+                      type="email"
+                      placeholder="E-post"
+                      className="w-full h-10 rounded-md border border-gray-300 bg-white px-10 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                    <FormField
-                      control={loginForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="relative">
-                              <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                              <Input
-                                type="password"
-                                placeholder="Lösenord"
-                                className="pl-10"
-                                {...field}
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-20" />
+                    <input
+                      type="password"
+                      placeholder="Lösenord"
+                      className="w-full h-10 rounded-md border border-gray-300 bg-white px-10 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                    <Button 
-                      type="submit" 
-                      className="w-full" 
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Loggar in..." : "Logga in"}
-                    </Button>
-                  </form>
-                </Form>
+                  </div>
+                  <Button 
+                    className="w-full" 
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Loggar in..." : "Logga in"}
+                  </Button>
+                </div>
               ) : (
-                <Form {...signupForm}>
-                  <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4">
-                    <FormField
-                      control={signupForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="relative">
-                              <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                              <Input
-                                placeholder="E-post"
-                                className="pl-10"
-                                {...field}
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                <div className="space-y-4">
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-20" />
+                    <input
+                      type="email"
+                      placeholder="E-post"
+                      className="w-full h-10 rounded-md border border-gray-300 bg-white px-10 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                    <FormField
-                      control={signupForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="relative">
-                              <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                              <Input
-                                type="password"
-                                placeholder="Lösenord"
-                                className="pl-10"
-                                {...field}
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-20" />
+                    <input
+                      type="password"
+                      placeholder="Lösenord"
+                      className="w-full h-10 rounded-md border border-gray-300 bg-white px-10 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                    <FormField
-                      control={signupForm.control}
-                      name="confirmPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="relative">
-                              <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                              <Input
-                                type="password"
-                                placeholder="Bekräfta lösenord"
-                                className="pl-10"
-                                {...field}
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-20" />
+                    <input
+                      type="password"
+                      placeholder="Bekräfta lösenord"
+                      className="w-full h-10 rounded-md border border-gray-300 bg-white px-10 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                    <Button 
-                      type="submit" 
-                      className="w-full" 
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Skapar konto..." : "Skapa konto"}
-                    </Button>
-                  </form>
-                </Form>
+                  </div>
+                  <Button 
+                    className="w-full" 
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Skapar konto..." : "Skapa konto"}
+                  </Button>
+                </div>
               )}
 
               <div className="mt-4 text-center">
