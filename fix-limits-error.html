@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Limits Error</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .fix-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .fix-button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .fix-button:hover {
+            background: #c82333;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .info {
+            color: blue;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Fix Limits Error</h1>
+    
+    <div class="fix-section">
+        <h2>Error Identified</h2>
+        <p>The error "Cannot read properties of undefined (reading 'limits')" has been fixed in the code. This page will:</p>
+        <ul>
+            <li>✅ Set proper localStorage values</li>
+            <li>✅ Clear any invalid subscription data</li>
+            <li>✅ Redirect you to the dashboard</li>
+        </ul>
+    </div>
+
+    <div class="fix-section">
+        <h2>Quick Fix</h2>
+        <button class="fix-button" onclick="fixAndRedirect()">
+            🎯 Fix Error & Go to Dashboard
+        </button>
+        <button class="fix-button" onclick="clearAllData()">
+            🗑️ Clear All Data & Restart
+        </button>
+        <div id="fix-result"></div>
+    </div>
+
+    <div class="fix-section">
+        <h2>What Was Fixed</h2>
+        <p><strong>Problem:</strong> The code was trying to access plan limits on an undefined plan object</p>
+        <p><strong>Solution:</strong> Added proper error handling and validation for plan data</p>
+        <p><strong>Files Updated:</strong></p>
+        <ul>
+            <li>src/lib/stripe.ts - Added plan validation</li>
+            <li>src/hooks/useSubscription.ts - Fixed function calls and added safety checks</li>
+            <li>src/components/PlanLimitBanner.tsx - Added null checks</li>
+        </ul>
+    </div>
+
+    <script>
+        function fixAndRedirect() {
+            const result = document.getElementById('fix-result');
+            result.innerHTML = '<span class="info">🔄 Applying fix...</span>';
+            
+            // Set proper localStorage values
+            localStorage.setItem('onboarding_completed', 'true');
+            localStorage.setItem('onboarding_step', '6');
+            localStorage.setItem('onboarding_completed_at', new Date().toISOString());
+            
+            // Clear any invalid subscription data that might cause issues
+            localStorage.removeItem('subscription_error');
+            localStorage.removeItem('plan_error');
+            
+            result.innerHTML = '<span class="success">✅ Fix applied! Redirecting to dashboard...</span>';
+            
+            // Redirect to dashboard
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1000);
+        }
+
+        function clearAllData() {
+            const result = document.getElementById('fix-result');
+            result.innerHTML = '<span class="info">🔄 Clearing all data...</span>';
+            
+            // Clear all localStorage
+            localStorage.clear();
+            
+            result.innerHTML = '<span class="success">✅ All data cleared! Redirecting to onboarding...</span>';
+            
+            // Redirect to onboarding
+            setTimeout(() => {
+                window.location.href = '/onboarding';
+            }, 1000);
+        }
+
+        // Auto-check on page load
+        window.onload = function() {
+            const result = document.getElementById('fix-result');
+            result.innerHTML = '<span class="info">ℹ️ Ready to fix the limits error. Click a button above.</span>';
+        };
+    </script>
+</body>
+</html> 

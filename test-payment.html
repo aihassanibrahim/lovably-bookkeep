@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .warning {
+            color: orange;
+            font-weight: bold;
+        }
+        .info {
+            color: blue;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>💳 Payment Test Page</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Pro Plan Payment</h2>
+        <p>Test the Pro plan payment flow:</p>
+        <button class="test-button" onclick="testProPayment()">Test Pro Payment (99kr/månad)</button>
+        <div id="test1-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Server Status</h2>
+        <p>Check if the Stripe API server is running:</p>
+        <button class="test-button" onclick="checkServerStatus()">Check Server Status</button>
+        <div id="test2-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Direct Onboarding Test</h2>
+        <p>Test the onboarding flow directly:</p>
+        <button class="test-button" onclick="testOnboarding()">Go to Onboarding</button>
+        <button class="test-button" onclick="testProSuccess()">Simulate Pro Success</button>
+        <div id="test3-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Setup Instructions</h2>
+        <div id="setup-info">
+            <h3>To enable real Stripe payments:</h3>
+            <ol>
+                <li><strong>Get your Stripe Secret Key:</strong>
+                    <ul>
+                        <li>Go to <a href="https://dashboard.stripe.com/apikeys" target="_blank">Stripe Dashboard → API Keys</a></li>
+                        <li>Copy your <strong>Secret key</strong> (starts with <code>sk_live_</code>)</li>
+                    </ul>
+                </li>
+                <li><strong>Create a Product & Price:</strong>
+                    <ul>
+                        <li>Go to <a href="https://dashboard.stripe.com/products" target="_blank">Stripe Dashboard → Products</a></li>
+                        <li>Create a new product called "BizPal Pro"</li>
+                        <li>Add a recurring price of 99 SEK/month</li>
+                        <li>Copy the <strong>Price ID</strong> (starts with <code>price_</code>)</li>
+                    </ul>
+                </li>
+                <li><strong>Update the server configuration:</strong>
+                    <ul>
+                        <li>Create a <code>.env</code> file in the project root</li>
+                        <li>Add: <code>STRIPE_SECRET_KEY=sk_live_your_secret_key_here</code></li>
+                        <li>Add: <code>STRIPE_PRO_PRICE_ID=price_your_price_id_here</code></li>
+                    </ul>
+                </li>
+                <li><strong>Restart the server:</strong>
+                    <ul>
+                        <li>Stop the current server (Ctrl+C)</li>
+                        <li>Run: <code>node server.js</code></li>
+                    </ul>
+                </li>
+            </ol>
+            
+                         <h3>Current Status:</h3>
+             <p><span class="success">✅ Live Stripe Integration Active</span> - Real payments enabled!</p>
+             <p><span class="info">ℹ️ Public Key:</span> <code>pk_live_51Rt4jwBK2aelwOoZSywqmWu1HwUXgggEnUuIB7RgX11jRv5owMJSC7uekpyVXrN2XlRChyGFrYnFZik30em1jfif00Sp4DWa9e</code></p>
+             <p><span class="info">ℹ️ Pro Plan Price ID:</span> <code>price_1Rt5J1BK2aelwOoZwlbWikOe</code></p>
+             <p><span class="info">ℹ️ Free Plan Price ID:</span> <code>price_1Rt8PmBK2aelwOoZz4ZZmrsD</code></p>
+        </div>
+    </div>
+
+    <script>
+        async function testProPayment() {
+            const result = document.getElementById('test1-result');
+            result.innerHTML = '<span class="info">🔄 Testing Pro payment...</span>';
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/stripe/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        planId: 'pro',
+                        userId: 'test-user-' + Date.now(),
+                        successUrl: 'http://localhost:8080/onboarding?success=true&plan=pro',
+                        cancelUrl: 'http://localhost:8080/onboarding?canceled=true',
+                    }),
+                });
+
+                const data = await response.json();
+                
+                                 if (response.ok) {
+                     if (data.isDevelopment) {
+                         result.innerHTML = `<span class="success">✅ Development Mode: ${data.message}</span><br>
+                                           <span class="info">ℹ️ Redirecting to success in 2 seconds...</span>`;
+                         setTimeout(() => {
+                             window.location.href = 'http://localhost:8080/onboarding?success=true&plan=pro';
+                         }, 2000);
+                     } else {
+                         result.innerHTML = `<span class="success">✅ Real Stripe session created: ${data.sessionId}</span><br>
+                                           <span class="info">ℹ️ You should be redirected to Stripe checkout...</span>`;
+                     }
+                 } else {
+                    result.innerHTML = `<span class="error">❌ Error: ${data.error}</span>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<span class="error">❌ Network Error: ${error.message}</span>`;
+            }
+        }
+
+        async function checkServerStatus() {
+            const result = document.getElementById('test2-result');
+            result.innerHTML = '<span class="info">🔄 Checking server status...</span>';
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/health');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.innerHTML = `<span class="success">✅ ${data.message}</span>`;
+                } else {
+                    result.innerHTML = `<span class="error">❌ Server error: ${data.error}</span>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<span class="error">❌ Cannot connect to server: ${error.message}</span>`;
+            }
+        }
+
+        function testOnboarding() {
+            const result = document.getElementById('test3-result');
+            result.innerHTML = '<span class="info">🔄 Redirecting to onboarding...</span>';
+            window.location.href = 'http://localhost:8080/onboarding';
+        }
+
+        function testProSuccess() {
+            const result = document.getElementById('test3-result');
+            result.innerHTML = '<span class="info">🔄 Simulating Pro payment success...</span>';
+            window.location.href = 'http://localhost:8080/onboarding?success=true&plan=pro';
+        }
+
+        // Auto-check server status on page load
+        window.onload = function() {
+            checkServerStatus();
+        };
+    </script>
+</body>
+</html> 

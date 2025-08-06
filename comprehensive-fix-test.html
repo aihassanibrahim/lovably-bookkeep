@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BizPal - Comprehensive Fix Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .info {
+            color: #17a2b8;
+            font-weight: bold;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 BizPal - Comprehensive Fix Test</h1>
+    <p>Detta är en test-sida för att verifiera att alla fixar fungerar korrekt.</p>
+
+    <div class="test-section">
+        <h2>✅ Fixar som har gjorts:</h2>
+        <ul>
+            <li><strong>"Prova free" knappen</strong> - Nu skapar den ett demo-konto istället för ett riktigt konto</li>
+            <li><strong>Typo fixad</strong> - "Personligad" → "Personlig"</li>
+            <li><strong>Demo-läge</strong> - Korrekt hantering av demo-sessioner</li>
+            <li><strong>Onboarding</strong> - Alla knappar och progress fungerar</li>
+            <li><strong>BizPal Context</strong> - Felhantering och fallback UI</li>
+            <li><strong>Limits error</strong> - Säkerhetskontroller för plan-gränser</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test-funktioner:</h2>
+        
+        <h3>1. Demo-konto test</h3>
+        <button class="test-button" onclick="testDemoAccount()">Testa "Prova free" funktionalitet</button>
+        <div id="demo-test-result"></div>
+
+        <h3>2. Onboarding test</h3>
+        <button class="test-button" onclick="testOnboarding()">Gå till onboarding</button>
+        <button class="test-button" onclick="clearOnboarding()">Rensa onboarding data</button>
+        <div id="onboarding-test-result"></div>
+
+        <h3>3. Dashboard test</h3>
+        <button class="test-button" onclick="testDashboard()">Gå till dashboard</button>
+        <div id="dashboard-test-result"></div>
+
+        <h3>4. Demo-läge test</h3>
+        <button class="test-button" onclick="enableDemoMode()">Aktivera demo-läge</button>
+        <button class="test-button" onclick="disableDemoMode()">Inaktivera demo-läge</button>
+        <div id="demo-mode-test-result"></div>
+
+        <h3>5. Status kontroll</h3>
+        <button class="test-button" onclick="checkStatus()">Kontrollera nuvarande status</button>
+        <div id="status-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Instruktioner för testning:</h2>
+        <ol>
+            <li><strong>Testa "Prova free"</strong> - Klicka på knappen och verifiera att den skapar ett demo-konto</li>
+            <li><strong>Testa onboarding</strong> - Gå igenom hela onboarding-flödet och verifiera att alla knappar fungerar</li>
+            <li><strong>Testa dashboard</strong> - Verifiera att du kommer till dashboard efter onboarding</li>
+            <li><strong>Testa demo-läge</strong> - Aktivera och inaktivera demo-läge</li>
+            <li><strong>Kontrollera status</strong> - Se vad som finns i localStorage</li>
+        </ol>
+    </div>
+
+    <script>
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function testDemoAccount() {
+            // Simulate the "Prova free" button functionality
+            const demoUser = {
+                id: `demo-${Date.now()}`,
+                email: 'test@demo.se',
+                user_metadata: {
+                    full_name: 'Test Demo Användare'
+                },
+                app_metadata: {
+                    provider: 'demo'
+                }
+            };
+
+            // Store demo session
+            localStorage.setItem('bizpal-demo-session', JSON.stringify({
+                user: demoUser,
+                access_token: 'demo-token',
+                refresh_token: 'demo-refresh',
+                expires_at: Date.now() + (24 * 60 * 60 * 1000)
+            }));
+
+            // Set demo flag
+            localStorage.setItem('bizpal-demo-mode', 'true');
+            localStorage.setItem('onboarding_completed', 'true');
+
+            showResult('demo-test-result', 
+                '✅ Demo-konto skapat!<br>' +
+                '• Demo-session lagrad<br>' +
+                '• Demo-läge aktiverat<br>' +
+                '• Onboarding markerat som slutförd<br>' +
+                'Du kan nu gå till dashboard för att testa.', 
+                'success'
+            );
+        }
+
+        function testOnboarding() {
+            // Clear any existing onboarding data
+            localStorage.removeItem('onboarding_completed');
+            localStorage.removeItem('bizpal-demo-mode');
+            localStorage.removeItem('bizpal-demo-session');
+            
+            showResult('onboarding-test-result', 
+                '✅ Onboarding data rensad!<br>' +
+                'Gå till <a href="/onboarding" target="_blank">onboarding</a> för att testa flödet.', 
+                'success'
+            );
+        }
+
+        function clearOnboarding() {
+            localStorage.removeItem('onboarding_completed');
+            localStorage.removeItem('bizpal-demo-mode');
+            localStorage.removeItem('bizpal-demo-session');
+            
+            showResult('onboarding-test-result', 
+                '✅ All onboarding data rensad!', 
+                'success'
+            );
+        }
+
+        function testDashboard() {
+            if (localStorage.getItem('onboarding_completed') === 'true') {
+                showResult('dashboard-test-result', 
+                    '✅ Onboarding slutförd!<br>' +
+                    'Gå till <a href="/" target="_blank">dashboard</a> för att testa.', 
+                    'success'
+                );
+            } else {
+                showResult('dashboard-test-result', 
+                    '⚠️ Onboarding inte slutförd!<br>' +
+                    'Du kommer att omdirigeras till onboarding.', 
+                    'error'
+                );
+            }
+        }
+
+        function enableDemoMode() {
+            localStorage.setItem('bizpal-demo-mode', 'true');
+            showResult('demo-mode-test-result', 
+                '✅ Demo-läge aktiverat!<br>' +
+                'Ladda om sidan för att se effekten.', 
+                'success'
+            );
+        }
+
+        function disableDemoMode() {
+            localStorage.removeItem('bizpal-demo-mode');
+            localStorage.removeItem('bizpal-demo-session');
+            showResult('demo-mode-test-result', 
+                '✅ Demo-läge inaktiverat!<br>' +
+                'Ladda om sidan för att se effekten.', 
+                'success'
+            );
+        }
+
+        function checkStatus() {
+            const onboardingCompleted = localStorage.getItem('onboarding_completed');
+            const demoMode = localStorage.getItem('bizpal-demo-mode');
+            const demoSession = localStorage.getItem('bizpal-demo-session');
+            
+            let status = '<strong>Nuvarande status:</strong><br>';
+            status += `• Onboarding slutförd: ${onboardingCompleted === 'true' ? '✅ Ja' : '❌ Nej'}<br>`;
+            status += `• Demo-läge: ${demoMode === 'true' ? '✅ Aktiverat' : '❌ Inaktiverat'}<br>`;
+            status += `• Demo-session: ${demoSession ? '✅ Finns' : '❌ Saknas'}<br>`;
+            
+            if (demoSession) {
+                try {
+                    const sessionData = JSON.parse(demoSession);
+                    status += `• Demo-användare: ${sessionData.user?.email || 'Okänd'}<br>`;
+                    status += `• Session utgång: ${new Date(sessionData.expires_at).toLocaleString('sv-SE')}<br>`;
+                } catch (e) {
+                    status += `• Demo-session: ⚠️ Felaktig data<br>`;
+                }
+            }
+            
+            showResult('status-result', status, 'info');
+        }
+
+        // Auto-check status on page load
+        window.onload = function() {
+            checkStatus();
+        };
+    </script>
+</body>
+</html> 

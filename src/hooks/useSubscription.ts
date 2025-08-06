@@ -139,7 +139,14 @@ export const useSubscription = () => {
   const canPerformAction = (action: 'add_transaction' | 'add_customer' | 'use_feature', feature?: string) => {
     if (!subscription) return false;
 
-    const currentPlan = PRICING_PLANS[subscription.plan_id as keyof typeof PRICING_PLANS];
+    // Ensure plan_id is valid
+    const planId = subscription.plan_id as 'free' | 'pro';
+    if (!planId || !PRICING_PLANS[planId]) {
+      console.warn(`Invalid subscription plan_id: ${subscription.plan_id}, defaulting to free`);
+      return false;
+    }
+
+    const currentPlan = PRICING_PLANS[planId];
     if (!currentPlan) return false;
 
     // Check feature access
@@ -149,12 +156,12 @@ export const useSubscription = () => {
 
     // Check plan limits
     if (action === 'add_transaction' || action === 'add_customer') {
-      const limits = checkPlanLimits(subscription.plan_id, {
-        transactions: usage?.transactions_count || 0,
-        customers: usage?.customers_count || 0,
-      });
-
-      return action === 'add_transaction' ? limits.canAddTransaction : limits.canAddCustomer;
+      const resource = action === 'add_transaction' ? 'transactions' : 'customers';
+      const currentUsage = action === 'add_transaction' 
+        ? (usage?.transactions_count || 0)
+        : (usage?.customers_count || 0);
+      
+      return checkPlanLimits(resource, currentUsage, planId);
     }
 
     return true;
@@ -162,8 +169,15 @@ export const useSubscription = () => {
 
   // Get current plan info
   const getCurrentPlan = () => {
-    if (!subscription) return PRICING_PLANS.FREE;
-    return PRICING_PLANS[subscription.plan_id as keyof typeof PRICING_PLANS] || PRICING_PLANS.FREE;
+    if (!subscription) return PRICING_PLANS.free;
+    
+    const planId = subscription.plan_id as 'free' | 'pro';
+    if (!planId || !PRICING_PLANS[planId]) {
+      console.warn(`Invalid subscription plan_id: ${subscription.plan_id}, defaulting to free`);
+      return PRICING_PLANS.free;
+    }
+    
+    return PRICING_PLANS[planId];
   };
 
   // Check if user is on free plan

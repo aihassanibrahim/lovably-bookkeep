@@ -107,16 +107,13 @@ export default function Landing() {
 
       // User doesn't have Pro, redirect to Stripe checkout
       await redirectToCheckout('pro', user.id);
-      toast({
-        title: 'Omdirigerar till betalning',
-        description: 'Du kommer att skickas till Stripe för att slutföra din prenumeration.',
+      toast.success('Omdirigerar till betalning', {
+        description: 'Du kommer att skickas till Stripe för att slutföra din prenumeration.'
       });
     } catch (error) {
       console.error('CTA error:', error);
-      toast({
-        title: 'Något gick fel',
-        description: 'Kunde inte starta betalningsprocessen. Försök igen.',
-        variant: 'destructive',
+      toast.error('Något gick fel', {
+        description: 'Kunde inte starta betalningsprocessen. Försök igen.'
       });
     }
   };
@@ -172,9 +169,8 @@ export default function Landing() {
         if (error) {
           throw error;
         }
-        toast({
-          title: "Välkommen tillbaka!",
-          description: "Du är nu inloggad.",
+        toast.success("Välkommen tillbaka!", {
+          description: "Du är nu inloggad."
         });
         // Navigate to dashboard after successful login
         setTimeout(() => {
@@ -185,9 +181,8 @@ export default function Landing() {
         if (error) {
           throw error;
         }
-        toast({
-          title: "Konto skapat!",
-          description: "Du är nu registrerad och kommer att omdirigeras till onboarding.",
+        toast.success("Konto skapat!", {
+          description: "Du är nu registrerad och kommer att omdirigeras till onboarding."
         });
         
         // Redirect to onboarding after successful signup
@@ -200,10 +195,8 @@ export default function Landing() {
       setFormData({ email: '', password: '', confirmPassword: '' });
       setErrors({});
     } catch (error) {
-      toast({
-        title: isLoginMode ? "Inloggning misslyckades" : "Registrering misslyckades",
-        description: isLoginMode ? "Kontrollera din e-post och lösenord." : "Försök igen eller kontakta support.",
-        variant: "destructive",
+      toast.error(isLoginMode ? "Inloggning misslyckades" : "Registrering misslyckades", {
+        description: isLoginMode ? "Kontrollera din e-post och lösenord." : "Försök igen eller kontakta support."
       });
     } finally {
       setIsLoading(false);
@@ -221,10 +214,8 @@ export default function Landing() {
       await redirectToCheckout(planId, user.id);
     } catch (error) {
       console.error('Upgrade error:', error);
-      toast({
-        title: 'Något gick fel',
-        description: 'Kunde inte starta uppgraderingen. Försök igen.',
-        variant: 'destructive',
+      toast.error('Något gick fel', {
+        description: 'Kunde inte starta uppgraderingen. Försök igen.'
       });
     }
   };
@@ -361,33 +352,53 @@ export default function Landing() {
                            
                            setIsLoading(true);
                            try {
-                             const { error } = await signUp(formData.email, formData.password);
-                             if (error) {
-                               throw error;
-                             }
-                             toast({
-                               title: "Konto skapat!",
-                               description: "Du har nu tillgång till gratisversionen av BizPal.",
+                             // Create demo account instead of real account
+                             const demoUser = {
+                               id: `demo-${Date.now()}`,
+                               email: formData.email,
+                               user_metadata: {
+                                 full_name: 'Demo Användare'
+                               },
+                               app_metadata: {
+                                 provider: 'demo'
+                               }
+                             };
+
+                             // Store demo session
+                             localStorage.setItem('bizpal-demo-session', JSON.stringify({
+                               user: demoUser,
+                               access_token: 'demo-token',
+                               refresh_token: 'demo-refresh',
+                               expires_at: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+                             }));
+
+                             // Set demo flag
+                             localStorage.setItem('bizpal-demo-mode', 'true');
+                             
+                             // Set onboarding as completed for demo
+                             localStorage.setItem('onboarding_completed', 'true');
+
+                             toast.success("Demo-konto skapat!", {
+                               description: "Du är nu i demo-läge med begränsad funktionalitet."
                              });
                              setShowLoginModal(false);
                              setFormData({ email: '', password: '', confirmPassword: '' });
                              setErrors({});
-                             // Navigate to onboarding after successful signup
+                             
+                             // Navigate to dashboard after successful demo creation
                              setTimeout(() => {
-                               navigate("/onboarding");
+                               window.location.href = '/';
                              }, 1000);
                            } catch (error) {
-                             toast({
-                               title: "Registrering misslyckades",
-                               description: "Försök igen eller kontakta support.",
-                               variant: "destructive",
+                             toast.error("Demo-konto misslyckades", {
+                               description: "Försök igen eller kontakta support."
                              });
                            } finally {
                              setIsLoading(false);
                            }
                          }}
                        >
-                         Prova gratis (begränsad version)
+                         Prova free (begränsad funktionalitet)
                        </Button>
                      </div>
                    </>
@@ -470,7 +481,7 @@ export default function Landing() {
                 className="hidden md:flex bg-black text-white px-6 py-2 font-medium hover:bg-gray-800 transition-colors"
                 data-testid="button-cta-header"
               >
-                Kom igång gratis
+                Kom igång free
               </Button>
               <MobileNav 
                 onNavigate={scrollToSection} 
@@ -513,7 +524,7 @@ export default function Landing() {
                     className="bg-black text-white px-8 py-4 text-lg font-semibold hover:bg-gray-800 transition-colors"
                     data-testid="button-cta-hero"
                   >
-                    Prova gratis i 30 dagar
+                    Prova free i 30 dagar
                   </Button>
                   <GuestLoginButton variant="button" />
                 </div>
@@ -1025,7 +1036,7 @@ export default function Landing() {
               className="bg-black text-white px-12 py-4 text-xl font-semibold hover:bg-gray-800 transition-colors"
               data-testid="button-cta-final"
               >
-              Prova BizPal gratis i 30 dagar
+                              Prova BizPal free i 30 dagar
               </Button>
 
             <div className="flex justify-center space-x-8 text-sm text-gray-600">
@@ -1055,9 +1066,8 @@ export default function Landing() {
                 const formData = new FormData(e.currentTarget);
                 const email = formData.get('email') as string;
                 if (email) {
-                  toast({
-                    title: "Tack för ditt intresse!",
-                    description: "Vi hör av oss inom kort med mer information.",
+                  toast.success("Tack för ditt intresse!", {
+                    description: "Vi hör av oss inom kort med mer information."
                   });
                   e.currentTarget.reset();
                 }

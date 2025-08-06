@@ -205,7 +205,7 @@ export const CompetitorComparison: React.FC<CompetitorComparisonProps> = ({ onUp
                 </li>
                 <li className="flex items-center space-x-2">
                   <Check className="w-4 h-4" />
-                  <span>Prova gratis med demo-läge</span>
+                  <span>Prova free med demo-läge</span>
                 </li>
                 <li className="flex items-center space-x-2">
                   <Check className="w-4 h-4" />
@@ -274,7 +274,7 @@ export const CompetitorComparison: React.FC<CompetitorComparisonProps> = ({ onUp
             Redo att välja det bästa för ditt företag?
           </h3>
           <p className="text-lg text-gray-600 mb-6">
-            Prova BizPal gratis och se skillnaden själv
+                            Prova BizPal free och se skillnaden själv
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
@@ -282,7 +282,7 @@ export const CompetitorComparison: React.FC<CompetitorComparisonProps> = ({ onUp
               onClick={onUpgrade}
               className="bg-green-600 hover:bg-green-700 text-white px-8 py-3"
             >
-              Prova BizPal gratis
+                              Prova BizPal free
             </Button>
             <Button 
               variant="outline" 

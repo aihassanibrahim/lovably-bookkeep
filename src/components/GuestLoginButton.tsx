@@ -45,9 +45,8 @@ export const GuestLoginButton: React.FC<GuestLoginButtonProps> = ({
       // Set demo flag
       localStorage.setItem('bizpal-demo-mode', 'true');
 
-      toast({
-        title: 'Välkommen som gäst!',
-        description: 'Du är nu i demo-läge. Prova alla funktioner med testdata.',
+      toast.success('Välkommen som gäst!', {
+        description: 'Du är nu i demo-läge. Prova alla funktioner med testdata.'
       });
       
       // Reload the page to trigger auth state change
@@ -56,10 +55,8 @@ export const GuestLoginButton: React.FC<GuestLoginButtonProps> = ({
     } catch (error) {
       console.error('Guest login error:', error);
       
-      toast({
-        title: 'Kunde inte aktivera demo-läge',
-        description: 'Försök igen eller kontakta support.',
-        variant: 'destructive',
+      toast.error('Kunde inte aktivera demo-läge', {
+        description: 'Försök igen eller kontakta support.'
       });
     } finally {
       setIsLoading(false);

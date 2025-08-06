@@ -42,7 +42,7 @@ const initialDemoData = {
       order_number: 'ORD-002',
       customer_name: 'Erik Eriksson',
       customer_social_media: '@erik_creative',
-      product_name: 'Personligad träskål',
+      product_name: 'Personlig träskål',
       price: 450,
       status: 'Pågående',
       order_date: '2025-08-02',
@@ -59,7 +59,7 @@ const initialDemoData = {
     },
     {
       id: 'demo-2',
-      name: 'Personligad träskål',
+      name: 'Personlig träskål',
       category: 'Träarbete',
       price: 450,
       description: 'Handsnidad träskål med personlig gravyr'

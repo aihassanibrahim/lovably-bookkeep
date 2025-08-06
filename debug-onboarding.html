@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onboarding Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .debug-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .debug-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .debug-button:hover {
+            background: #0056b3;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .info {
+            color: blue;
+            font-weight: bold;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Onboarding Debug Page</h1>
+    
+    <div class="debug-section">
+        <h2>LocalStorage Status</h2>
+        <button class="debug-button" onclick="checkLocalStorage()">Check LocalStorage</button>
+        <button class="debug-button" onclick="clearLocalStorage()">Clear LocalStorage</button>
+        <button class="debug-button" onclick="setOnboardingCompleted()">Set Onboarding Completed</button>
+        <div id="localStorage-result"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>Navigation Tests</h2>
+        <button class="debug-button" onclick="goToDashboard()">Go to Dashboard (/)</button>
+        <button class="debug-button" onclick="goToOnboarding()">Go to Onboarding</button>
+        <button class="debug-button" onclick="simulateOnboardingComplete()">Simulate Onboarding Complete</button>
+        <div id="navigation-result"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>Current URL Info</h2>
+        <div id="url-info"></div>
+    </div>
+
+    <script>
+        function checkLocalStorage() {
+            const result = document.getElementById('localStorage-result');
+            const onboardingCompleted = localStorage.getItem('onboarding_completed');
+            const allItems = {};
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                allItems[key] = localStorage.getItem(key);
+            }
+            
+            result.innerHTML = `
+                <h3>LocalStorage Contents:</h3>
+                <pre>${JSON.stringify(allItems, null, 2)}</pre>
+                <p><strong>onboarding_completed:</strong> <span class="${onboardingCompleted === 'true' ? 'success' : 'error'}">${onboardingCompleted || 'null'}</span></p>
+            `;
+        }
+
+        function clearLocalStorage() {
+            localStorage.removeItem('onboarding_completed');
+            const result = document.getElementById('localStorage-result');
+            result.innerHTML = '<span class="success">✅ LocalStorage cleared</span>';
+        }
+
+        function setOnboardingCompleted() {
+            localStorage.setItem('onboarding_completed', 'true');
+            const result = document.getElementById('localStorage-result');
+            result.innerHTML = '<span class="success">✅ Onboarding completed set to true</span>';
+        }
+
+        function goToDashboard() {
+            const result = document.getElementById('navigation-result');
+            result.innerHTML = '<span class="info">🔄 Redirecting to dashboard...</span>';
+            window.location.href = '/';
+        }
+
+        function goToOnboarding() {
+            const result = document.getElementById('navigation-result');
+            result.innerHTML = '<span class="info">🔄 Redirecting to onboarding...</span>';
+            window.location.href = '/onboarding';
+        }
+
+        function simulateOnboardingComplete() {
+            localStorage.setItem('onboarding_completed', 'true');
+            const result = document.getElementById('navigation-result');
+            result.innerHTML = '<span class="success">✅ Onboarding completed set, now redirecting to dashboard...</span>';
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1000);
+        }
+
+        function updateUrlInfo() {
+            const urlInfo = document.getElementById('url-info');
+            urlInfo.innerHTML = `
+                <p><strong>Current URL:</strong> ${window.location.href}</p>
+                <p><strong>Pathname:</strong> ${window.location.pathname}</p>
+                <p><strong>Search:</strong> ${window.location.search}</p>
+                <p><strong>Hash:</strong> ${window.location.hash}</p>
+            `;
+        }
+
+        // Auto-check on page load
+        window.onload = function() {
+            checkLocalStorage();
+            updateUrlInfo();
+        };
+    </script>
+</body>
+</html> 

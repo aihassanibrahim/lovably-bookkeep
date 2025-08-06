@@ -165,7 +165,7 @@ export const FeatureComparison: React.FC = () => {
                 <p className="text-xs text-gray-600">{feature.description}</p>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">Gratis</span>
+                <span className="text-xs text-gray-500">Free</span>
                 <X className="w-4 h-4 text-red-500" />
                 <span className="text-xs text-gray-500">Pro</span>
                 <Check className="w-4 h-4 text-green-600" />

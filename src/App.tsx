@@ -8,6 +8,7 @@ import LandingPage from "@/pages/LandingPage";
 import { BizPalProvider } from "@/context/BizPalContext";
 import { NavigationProvider } from "@/context/NavigationContext";
 import { ThemeProvider } from "@/components/theme-provider";
+import { DemoProvider } from "@/context/DemoContext";
 import Navigation from "@/components/Navigation";
 import MobileNavigation from "@/components/MobileNavigation";
 import SupportButton from "@/components/SupportButton";
@@ -130,15 +131,17 @@ const App = () => (
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme="light" storageKey="bizpal-ui-theme">
           <AuthProvider>
-            <BizPalProvider>
-              <NavigationProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <Sonner />
-                  <AppContent />
-                </TooltipProvider>
-              </NavigationProvider>
-            </BizPalProvider>
+            <DemoProvider>
+              <BizPalProvider>
+                <NavigationProvider>
+                  <TooltipProvider>
+                    <Toaster />
+                    <Sonner />
+                    <AppContent />
+                  </TooltipProvider>
+                </NavigationProvider>
+              </BizPalProvider>
+            </DemoProvider>
           </AuthProvider>
         </ThemeProvider>
       </QueryClientProvider>

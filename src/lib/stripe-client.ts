@@ -6,8 +6,12 @@ export const redirectToCheckout = async (planId: string, userId: string) => {
   try {
     console.log(`Creating Stripe checkout session for ${planId} plan...`);
     
-    // Create checkout session
-    const response = await fetch('/api/stripe/create-checkout-session', {
+    // For development, use real Stripe checkout (remove simulation)
+    console.log('Creating real Stripe checkout session...');
+    
+    // Use Stripe API (works in both dev and production)
+    const apiUrl = import.meta.env.DEV ? 'http://localhost:3001' : '';
+    const response = await fetch(`${apiUrl}/api/stripe/create-checkout-session`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -15,8 +19,8 @@ export const redirectToCheckout = async (planId: string, userId: string) => {
       body: JSON.stringify({
         planId,
         userId,
-        successUrl: `${window.location.origin}/dashboard?success=true&plan=${planId}`,
-        cancelUrl: `${window.location.origin}/dashboard?canceled=true`,
+        successUrl: `${window.location.origin}/onboarding?success=true&plan=${planId}`,
+        cancelUrl: `${window.location.origin}/onboarding?canceled=true`,
       }),
     });
 
@@ -25,9 +29,19 @@ export const redirectToCheckout = async (planId: string, userId: string) => {
       throw new Error(errorData.error || 'Failed to create checkout session');
     }
 
-    const { sessionId } = await response.json();
+    const responseData = await response.json();
+    const { sessionId, isDevelopment } = responseData;
     
-    // Redirect to Stripe Checkout
+    if (isDevelopment) {
+      console.log('Development mode: Simulating payment success...');
+      // In development mode, redirect directly to success URL
+      setTimeout(() => {
+        window.location.href = `${window.location.origin}/onboarding?success=true&plan=${planId}`;
+      }, 2000);
+      return;
+    }
+    
+    // Redirect to real Stripe Checkout
     const stripe = await stripePromise;
     const { error } = await stripe!.redirectToCheckout({
       sessionId,

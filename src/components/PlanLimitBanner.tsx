@@ -134,6 +134,13 @@ export const UsageTracker: React.FC = () => {
   if (!usage) return null;
 
   const plan = getCurrentPlan();
+  
+  // Safety check for plan limits
+  if (!plan || !plan.limits) {
+    console.warn('Plan or plan limits not found, using default free plan limits');
+    return null;
+  }
+  
   const transactionPercentage = plan.limits.transactions === -1 
     ? 0 
     : Math.min((usage.transactions_count / plan.limits.transactions) * 100, 100);

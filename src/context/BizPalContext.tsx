@@ -210,8 +210,8 @@ const bizPalReducer = (state, action) => {
   }
 };
 
-// Create context
-const BizPalContext = createContext();
+// Create context with default value
+const BizPalContext = createContext(null);
 
 // Custom hook to use BizPal context
 export const useBizPal = () => {
@@ -225,8 +225,25 @@ export const useBizPal = () => {
 // Provider component
 export const BizPalProvider = ({ children }) => {
   const [state, dispatch] = useReducer(bizPalReducer, { ...initialState, loading: true });
-  const { user } = useAuth();
-  const { canPerformAction, updateUsage, isFreePlan } = useSubscription();
+  const [error, setError] = useState(null);
+  
+  // Get auth and subscription with error handling
+  let user = null;
+  let canPerformAction = null;
+  let updateUsage = null;
+  let isFreePlan = null;
+  
+  try {
+    const auth = useAuth();
+    const subscription = useSubscription();
+    user = auth?.user;
+    canPerformAction = subscription?.canPerformAction;
+    updateUsage = subscription?.updateUsage;
+    isFreePlan = subscription?.isFreePlan;
+  } catch (err) {
+    console.error('Error in BizPalProvider dependencies:', err);
+    setError(err);
+  }
 
   // Load all data from Supabase when user changes
   useEffect(() => {
@@ -695,7 +712,7 @@ export const BizPalProvider = ({ children }) => {
       if (isFreePlan()) {
         const canAdd = canPerformAction('add_transaction');
         if (!canAdd) {
-          toast.error('Du har nått gränsen för gratisversionen. Uppgradera till Pro för att lägga till fler ordrar.');
+          toast.error('Du har nått gränsen för free-versionen. Uppgradera till Pro för att lägga till fler ordrar.');
           return null;
         }
       }
@@ -916,7 +933,7 @@ export const BizPalProvider = ({ children }) => {
       if (isFreePlan()) {
         const canAdd = canPerformAction('add_customer');
         if (!canAdd) {
-          toast.error('Du har nått gränsen för gratisversionen. Uppgradera till Pro för att lägga till fler kunder.');
+          toast.error('Du har nått gränsen för free-versionen. Uppgradera till Pro för att lägga till fler kunder.');
           return null;
         }
       }
@@ -1402,6 +1419,25 @@ export const BizPalProvider = ({ children }) => {
     // Actions
     ...actions
   };
+
+  // Show error if provider failed to initialize
+  if (error) {
+    console.error('BizPalProvider error:', error);
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-red-50">
+        <div className="text-center p-8">
+          <h2 className="text-xl font-bold text-red-800 mb-4">BizPal Provider Error</h2>
+          <p className="text-red-600 mb-4">Failed to initialize BizPal context</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Reload Page
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <BizPalContext.Provider value={value}>

@@ -54,7 +54,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onUpgrade }) => 
             Välj rätt plan för ditt företag
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Börja gratis och uppgradera när du växer. Alla planer inkluderar grundläggande funktioner.
+            Börja free och uppgradera när du växer. Alla planer inkluderar grundläggande funktioner.
           </p>
         </div>
 
@@ -78,7 +78,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onUpgrade }) => 
                 <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
                 <div className="flex items-baseline justify-center gap-1">
                   <span className="text-4xl font-bold">
-                    {plan.price === 0 ? 'Gratis' : `${plan.price}kr`}
+                    {plan.price === 0 ? 'Free' : `${plan.price}kr`}
                   </span>
                   {plan.price > 0 && (
                     <span className="text-gray-600">/{plan.interval}</span>
@@ -138,7 +138,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onUpgrade }) => 
               <thead>
                 <tr className="border-b border-gray-200">
                   <th className="text-left py-4 px-4 font-semibold">Funktion</th>
-                  <th className="text-center py-4 px-4 font-semibold">Gratis</th>
+                  <th className="text-center py-4 px-4 font-semibold">Free</th>
                   <th className="text-center py-4 px-4 font-semibold">Pro</th>
                 </tr>
               </thead>
@@ -214,7 +214,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onUpgrade }) => 
             <div className="space-y-2">
               <h4 className="font-semibold">Kan jag byta plan?</h4>
               <p className="text-sm text-gray-600">
-                Ja, du kan uppgradera till Pro när som helst. Du kan också nedgradera tillbaka till gratis planen.
+                Ja, du kan uppgradera till Pro när som helst. Du kan också nedgradera tillbaka till free planen.
               </p>
             </div>
             <div className="space-y-2">
@@ -226,7 +226,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onUpgrade }) => 
             <div className="space-y-2">
               <h4 className="font-semibold">Finns det en testperiod?</h4>
               <p className="text-sm text-gray-600">
-                Pro-planen har en 14-dagars gratis testperiod. Du kan avbryta när som helst utan kostnad.
+                Pro-planen har en 14-dagars free testperiod. Du kan avbryta när som helst utan kostnad.
               </p>
             </div>
           </div>

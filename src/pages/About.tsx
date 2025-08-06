@@ -230,14 +230,14 @@ const About: React.FC = () => {
             <CardContent className="space-y-4">
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button asChild size="lg">
-                  <Link to="/">Prova Gratis</Link>
+                  <Link to="/">Prova Free</Link>
                 </Button>
                 <Button variant="outline" size="lg" asChild>
                   <Link to="/faq">Läs FAQ</Link>
                 </Button>
               </div>
               <p className="text-sm text-muted-foreground">
-                Ingen kreditkort krävs • 14 dagars gratis provperiod • Avbryt när som helst
+                Ingen kreditkort krävs • 14 dagars free provperiod • Avbryt när som helst
               </p>
             </CardContent>
           </Card>

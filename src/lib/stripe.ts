@@ -1,10 +1,10 @@
 import { loadStripe } from '@stripe/stripe-js';
 
 // Stripe configuration and pricing plans
-export const STRIPE_PUBLISHABLE_KEY = import.meta.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_your_stripe_publishable_key_here';
+export const STRIPE_PUBLISHABLE_KEY = import.meta.env.STRIPE_PUBLISHABLE_KEY || 'pk_live_51Rt4jwBK2aelwOoZSywqmWu1HwUXgggEnUuIB7RgX11jRv5owMJSC7uekpyVXrN2XlRChyGFrYnFZik30em1jfif00Sp4DWa9e';
 export const STRIPE_SECRET_KEY = import.meta.env.STRIPE_SECRET_KEY || 'sk_test_your_stripe_secret_key_here';
 export const STRIPE_WEBHOOK_SECRET = import.meta.env.STRIPE_WEBHOOK_SECRET || 'whsec_your_stripe_webhook_secret_here';
-export const STRIPE_PRO_PRICE_ID = import.meta.env.STRIPE_PRO_PRICE_ID || 'price_your_pro_plan_price_id_here';
+export const STRIPE_PRO_PRICE_ID = import.meta.env.STRIPE_PRO_PRICE_ID || 'price_1Rt5J1BK2aelwOoZwlbWikOe';
 
 // Initialize Stripe
 export const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
@@ -12,7 +12,7 @@ export const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
 // Pricing plans configuration
 export const PRICING_PLANS = {
   free: {
-    name: 'Gratis',
+    name: 'Free',
     price: 0,
     currency: 'SEK',
     interval: 'month',
@@ -38,7 +38,7 @@ export const PRICING_PLANS = {
     currency: 'SEK',
     interval: 'month',
     features: [
-      'Allt i Gratis-planen',
+      'Allt i Free-planen',
       'Kvittoscanning',
       'Momsrapportering',
       'Obegränsade transaktioner',
@@ -61,10 +61,10 @@ export const PRICING_PLANS = {
 // Stripe Pricing Table ID
 export const STRIPE_PRICING_TABLE_ID = 'prctbl_1Rt5kxBK2aelwOoZMbCtsMWM';
 
-// Stripe price IDs - replace with your actual price IDs
+// Stripe price IDs - your actual price IDs
 export const STRIPE_PRICE_IDS = {
   PRO_MONTHLY: 'price_1Rt5J1BK2aelwOoZwlbWikOe',
-  FREE_MONTHLY: 'price_1Rt5IaBK2aelwOoZUhe1kzdl'
+  FREE_MONTHLY: 'price_1Rt8PmBK2aelwOoZz4ZZmrsD'
 };
 
 // Feature access checking
@@ -97,6 +97,12 @@ export const checkFeatureAccess = (feature: string, plan: 'free' | 'pro'): boole
 
 // Plan limits checking
 export const checkPlanLimits = (resource: string, currentUsage: number, plan: 'free' | 'pro'): boolean => {
+  // Add safety check for plan parameter
+  if (!plan || !PRICING_PLANS[plan]) {
+    console.warn(`Invalid plan: ${plan}, defaulting to free plan`);
+    plan = 'free';
+  }
+  
   const limits = PRICING_PLANS[plan].limits;
   const limit = limits[resource as keyof typeof limits];
   

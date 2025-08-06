@@ -114,12 +114,12 @@ export const FeaturesSection: React.FC = () => {
               Redo att förenkla din bokföring?
             </h3>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              Börja gratis idag och uppgradera när du behöver fler funktioner. 
+              Börja free idag och uppgradera när du behöver fler funktioner. 
               Ingen bindningstid och full kontroll över din data.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                Kom igång gratis
+                Kom igång free
               </button>
               <button className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
                 Se demo

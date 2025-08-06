@@ -35,8 +35,18 @@ export const OnboardingRedirect: React.FC<OnboardingRedirectProps> = ({ children
           console.error('Error checking onboarding status:', error);
         }
 
+        // Check localStorage as fallback
+        const localStorageCompleted = localStorage.getItem('onboarding_completed') === 'true';
+        
+        console.log('OnboardingRedirect check:', {
+          profile,
+          profileCompleted: profile?.onboarding_completed,
+          localStorageCompleted,
+          shouldRedirect: (!profile || !profile.onboarding_completed) && !localStorageCompleted
+        });
+        
         // If no profile exists or onboarding is not completed, redirect to onboarding
-        if (!profile || !profile.onboarding_completed) {
+        if ((!profile || !profile.onboarding_completed) && !localStorageCompleted) {
           setShouldRedirect(true);
         }
       } catch (error) {

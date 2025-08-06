@@ -166,25 +166,20 @@ export default function Dashboard() {
 
   const handleUpgrade = async () => {
     if (!user) {
-      toast({
-        title: 'Logga in först',
-        description: 'Du måste logga in för att uppgradera din plan.',
-        variant: 'destructive',
+      toast.error('Logga in först', {
+        description: 'Du måste logga in för att uppgradera din plan.'
       });
       return;
     }
 
     try {
       await redirectToCheckout('pro', user.id);
-      toast({
-        title: 'Omdirigerar till betalning',
-        description: 'Du kommer att skickas till Stripe för att slutföra din prenumeration.',
+      toast.success('Omdirigerar till betalning', {
+        description: 'Du kommer att skickas till Stripe för att slutföra din prenumeration.'
       });
     } catch (error) {
-      toast({
-        title: 'Något gick fel',
-        description: 'Kunde inte starta uppgraderingen. Försök igen.',
-        variant: 'destructive',
+      toast.error('Något gick fel', {
+        description: 'Kunde inte starta uppgraderingen. Försök igen.'
       });
     }
   };
@@ -295,7 +290,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <span className="font-medium">Nuvarande plan:</span>
               <Badge variant={isProPlan() ? "default" : "secondary"}>
-                {isProPlan() ? "Pro" : "Gratis"}
+                {isProPlan() ? "Pro" : "Free"}
               </Badge>
             </div>
             {isFreePlan() && (

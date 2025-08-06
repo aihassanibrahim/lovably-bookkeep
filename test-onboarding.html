@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onboarding Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Onboarding Test Page</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Direct Navigation</h2>
+        <p>Test if you can navigate directly to the onboarding page:</p>
+        <button class="test-button" onclick="testDirectNavigation()">Go to Onboarding</button>
+        <div id="test1-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Dashboard Navigation</h2>
+        <p>Test if you can navigate to the dashboard:</p>
+        <button class="test-button" onclick="testDashboardNavigation()">Go to Dashboard</button>
+        <div id="test2-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Pro Plan Payment Simulation</h2>
+        <p>Test the Pro plan payment simulation:</p>
+        <button class="test-button" onclick="testProPayment()">Simulate Pro Payment</button>
+        <div id="test3-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 4: URL Parameters</h2>
+        <p>Test URL parameter handling:</p>
+        <button class="test-button" onclick="testUrlParams()">Test URL Params</button>
+        <div id="test4-result"></div>
+    </div>
+
+    <script>
+        function testDirectNavigation() {
+            const result = document.getElementById('test1-result');
+            try {
+                window.location.href = 'http://localhost:8080/onboarding';
+                result.innerHTML = '<span class="success">✅ Redirecting to onboarding...</span>';
+            } catch (error) {
+                result.innerHTML = '<span class="error">❌ Error: ' + error.message + '</span>';
+            }
+        }
+
+        function testDashboardNavigation() {
+            const result = document.getElementById('test2-result');
+            try {
+                window.location.href = 'http://localhost:8080/';
+                result.innerHTML = '<span class="success">✅ Redirecting to dashboard...</span>';
+            } catch (error) {
+                result.innerHTML = '<span class="error">❌ Error: ' + error.message + '</span>';
+            }
+        }
+
+        function testProPayment() {
+            const result = document.getElementById('test3-result');
+            try {
+                // Simulate the Pro plan payment flow
+                setTimeout(() => {
+                    window.location.href = 'http://localhost:8080/onboarding?success=true&plan=pro';
+                }, 2000);
+                result.innerHTML = '<span class="success">✅ Simulating Pro payment... (2s delay)</span>';
+            } catch (error) {
+                result.innerHTML = '<span class="error">❌ Error: ' + error.message + '</span>';
+            }
+        }
+
+        function testUrlParams() {
+            const result = document.getElementById('test4-result');
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const success = urlParams.get('success');
+                const plan = urlParams.get('plan');
+                
+                if (success || plan) {
+                    result.innerHTML = `<span class="success">✅ URL Params found: success=${success}, plan=${plan}</span>`;
+                } else {
+                    result.innerHTML = '<span class="error">❌ No URL parameters found</span>';
+                }
+            } catch (error) {
+                result.innerHTML = '<span class="error">❌ Error: ' + error.message + '</span>';
+            }
+        }
+
+        // Auto-run URL params test on page load
+        window.onload = function() {
+            testUrlParams();
+        };
+    </script>
+</body>
+</html> 

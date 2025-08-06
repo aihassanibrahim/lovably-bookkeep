@@ -74,7 +74,7 @@ export function MobileNav({ onNavigate, onLoginClick, onCTAClick }: MobileNavPro
               onClick={handleCTAClick}
               className="w-full bg-black text-white hover:bg-gray-800"
             >
-              Kom igång gratis
+                              Kom igång free
             </Button>
           </div>
         </div>
