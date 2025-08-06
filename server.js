@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // Initialize Stripe
-const stripeKey = process.env.STRIPE_SECRET_KEY || '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';
+const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_your_stripe_secret_key_here';
 const stripe = new Stripe(stripeKey);
 
 // Stripe checkout session endpoint
@@ -50,7 +50,7 @@ app.post('/api/stripe/create-checkout-session', async (req, res) => {
       payment_method_types: ['card'],
                line_items: [
            {
-             price: process.env.STRIPE_PRO_PRICE_ID || 'price_1Rt5J1BK2aelwOoZwlbWikOe', // Pro plan
+             price: process.env.STRIPE_PRO_PRICE_ID || 'price_test_your_pro_price_id_here', // Pro plan
              quantity: 1,
            },
          ],

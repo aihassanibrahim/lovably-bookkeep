@@ -1,10 +1,10 @@
 import { loadStripe } from '@stripe/stripe-js';
 
 // Stripe configuration and pricing plans
-export const STRIPE_PUBLISHABLE_KEY = import.meta.env.STRIPE_PUBLISHABLE_KEY || 'pk_live_51Rt4jwBK2aelwOoZSywqmWu1HwUXgggEnUuIB7RgX11jRv5owMJSC7uekpyVXrN2XlRChyGFrYnFZik30em1jfif00Sp4DWa9e';
+export const STRIPE_PUBLISHABLE_KEY = import.meta.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_your_stripe_publishable_key_here';
 export const STRIPE_SECRET_KEY = import.meta.env.STRIPE_SECRET_KEY || 'sk_test_your_stripe_secret_key_here';
 export const STRIPE_WEBHOOK_SECRET = import.meta.env.STRIPE_WEBHOOK_SECRET || 'whsec_your_stripe_webhook_secret_here';
-export const STRIPE_PRO_PRICE_ID = import.meta.env.STRIPE_PRO_PRICE_ID || 'price_1Rt5J1BK2aelwOoZwlbWikOe';
+export const STRIPE_PRO_PRICE_ID = import.meta.env.STRIPE_PRO_PRICE_ID || 'price_test_your_pro_price_id_here';
 
 // Initialize Stripe
 export const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
@@ -59,12 +59,12 @@ export const PRICING_PLANS = {
 };
 
 // Stripe Pricing Table ID
-export const STRIPE_PRICING_TABLE_ID = 'prctbl_1Rt5kxBK2aelwOoZMbCtsMWM';
+export const STRIPE_PRICING_TABLE_ID = 'prctbl_test_your_pricing_table_id_here';
 
 // Stripe price IDs - your actual price IDs
 export const STRIPE_PRICE_IDS = {
-  PRO_MONTHLY: 'price_1Rt5J1BK2aelwOoZwlbWikOe',
-  FREE_MONTHLY: 'price_1Rt8PmBK2aelwOoZz4ZZmrsD'
+  PRO_MONTHLY: 'price_test_your_pro_price_id_here',
+  FREE_MONTHLY: 'price_test_your_free_price_id_here'
 };
 
 // Feature access checking
