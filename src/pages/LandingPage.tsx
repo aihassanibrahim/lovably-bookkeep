@@ -27,7 +27,7 @@ import { PricingSection } from "@/components/PricingSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { FeedbackForm } from "@/components/FeedbackForm";
 import { GuestLoginButton } from "@/components/GuestLoginButton";
-import { mockCheckout } from "@/lib/stripe-client";
+import { redirectToCheckout } from "@/lib/stripe-client";
 import {
   ShoppingCart,
   Clock,
@@ -41,6 +41,7 @@ import {
   Mail,
   Lock,
   User,
+  LogIn,
 } from "lucide-react";
 
 const emailSchema = z.object({
@@ -72,7 +73,7 @@ export default function Landing() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, user } = useAuth();
 
   const emailForm = useForm<EmailFormData>({
     resolver: zodResolver(emailSchema),
@@ -140,10 +141,19 @@ export default function Landing() {
       await signIn(data.email, data.password);
       toast({
         title: "Välkommen tillbaka!",
-        description: "Du är nu inloggad.",
+        description: "Du är nu inloggad och kommer att omdirigeras till betalningssidan.",
       });
       setShowLoginModal(false);
-      navigate("/");
+      
+      // Redirect to Stripe checkout after successful login
+      setTimeout(async () => {
+        try {
+          await redirectToCheckout('pro', user?.id || '');
+        } catch (error) {
+          console.error('Error redirecting to checkout after login:', error);
+          navigate("/");
+        }
+      }, 1500);
     } catch (error) {
       toast({
         title: "Inloggning misslyckades",
@@ -161,10 +171,19 @@ export default function Landing() {
       await signUp(data.email, data.password);
       toast({
         title: "Konto skapat!",
-        description: "Kontrollera din e-post för verifiering.",
+        description: "Du är nu registrerad och kommer att omdirigeras till betalningssidan.",
       });
       setShowLoginModal(false);
-      navigate("/");
+      
+      // Redirect to Stripe checkout after successful signup
+      setTimeout(async () => {
+        try {
+          await redirectToCheckout('pro', user?.id || '');
+        } catch (error) {
+          console.error('Error redirecting to checkout after signup:', error);
+          navigate("/");
+        }
+      }, 1500);
     } catch (error) {
       toast({
         title: "Registrering misslyckades",
@@ -176,7 +195,30 @@ export default function Landing() {
     }
   };
 
-  const handleCTAClick = () => {
+  const handleCTAClick = async () => {
+    if (user) {
+      // User is logged in, redirect to Stripe checkout
+      try {
+        await redirectToCheckout('pro', user.id);
+        toast({
+          title: 'Omdirigerar till betalning',
+          description: 'Du kommer att skickas till Stripe för att slutföra din prenumeration.',
+        });
+      } catch (error) {
+        toast({
+          title: 'Något gick fel',
+          description: 'Kunde inte starta betalningsprocessen. Försök igen.',
+          variant: 'destructive',
+        });
+      }
+    } else {
+      // User is not logged in, show login modal
+      setShowLoginModal(true);
+      setIsLoginMode(true);
+    }
+  };
+
+  const handleLoginClick = () => {
     setShowLoginModal(true);
     setIsLoginMode(true);
   };
@@ -190,7 +232,7 @@ export default function Landing() {
 
     try {
       if (planId === 'pro') {
-        await mockCheckout(planId);
+        await redirectToCheckout(planId, user.id);
         toast({
           title: 'Uppgradering påbörjad',
           description: 'Du kommer att omdirigeras till betalningssidan.',
@@ -411,13 +453,26 @@ export default function Landing() {
 
             <div className="flex items-center space-x-4">
               <Button
+                onClick={handleLoginClick}
+                variant="outline"
+                className="hidden md:flex border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                data-testid="button-login-header"
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                Logga in
+              </Button>
+              <Button
                 onClick={handleCTAClick}
                 className="hidden md:flex bg-black text-white px-6 py-2 font-medium hover:bg-gray-800 transition-colors"
                 data-testid="button-cta-header"
               >
                 Kom igång gratis
               </Button>
-              <MobileNav onNavigate={scrollToSection} />
+              <MobileNav 
+                onNavigate={scrollToSection} 
+                onLoginClick={handleLoginClick}
+                onCTAClick={handleCTAClick}
+              />
             </div>
           </div>
         </div>

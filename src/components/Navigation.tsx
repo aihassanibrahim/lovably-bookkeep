@@ -253,6 +253,8 @@ const NavigationSection = ({ section, isMobile, expandedSections, toggleSection 
 
 // User Profile Component
 const UserProfile = ({ user, signOut }) => {
+  const isDemoMode = localStorage.getItem('bizpal-demo-mode') === 'true';
+  
   return (
     <div className="flex-shrink-0 border-t p-4">
       <div className="flex items-center mb-3">
@@ -265,7 +267,14 @@ const UserProfile = ({ user, signOut }) => {
           <p className="text-sm font-medium text-foreground truncate">
             {user?.email || 'Användare'}
           </p>
-          <p className="text-xs text-muted-foreground">BizPal</p>
+          <div className="flex items-center gap-2">
+            <p className="text-xs text-muted-foreground">BizPal</p>
+            {isDemoMode && (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                Demo
+              </span>
+            )}
+          </div>
         </div>
       </div>
       <Button
@@ -275,7 +284,7 @@ const UserProfile = ({ user, signOut }) => {
         className="w-full justify-start"
       >
         <LogOut className="h-4 w-4 mr-2" />
-        Logga ut
+        {isDemoMode ? 'Avsluta demo' : 'Logga ut'}
       </Button>
     </div>
   );

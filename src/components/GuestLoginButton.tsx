@@ -16,33 +16,49 @@ export const GuestLoginButton: React.FC<GuestLoginButtonProps> = ({
   variant = 'button' 
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuth();
   const navigate = useNavigate();
 
   const handleGuestLogin = async () => {
     setIsLoading(true);
     
     try {
-      // Guest credentials (you should create a test user in Supabase)
-      const guestEmail = 'guest@bizpal.test';
-      const guestPassword = 'guest123456';
-      
-      await signIn(guestEmail, guestPassword);
-      
+      // Create a demo session in localStorage to simulate guest login
+      const demoUser = {
+        id: 'demo-user-id',
+        email: 'demo@bizpal.se',
+        user_metadata: {
+          full_name: 'Demo Användare'
+        },
+        app_metadata: {
+          provider: 'demo'
+        }
+      };
+
+      // Store demo session
+      localStorage.setItem('bizpal-demo-session', JSON.stringify({
+        user: demoUser,
+        access_token: 'demo-token',
+        refresh_token: 'demo-refresh',
+        expires_at: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+      }));
+
+      // Set demo flag
+      localStorage.setItem('bizpal-demo-mode', 'true');
+
       toast({
         title: 'Välkommen som gäst!',
-        description: 'Du är nu inloggad med testdata. Prova alla funktioner.',
+        description: 'Du är nu i demo-läge. Prova alla funktioner med testdata.',
       });
       
-      // Navigate to dashboard
-      navigate('/');
+      // Reload the page to trigger auth state change
+      window.location.reload();
       
     } catch (error) {
       console.error('Guest login error:', error);
       
       toast({
-        title: 'Kunde inte logga in som gäst',
-        description: 'Testanvändaren kanske inte finns. Kontakta support.',
+        title: 'Kunde inte aktivera demo-läge',
+        description: 'Försök igen eller kontakta support.',
         variant: 'destructive',
       });
     } finally {
@@ -63,7 +79,7 @@ export const GuestLoginButton: React.FC<GuestLoginButtonProps> = ({
             Testa BizPal som gäst
           </CardTitle>
           <CardDescription>
-            Logga in med testdata och prova alla funktioner utan att skapa konto
+            Aktivera demo-läge och prova alla funktioner med testdata
           </CardDescription>
         </CardHeader>
         
@@ -77,7 +93,7 @@ export const GuestLoginButton: React.FC<GuestLoginButtonProps> = ({
             {isLoading ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Loggar in...
+                Aktiverar demo...
               </>
             ) : (
               <>
@@ -105,7 +121,7 @@ export const GuestLoginButton: React.FC<GuestLoginButtonProps> = ({
       {isLoading ? (
         <>
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
-          Loggar in...
+          Aktiverar demo...
         </>
       ) : (
         <>

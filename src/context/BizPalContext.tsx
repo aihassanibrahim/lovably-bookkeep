@@ -229,26 +229,278 @@ export const BizPalProvider = ({ children }) => {
   // Load all data from Supabase when user changes
   useEffect(() => {
     if (user) {
-      // First check and create tables if they don't exist
-      checkAndCreateTables().then(() => {
-        // Test database connection
-        testDatabaseConnection().then(() => {
-          // Test product creation
-          testCreateProduct().then((success) => {
-            if (success) {
-              console.log('✅ Database is fully functional');
-            } else {
-              console.log('❌ Database has issues');
-            }
-            loadAllData();
+      // Check if user is in demo mode
+      const isDemoMode = localStorage.getItem('bizpal-demo-mode') === 'true';
+      
+      if (isDemoMode) {
+        // Load demo data instead of real data
+        loadDemoData();
+      } else {
+        // First check and create tables if they don't exist
+        checkAndCreateTables().then(() => {
+          // Test database connection
+          testDatabaseConnection().then(() => {
+            // Test product creation
+            testCreateProduct().then((success) => {
+              if (success) {
+                console.log('✅ Database is fully functional');
+              } else {
+                console.log('❌ Database has issues');
+              }
+              loadAllData();
+            });
           });
         });
-      });
+      }
     } else {
       dispatch({ type: actionTypes.CLEAR_ALL_DATA });
       dispatch({ type: actionTypes.SET_LOADING, payload: false });
     }
   }, [user]);
+
+  const loadDemoData = async () => {
+    if (!user) return;
+
+    try {
+      dispatch({ type: actionTypes.SET_LOADING, payload: true });
+
+      // Demo data for testing
+      const demoOrders = [
+        {
+          id: 'demo-order-1',
+          order_number: 'ORD-2024-001',
+          customer_name: 'Demo Kund AB',
+          customer_phone: '070-123 45 67',
+          customer_address: 'Demo Gatan 1, 12345 Stockholm',
+          product_name: 'Träbord',
+          product_details: 'Ek, 120x80cm',
+          product_customizations: 'Mörk finish',
+          price: 2500,
+          status: 'Beställd',
+          order_date: '2024-01-15',
+          estimated_completion: '2024-02-15',
+          notes: 'Demo order för testning',
+          user_id: user.id,
+          created_at: '2024-01-15T10:00:00Z',
+          updated_at: '2024-01-15T10:00:00Z'
+        },
+        {
+          id: 'demo-order-2',
+          order_number: 'ORD-2024-002',
+          customer_name: 'Test Företag',
+          customer_phone: '070-987 65 43',
+          customer_address: 'Testvägen 5, 54321 Göteborg',
+          product_name: 'Stolar',
+          product_details: 'Bekväm, 4 st',
+          product_customizations: 'Grön tyg',
+          price: 1200,
+          status: 'I produktion',
+          order_date: '2024-01-10',
+          estimated_completion: '2024-01-25',
+          notes: 'Snabb leverans önskas',
+          user_id: user.id,
+          created_at: '2024-01-10T14:30:00Z',
+          updated_at: '2024-01-10T14:30:00Z'
+        }
+      ];
+
+      const demoCustomers = [
+        {
+          id: 'demo-customer-1',
+          company_name: 'Demo Kund AB',
+          contact_person: 'Anna Andersson',
+          email: 'anna@demokund.se',
+          phone: '070-123 45 67',
+          address: 'Demo Gatan 1, 12345 Stockholm',
+          org_number: '556123-4567',
+          customer_number: 'CUST-001',
+          is_active: true,
+          user_id: user.id,
+          created_at: '2024-01-01T09:00:00Z',
+          updated_at: '2024-01-01T09:00:00Z'
+        },
+        {
+          id: 'demo-customer-2',
+          company_name: 'Test Företag',
+          contact_person: 'Erik Eriksson',
+          email: 'erik@testforetag.se',
+          phone: '070-987 65 43',
+          address: 'Testvägen 5, 54321 Göteborg',
+          org_number: '556987-6543',
+          customer_number: 'CUST-002',
+          is_active: true,
+          user_id: user.id,
+          created_at: '2024-01-05T11:00:00Z',
+          updated_at: '2024-01-05T11:00:00Z'
+        }
+      ];
+
+      const demoProducts = [
+        {
+          id: 'demo-product-1',
+          name: 'Träbord',
+          description: 'Vackert handgjort bord i ek',
+          category: 'Möbler',
+          price: 2500,
+          cost: 1500,
+          stock_quantity: 5,
+          sku: 'TB-001',
+          is_active: true,
+          user_id: user.id,
+          created_at: '2024-01-01T08:00:00Z',
+          updated_at: '2024-01-01T08:00:00Z'
+        },
+        {
+          id: 'demo-product-2',
+          name: 'Stolar',
+          description: 'Bekväma stolar i olika färger',
+          category: 'Möbler',
+          price: 300,
+          cost: 200,
+          stock_quantity: 20,
+          sku: 'ST-001',
+          is_active: true,
+          user_id: user.id,
+          created_at: '2024-01-01T08:00:00Z',
+          updated_at: '2024-01-01T08:00:00Z'
+        }
+      ];
+
+      const demoExpenses = [
+        {
+          id: 'demo-expense-1',
+          description: 'Köp av trä',
+          amount: 5000,
+          category: 'Material',
+          date: '2024-01-15',
+          receipt_url: null,
+          notes: 'Ek för bord',
+          user_id: user.id,
+          created_at: '2024-01-15T12:00:00Z',
+          updated_at: '2024-01-15T12:00:00Z'
+        },
+        {
+          id: 'demo-expense-2',
+          description: 'Verktyg',
+          amount: 1200,
+          category: 'Verktyg',
+          date: '2024-01-10',
+          receipt_url: null,
+          notes: 'Nya verktyg för produktion',
+          user_id: user.id,
+          created_at: '2024-01-10T15:00:00Z',
+          updated_at: '2024-01-10T15:00:00Z'
+        }
+      ];
+
+      const demoProductionTasks = [
+        {
+          id: 'demo-task-1',
+          title: 'Tillverka träbord',
+          description: 'Tillverka bord i ek enligt order ORD-2024-001',
+          status: 'I produktion',
+          priority: 'Hög',
+          assigned_to: 'Demo Användare',
+          due_date: '2024-02-15',
+          order_id: 'demo-order-1',
+          user_id: user.id,
+          created_at: '2024-01-15T10:00:00Z',
+          updated_at: '2024-01-15T10:00:00Z'
+        },
+        {
+          id: 'demo-task-2',
+          title: 'Montera stolar',
+          description: 'Montera 4 stolar för order ORD-2024-002',
+          status: 'Väntar',
+          priority: 'Medium',
+          assigned_to: 'Demo Användare',
+          due_date: '2024-01-25',
+          order_id: 'demo-order-2',
+          user_id: user.id,
+          created_at: '2024-01-10T14:30:00Z',
+          updated_at: '2024-01-10T14:30:00Z'
+        }
+      ];
+
+      const demoSuppliers = [
+        {
+          id: 'demo-supplier-1',
+          company_name: 'Träleverantör AB',
+          contact_person: 'Lars Larsson',
+          email: 'lars@traleverantor.se',
+          phone: '070-111 22 33',
+          address: 'Trävägen 10, 11111 Stockholm',
+          org_number: '556111-2233',
+          supplier_number: 'SUPP-001',
+          is_active: true,
+          user_id: user.id,
+          created_at: '2024-01-01T08:00:00Z',
+          updated_at: '2024-01-01T08:00:00Z'
+        },
+        {
+          id: 'demo-supplier-2',
+          company_name: 'Verktyg & Co',
+          contact_person: 'Maria Svensson',
+          email: 'maria@verktyg.se',
+          phone: '070-444 55 66',
+          address: 'Verktygsgatan 5, 22222 Göteborg',
+          org_number: '556444-5566',
+          supplier_number: 'SUPP-002',
+          is_active: true,
+          user_id: user.id,
+          created_at: '2024-01-05T09:00:00Z',
+          updated_at: '2024-01-05T09:00:00Z'
+        }
+      ];
+
+      const demoInventoryItems = [
+        {
+          id: 'demo-inventory-1',
+          name: 'Ekplankor',
+          description: 'Ekplankor för bordstillverkning',
+          category: 'Trä',
+          quantity: 50,
+          unit: 'st',
+          cost_per_unit: 200,
+          supplier_id: 'demo-supplier-1',
+          min_stock_level: 10,
+          location: 'Lager A',
+          user_id: user.id,
+          created_at: '2024-01-01T08:00:00Z',
+          updated_at: '2024-01-01T08:00:00Z'
+        },
+        {
+          id: 'demo-inventory-2',
+          name: 'Skruvar',
+          description: 'Skruvar för möbelsammanfogning',
+          category: 'Fästelement',
+          quantity: 500,
+          unit: 'st',
+          cost_per_unit: 2,
+          supplier_id: 'demo-supplier-2',
+          min_stock_level: 100,
+          location: 'Lager B',
+          user_id: user.id,
+          created_at: '2024-01-01T08:00:00Z',
+          updated_at: '2024-01-01T08:00:00Z'
+        }
+      ];
+
+      // Set demo data
+      dispatch({ type: actionTypes.SET_ORDERS, payload: demoOrders });
+      dispatch({ type: actionTypes.SET_CUSTOMERS, payload: demoCustomers });
+      dispatch({ type: actionTypes.SET_PRODUCTS, payload: demoProducts });
+      dispatch({ type: actionTypes.SET_EXPENSES, payload: demoExpenses });
+      dispatch({ type: actionTypes.SET_SUPPLIERS, payload: demoSuppliers });
+      dispatch({ type: actionTypes.SET_PRODUCTION_TASKS, payload: demoProductionTasks });
+      dispatch({ type: actionTypes.SET_INVENTORY_ITEMS, payload: demoInventoryItems });
+      dispatch({ type: actionTypes.SET_LOADING, payload: false });
+
+    } catch (error) {
+      console.error('Error loading demo data:', error);
+      dispatch({ type: actionTypes.SET_LOADING, payload: false });
+    }
+  };
 
   const loadAllData = async () => {
     if (!user) return;
@@ -418,6 +670,25 @@ export const BizPalProvider = ({ children }) => {
     addOrder: async (orderData) => {
       if (!user) return;
       
+      // Check if in demo mode
+      const isDemoMode = localStorage.getItem('bizpal-demo-mode') === 'true';
+      
+      if (isDemoMode) {
+        // Create demo order
+        const demoOrder = {
+          id: `demo-order-${Date.now()}`,
+          ...orderData,
+          price: parseFloat(orderData.price) || 0,
+          user_id: user.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        dispatch({ type: actionTypes.ADD_ORDER, payload: demoOrder });
+        toast.success('Demo order skapad!');
+        return demoOrder;
+      }
+      
       try {
         // Convert price to number
         const orderWithPrice = {
@@ -498,6 +769,32 @@ export const BizPalProvider = ({ children }) => {
     // Expenses
     addExpense: async (expenseData) => {
       if (!user) return;
+      
+      // Check if in demo mode
+      const isDemoMode = localStorage.getItem('bizpal-demo-mode') === 'true';
+      
+      if (isDemoMode) {
+        // Create demo expense
+        const demoExpense = {
+          id: `demo-expense-${Date.now()}`,
+          expense_number: expenseData.expense_number,
+          supplier_name: expenseData.supplier_name,
+          expense_date: expenseData.expense_date,
+          description: expenseData.description,
+          kostnad_med_moms: expenseData.kostnad_med_moms,
+          amount: expenseData.kostnad_med_moms,
+          category: expenseData.category,
+          receipt_url: expenseData.receipt_url,
+          notes: expenseData.notes,
+          user_id: user.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        dispatch({ type: actionTypes.ADD_EXPENSE, payload: demoExpense });
+        toast.success('Demo utgift tillagd!');
+        return demoExpense;
+      }
       
       try {
         // Ensure we're using the correct column names
@@ -581,6 +878,24 @@ export const BizPalProvider = ({ children }) => {
     addCustomer: async (customerData) => {
       if (!user) return;
       
+      // Check if in demo mode
+      const isDemoMode = localStorage.getItem('bizpal-demo-mode') === 'true';
+      
+      if (isDemoMode) {
+        // Create demo customer
+        const demoCustomer = {
+          id: `demo-customer-${Date.now()}`,
+          ...customerData,
+          user_id: user.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        dispatch({ type: actionTypes.ADD_CUSTOMER, payload: demoCustomer });
+        toast.success('Demo kund tillagd!');
+        return demoCustomer;
+      }
+      
       try {
         const { data, error } = await supabase
           .from('customers')
@@ -648,6 +963,24 @@ export const BizPalProvider = ({ children }) => {
     // Suppliers
     addSupplier: async (supplierData) => {
       if (!user) return;
+      
+      // Check if in demo mode
+      const isDemoMode = localStorage.getItem('bizpal-demo-mode') === 'true';
+      
+      if (isDemoMode) {
+        // Create demo supplier
+        const demoSupplier = {
+          id: `demo-supplier-${Date.now()}`,
+          ...supplierData,
+          user_id: user.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        dispatch({ type: actionTypes.ADD_SUPPLIER, payload: demoSupplier });
+        toast.success('Demo leverantör tillagd!');
+        return demoSupplier;
+      }
       
       try {
         const { data, error } = await supabase
@@ -751,6 +1084,24 @@ export const BizPalProvider = ({ children }) => {
         return;
       }
       
+      // Check if in demo mode
+      const isDemoMode = localStorage.getItem('bizpal-demo-mode') === 'true';
+      
+      if (isDemoMode) {
+        // Create demo product
+        const demoProduct = {
+          id: `demo-product-${Date.now()}`,
+          ...productData,
+          user_id: user.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        dispatch({ type: actionTypes.ADD_PRODUCT, payload: demoProduct });
+        toast.success('Demo produkt tillagd!');
+        return demoProduct;
+      }
+      
       try {
         console.log('Attempting to add product with data:', { ...productData, user_id: user.id });
         
@@ -831,6 +1182,24 @@ export const BizPalProvider = ({ children }) => {
     addProductionTask: async (taskData) => {
       if (!user) return;
       
+      // Check if in demo mode
+      const isDemoMode = localStorage.getItem('bizpal-demo-mode') === 'true';
+      
+      if (isDemoMode) {
+        // Create demo production task
+        const demoTask = {
+          id: `demo-task-${Date.now()}`,
+          ...taskData,
+          user_id: user.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        dispatch({ type: actionTypes.ADD_PRODUCTION_TASK, payload: demoTask });
+        toast.success('Demo produktionsuppgift tillagd!');
+        return demoTask;
+      }
+      
       try {
         const { data, error } = await supabase
           .from('production_tasks')
@@ -898,6 +1267,24 @@ export const BizPalProvider = ({ children }) => {
     // Inventory Items
     addInventoryItem: async (itemData) => {
       if (!user) return;
+      
+      // Check if in demo mode
+      const isDemoMode = localStorage.getItem('bizpal-demo-mode') === 'true';
+      
+      if (isDemoMode) {
+        // Create demo inventory item
+        const demoItem = {
+          id: `demo-inventory-${Date.now()}`,
+          ...itemData,
+          user_id: user.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        dispatch({ type: actionTypes.ADD_INVENTORY_ITEM, payload: demoItem });
+        toast.success('Demo lagerartikel tillagd!');
+        return demoItem;
+      }
       
       try {
         const { data, error } = await supabase

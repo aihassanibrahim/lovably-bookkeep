@@ -27,7 +27,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
+    // Check for demo mode first
+    const demoMode = localStorage.getItem('bizpal-demo-mode');
+    const demoSession = localStorage.getItem('bizpal-demo-session');
+    
+    if (demoMode === 'true' && demoSession) {
+      try {
+        const demoData = JSON.parse(demoSession);
+        const now = Date.now();
+        
+        // Check if demo session is still valid (24 hours)
+        if (demoData.expires_at > now) {
+          setUser(demoData.user as User);
+          setSession(demoData as Session);
+          setLoading(false);
+          return;
+        } else {
+          // Demo session expired, clear it
+          localStorage.removeItem('bizpal-demo-mode');
+          localStorage.removeItem('bizpal-demo-session');
+        }
+      } catch (error) {
+        console.error('Error parsing demo session:', error);
+        localStorage.removeItem('bizpal-demo-mode');
+        localStorage.removeItem('bizpal-demo-session');
+      }
+    }
+
+    // Get initial session from Supabase
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -63,7 +90,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    // Clear demo mode if active
+    const isDemoMode = localStorage.getItem('bizpal-demo-mode') === 'true';
+    localStorage.removeItem('bizpal-demo-mode');
+    localStorage.removeItem('bizpal-demo-session');
+    
+    if (isDemoMode) {
+      // For demo mode, just clear the session and reload
+      setUser(null);
+      setSession(null);
+      window.location.reload();
+    } else {
+      // For real users, sign out from Supabase
+      await supabase.auth.signOut();
+    }
   };
 
   const value = {

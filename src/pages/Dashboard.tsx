@@ -232,7 +232,14 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
         <div className="space-y-2">
-          <h1 className="text-3xl lg:text-4xl font-bold tracking-tight">Dashboard</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl lg:text-4xl font-bold tracking-tight">Dashboard</h1>
+            {localStorage.getItem('bizpal-demo-mode') === 'true' && (
+              <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
+                Demo-läge
+              </Badge>
+            )}
+          </div>
           <p className="text-muted-foreground text-base lg:text-lg">
             Översikt av din verksamhet - {new Date().toLocaleDateString('sv-SE')}
           </p>

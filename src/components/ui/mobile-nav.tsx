@@ -1,16 +1,28 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogIn } from "lucide-react";
 
 interface MobileNavProps {
   onNavigate: (sectionId: string) => void;
+  onLoginClick: () => void;
+  onCTAClick: () => void;
 }
 
-export function MobileNav({ onNavigate }: MobileNavProps) {
+export function MobileNav({ onNavigate, onLoginClick, onCTAClick }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleNavigate = (sectionId: string) => {
     onNavigate(sectionId);
+    setIsOpen(false);
+  };
+
+  const handleLoginClick = () => {
+    onLoginClick();
+    setIsOpen(false);
+  };
+
+  const handleCTAClick = () => {
+    onCTAClick();
     setIsOpen(false);
   };
 
@@ -46,6 +58,24 @@ export function MobileNav({ onNavigate }: MobileNavProps) {
             >
               FAQ
             </button>
+            
+            <div className="border-t border-gray-200 pt-2 mt-2">
+              <Button
+                onClick={handleLoginClick}
+                variant="outline"
+                className="w-full justify-start border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                Logga in
+              </Button>
+            </div>
+            
+            <Button
+              onClick={handleCTAClick}
+              className="w-full bg-black text-white hover:bg-gray-800"
+            >
+              Kom igång gratis
+            </Button>
           </div>
         </div>
       )}
