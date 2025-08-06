@@ -45,9 +45,30 @@ export const OnboardingRedirect: React.FC<OnboardingRedirectProps> = ({ children
           shouldRedirect: (!profile || !profile.onboarding_completed) && !localStorageCompleted
         });
         
+        // If no profile exists, try to create one
+        if (!profile && user) {
+          console.log('OnboardingRedirect: No profile found, creating one');
+          const { error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              user_id: user.id,
+              onboarding_completed: false,
+              onboarding_step: 0,
+            });
+          
+          if (createError) {
+            console.error('Error creating profile:', createError);
+          } else {
+            console.log('Profile created successfully');
+          }
+        }
+        
         // If no profile exists or onboarding is not completed, redirect to onboarding
         if ((!profile || !profile.onboarding_completed) && !localStorageCompleted) {
+          console.log('OnboardingRedirect: Profile not found or onboarding not completed, redirecting');
           setShouldRedirect(true);
+        } else {
+          console.log('OnboardingRedirect: Onboarding completed or profile exists, allowing access');
         }
       } catch (error) {
         console.error('Error checking onboarding status:', error);
@@ -61,7 +82,8 @@ export const OnboardingRedirect: React.FC<OnboardingRedirectProps> = ({ children
 
   useEffect(() => {
     if (!loading && shouldRedirect && user) {
-      navigate('/onboarding');
+      console.log('OnboardingRedirect: Redirecting to onboarding');
+      window.location.href = '/onboarding';
     }
   }, [loading, shouldRedirect, user, navigate]);
 

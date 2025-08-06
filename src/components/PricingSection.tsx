@@ -78,7 +78,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onUpgrade }) => 
                 <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
                 <div className="flex items-baseline justify-center gap-1">
                   <span className="text-4xl font-bold">
-                    {plan.price === 0 ? 'Free' : `${plan.price}kr`}
+                    {plan.price === 0 ? '0kr' : `${plan.price}kr`}
                   </span>
                   {plan.price > 0 && (
                     <span className="text-gray-600">/{plan.interval}</span>
@@ -100,22 +100,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onUpgrade }) => 
                   ))}
                 </div>
 
-                {/* Limits */}
-                {plan.limits && (
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-sm mb-2">Planbegränsningar:</h4>
-                    <div className="space-y-1 text-sm text-gray-600">
-                      <div className="flex justify-between">
-                        <span>Transaktioner:</span>
-                        <span>{plan.limits.transactions === -1 ? 'Obegränsat' : `${plan.limits.transactions}/månad`}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Kunder:</span>
-                        <span>{plan.limits.customers === -1 ? 'Obegränsat' : `${plan.limits.customers} kunder`}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
+
 
                 {/* CTA Button */}
                 <Button 

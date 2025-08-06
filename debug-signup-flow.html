@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Signup Flow</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        button { margin: 5px; padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Debug Signup Flow & Onboarding Redirect</h1>
+    
+    <div class="debug-section">
+        <h2>Current Status</h2>
+        <div id="current-status">Loading...</div>
+        <button onclick="checkStatus()">Refresh Status</button>
+    </div>
+
+    <div class="debug-section">
+        <h2>Test Signup Flow</h2>
+        <p>Test the signup process and see what happens with onboarding redirect:</p>
+        <button onclick="testSignup()">Test Signup (New Email)</button>
+        <button onclick="testSignupDuplicate()">Test Signup (Duplicate Email)</button>
+        <button onclick="clearAuth()">Clear Auth Data</button>
+    </div>
+
+    <div class="debug-section">
+        <h2>Onboarding Status</h2>
+        <button onclick="checkOnboardingStatus()">Check Onboarding Status</button>
+        <button onclick="setOnboardingCompleted()">Set Onboarding Completed</button>
+        <button onclick="clearOnboarding()">Clear Onboarding</button>
+        <div id="onboarding-status">Click button to check</div>
+    </div>
+
+    <div class="debug-section">
+        <h2>Navigation Tests</h2>
+        <button onclick="goToLanding()">Go to Landing Page</button>
+        <button onclick="goToOnboarding()">Go to Onboarding</button>
+        <button onclick="goToDashboard()">Go to Dashboard</button>
+        <button onclick="simulateSignupRedirect()">Simulate Signup → Onboarding Redirect</button>
+    </div>
+
+    <div class="debug-section">
+        <h2>LocalStorage Debug</h2>
+        <button onclick="showLocalStorage()">Show LocalStorage</button>
+        <button onclick="clearAllLocalStorage()">Clear All LocalStorage</button>
+        <pre id="localstorage-content"></pre>
+    </div>
+
+    <div class="debug-section">
+        <h2>Console Logs</h2>
+        <button onclick="clearConsole()">Clear Console</button>
+        <div id="console-logs"></div>
+    </div>
+
+    <script>
+        // Capture console logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addToConsole(type, ...args) {
+            const logsDiv = document.getElementById('console-logs');
+            const logEntry = document.createElement('div');
+            logEntry.className = type;
+            logEntry.innerHTML = `<strong>${type.toUpperCase()}:</strong> ${args.join(' ')}`;
+            logsDiv.appendChild(logEntry);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+        
+        console.log = (...args) => {
+            originalLog.apply(console, args);
+            addToConsole('log', ...args);
+        };
+        
+        console.error = (...args) => {
+            originalError.apply(console, args);
+            addToConsole('error', ...args);
+        };
+        
+        console.warn = (...args) => {
+            originalWarn.apply(console, args);
+            addToConsole('warn', ...args);
+        };
+
+        function checkStatus() {
+            const statusDiv = document.getElementById('current-status');
+            const currentUrl = window.location.href;
+            const user = localStorage.getItem('supabase.auth.token');
+            const demoMode = localStorage.getItem('bizpal-demo-mode');
+            const onboardingCompleted = localStorage.getItem('onboarding_completed');
+            
+            statusDiv.innerHTML = `
+                <p><strong>Current URL:</strong> ${currentUrl}</p>
+                <p><strong>Auth Token:</strong> ${user ? 'Present' : 'None'}</p>
+                <p><strong>Demo Mode:</strong> ${demoMode || 'false'}</p>
+                <p><strong>Onboarding Completed:</strong> ${onboardingCompleted || 'false'}</p>
+            `;
+        }
+
+        function testSignup() {
+            const testEmail = `test${Date.now()}@example.com`;
+            const testPassword = 'testpassword123';
+            
+            console.log('Testing signup with:', testEmail);
+            
+            // Simulate the signup process
+            fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: testEmail,
+                    password: testPassword
+                })
+            }).then(response => {
+                console.log('Signup response status:', response.status);
+                return response.json();
+            }).then(data => {
+                console.log('Signup response:', data);
+                if (data.error) {
+                    console.error('Signup error:', data.error);
+                } else {
+                    console.log('Signup successful, should redirect to onboarding');
+                    // Simulate the redirect that should happen
+                    setTimeout(() => {
+                        window.location.href = '/onboarding';
+                    }, 1000);
+                }
+            }).catch(error => {
+                console.error('Signup request failed:', error);
+            });
+        }
+
+        function testSignupDuplicate() {
+            const testEmail = 'duplicate@example.com';
+            const testPassword = 'testpassword123';
+            
+            console.log('Testing duplicate signup with:', testEmail);
+            
+            // Try to signup with the same email twice
+            fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: testEmail,
+                    password: testPassword
+                })
+            }).then(response => {
+                console.log('Duplicate signup response status:', response.status);
+                return response.json();
+            }).then(data => {
+                console.log('Duplicate signup response:', data);
+                if (data.error) {
+                    console.log('Expected error for duplicate email:', data.error);
+                }
+            }).catch(error => {
+                console.error('Duplicate signup request failed:', error);
+            });
+        }
+
+        function clearAuth() {
+            localStorage.removeItem('supabase.auth.token');
+            localStorage.removeItem('bizpal-demo-mode');
+            localStorage.removeItem('bizpal-demo-session');
+            console.log('Auth data cleared');
+            checkStatus();
+        }
+
+        function checkOnboardingStatus() {
+            const statusDiv = document.getElementById('onboarding-status');
+            const onboardingCompleted = localStorage.getItem('onboarding_completed');
+            const demoMode = localStorage.getItem('bizpal-demo-mode');
+            
+            statusDiv.innerHTML = `
+                <p><strong>LocalStorage onboarding_completed:</strong> ${onboardingCompleted || 'false'}</p>
+                <p><strong>Demo Mode:</strong> ${demoMode || 'false'}</p>
+                <p><strong>Current URL:</strong> ${window.location.href}</p>
+            `;
+        }
+
+        function setOnboardingCompleted() {
+            localStorage.setItem('onboarding_completed', 'true');
+            console.log('Onboarding marked as completed');
+            checkOnboardingStatus();
+        }
+
+        function clearOnboarding() {
+            localStorage.removeItem('onboarding_completed');
+            console.log('Onboarding status cleared');
+            checkOnboardingStatus();
+        }
+
+        function goToLanding() {
+            window.location.href = '/';
+        }
+
+        function goToOnboarding() {
+            window.location.href = '/onboarding';
+        }
+
+        function goToDashboard() {
+            window.location.href = '/';
+        }
+
+        function simulateSignupRedirect() {
+            console.log('Simulating signup → onboarding redirect flow');
+            
+            // Simulate successful signup
+            localStorage.setItem('supabase.auth.token', 'test-token');
+            
+            // Wait a bit then redirect to onboarding
+            setTimeout(() => {
+                console.log('Redirecting to onboarding...');
+                window.location.href = '/onboarding';
+            }, 1000);
+        }
+
+        function showLocalStorage() {
+            const contentDiv = document.getElementById('localstorage-content');
+            const items = {};
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                items[key] = value;
+            }
+            
+            contentDiv.textContent = JSON.stringify(items, null, 2);
+        }
+
+        function clearAllLocalStorage() {
+            localStorage.clear();
+            console.log('All localStorage cleared');
+            showLocalStorage();
+        }
+
+        function clearConsole() {
+            document.getElementById('console-logs').innerHTML = '';
+        }
+
+        // Initialize
+        checkStatus();
+        checkOnboardingStatus();
+        showLocalStorage();
+    </script>
+</body>
+</html> 

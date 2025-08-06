@@ -103,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -117,17 +117,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       // Create initial profile record for new user
-      if (user) {
+      // Use the user from the signup response, not the state
+      if (data.user) {
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
-            user_id: user.id,
+            user_id: data.user.id,
             onboarding_completed: false,
             onboarding_step: 0,
           });
 
         if (profileError) {
           console.error('Profile creation error:', profileError);
+          // Don't fail the signup if profile creation fails
+          // The profile can be created later during onboarding
+        } else {
+          console.log('Profile created successfully for user:', data.user.id);
         }
       }
 

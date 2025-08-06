@@ -564,7 +564,7 @@ const PlanSelectionStep: React.FC<{
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold mb-2">99 kr/månad</div>
+              <div className="text-3xl font-bold mb-2">299 kr/månad</div>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-center">
                   <Check className="h-4 w-4 text-green-600 mr-2" />

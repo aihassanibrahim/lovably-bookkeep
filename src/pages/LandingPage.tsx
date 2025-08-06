@@ -187,7 +187,7 @@ export default function Landing() {
         
         // Redirect to onboarding after successful signup
         setTimeout(() => {
-          navigate("/onboarding");
+          window.location.href = "/onboarding";
         }, 1500);
       }
       
@@ -195,9 +195,22 @@ export default function Landing() {
       setFormData({ email: '', password: '', confirmPassword: '' });
       setErrors({});
     } catch (error) {
-      toast.error(isLoginMode ? "Inloggning misslyckades" : "Registrering misslyckades", {
-        description: isLoginMode ? "Kontrollera din e-post och lösenord." : "Försök igen eller kontakta support."
-      });
+      console.error('Auth error:', error);
+      
+      // Handle specific error cases
+      if (error?.message?.includes('already registered') || error?.message?.includes('already exists')) {
+        toast.error("E-postadressen används redan", {
+          description: "Denna e-postadress är redan registrerad. Försök logga in istället."
+        });
+      } else if (error?.message?.includes('Invalid login credentials')) {
+        toast.error("Felaktiga inloggningsuppgifter", {
+          description: "Kontrollera din e-post och lösenord."
+        });
+      } else {
+        toast.error(isLoginMode ? "Inloggning misslyckades" : "Registrering misslyckades", {
+          description: isLoginMode ? "Kontrollera din e-post och lösenord." : "Försök igen eller kontakta support."
+        });
+      }
     } finally {
       setIsLoading(false);
     }
