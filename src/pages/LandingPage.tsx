@@ -151,13 +151,23 @@ export default function Landing() {
     
     try {
       if (isLoginMode) {
-        await signIn(formData.email, formData.password);
+        const { error } = await signIn(formData.email, formData.password);
+        if (error) {
+          throw error;
+        }
         toast({
           title: "Välkommen tillbaka!",
           description: "Du är nu inloggad.",
         });
+        // Navigate to dashboard after successful login
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
       } else {
-        await signUp(formData.email, formData.password);
+        const { error } = await signUp(formData.email, formData.password);
+        if (error) {
+          throw error;
+        }
         toast({
           title: "Konto skapat!",
           description: "Du är nu registrerad och kommer att omdirigeras till betalningssidan.",
@@ -344,7 +354,10 @@ export default function Landing() {
                            
                            setIsLoading(true);
                            try {
-                             await signUp(formData.email, formData.password);
+                             const { error } = await signUp(formData.email, formData.password);
+                             if (error) {
+                               throw error;
+                             }
                              toast({
                                title: "Konto skapat!",
                                description: "Du har nu tillgång till gratisversionen av BizPal.",
@@ -352,6 +365,10 @@ export default function Landing() {
                              setShowLoginModal(false);
                              setFormData({ email: '', password: '', confirmPassword: '' });
                              setErrors({});
+                             // Navigate to dashboard after successful signup
+                             setTimeout(() => {
+                               navigate("/");
+                             }, 1000);
                            } catch (error) {
                              toast({
                                title: "Registrering misslyckades",

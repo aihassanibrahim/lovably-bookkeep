@@ -26,9 +26,11 @@ export function ThemeProvider({
   storageKey = 'bizpal-ui-theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  );
+  const [theme, setTheme] = useState<Theme>(() => {
+    // Force light mode for now, ignore any stored preferences
+    localStorage.setItem(storageKey, 'light');
+    return 'light';
+  });
 
   useEffect(() => {
     const root = window.document.documentElement;
