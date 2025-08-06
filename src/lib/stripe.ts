@@ -1,6 +1,7 @@
 import { loadStripe } from '@stripe/stripe-js';
 
-
+// Stripe configuration
+export const STRIPE_PUBLISHABLE_KEY = 'pk_live_51Rt4jwBK2aelwOoZSywqmWu1HwUXgggEnUuIB7RgX11jRv5owMJSC7uekpyVXrN2XlRChyGFrYnFZik30em1jfif00Sp4DWa9e';
 
 // Initialize Stripe
 export const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
@@ -45,9 +46,6 @@ export const PRICING_PLANS = {
     }
   }
 };
-
-// Stripe configuration
-export const STRIPE_PUBLISHABLE_KEY = 'pk_live_51Rt4jwBK2aelwOoZSywqmWu1HwUXgggEnUuIB7RgX11jRv5owMJSC7uekpyVXrN2XlRChyGFrYnFZik30em1jfif00Sp4DWa9e';
 
 // Stripe Pricing Table ID
 export const STRIPE_PRICING_TABLE_ID = 'prctbl_1Rt5kxBK2aelwOoZMbCtsMWM';
