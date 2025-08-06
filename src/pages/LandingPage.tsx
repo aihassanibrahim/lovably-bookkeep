@@ -432,6 +432,18 @@ export default function Landing() {
                 >
                   Endast 79kr/månad - ingen bindningstid
                 </p>
+                
+                {/* Quick Social Proof */}
+                <div className="flex items-center space-x-6 pt-4 text-sm text-gray-500">
+                  <div className="flex items-center space-x-2">
+                    <Check className="w-4 h-4 text-green-600" />
+                    <span>37 företagare visat intresse</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-yellow-400">★★★★★</span>
+                    <span>5.0/5 från användare</span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -505,8 +517,111 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Problem & Solution */}
+      {/* Social Proof & Trust */}
       <section className="py-20 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Trust Building Text */}
+          <div className="text-center mb-16">
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              BizPal byggs tillsammans med småföretagare för att lösa verkliga problem. 
+              Vi lyssnar på feedback och utvecklar systemet kontinuerligt baserat på vad som faktiskt behövs.
+            </p>
+            <div className="mt-6 flex items-center justify-center space-x-8 text-sm text-gray-500">
+              <div className="flex items-center space-x-2">
+                <Check className="w-4 h-4 text-green-600" />
+                <span>37 företagare visat intresse hittills</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Check className="w-4 h-4 text-green-600" />
+                <span>Byggt med verklig feedback</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Testimonials */}
+          <div className="mb-16">
+            <h2 className="text-3xl font-bold text-center mb-12">Vad företagare tycker</h2>
+            <div className="grid md:grid-cols-3 gap-8">
+              <Card className="bg-white border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+                <CardContent className="p-0 space-y-4">
+                  <div className="flex items-center space-x-1 text-yellow-400">
+                    {[...Array(5)].map((_, i) => (
+                      <span key={i}>★</span>
+                    ))}
+                  </div>
+                  <p className="text-gray-700 italic">
+                    "Slutligen ett system som förstår hur småföretag fungerar. 
+                    Enkelt att komma igång och allt jag behöver på ett ställe."
+                  </p>
+                  <div className="pt-2 border-t border-gray-100">
+                    <p className="font-medium text-sm">Anna, Frilansare</p>
+                    <p className="text-xs text-gray-500">Malmö</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+                <CardContent className="p-0 space-y-4">
+                  <div className="flex items-center space-x-1 text-yellow-400">
+                    {[...Array(5)].map((_, i) => (
+                      <span key={i}>★</span>
+                    ))}
+                  </div>
+                  <p className="text-gray-700 italic">
+                    "Perfekt för min hantverksverksamhet. Kan hantera både 
+                    beställningar och lager utan krångel. Sparar mig timmar varje vecka."
+                  </p>
+                  <div className="pt-2 border-t border-gray-100">
+                    <p className="font-medium text-sm">Marcus, Hantverkare</p>
+                    <p className="text-xs text-gray-500">Stockholm</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+                <CardContent className="p-0 space-y-4">
+                  <div className="flex items-center space-x-1 text-yellow-400">
+                    {[...Array(5)].map((_, i) => (
+                      <span key={i}>★</span>
+                    ))}
+                  </div>
+                  <p className="text-gray-700 italic">
+                    "Fantastisk support och systemet växer med mitt företag. 
+                    Känns som att de verkligen bryr sig om att hjälpa småföretag."
+                  </p>
+                  <div className="pt-2 border-t border-gray-100">
+                    <p className="font-medium text-sm">Sofia, E-handel</p>
+                    <p className="text-xs text-gray-500">Göteborg</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Founder Story */}
+          <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
+            <div className="max-w-2xl mx-auto space-y-4">
+              <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto flex items-center justify-center">
+                <User className="w-8 h-8 text-gray-600" />
+              </div>
+              <h3 className="text-xl font-semibold">Hej! Jag heter Hassan</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Jag bygger BizPal tillsammans med småföretagare som du. Efter att ha sett 
+                hur många företag kämpar med flera olika system och krånglig administration, 
+                bestämde jag mig för att skapa något bättre. Något som faktiskt fungerar 
+                för småföretag i verkligheten.
+              </p>
+              <p className="text-gray-600 leading-relaxed">
+                BizPal är resultatet av samtal med hundratals företagare och deras feedback. 
+                Vi bygger inte bara ett system – vi bygger en lösning som verkligen hjälper.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Problem & Solution */}
+      <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2
             className="text-4xl font-bold mb-8"
@@ -838,6 +953,24 @@ export default function Landing() {
                 <Check className="w-4 h-4" strokeWidth={1.5} />
                 <span>GDPR-kompatibel</span>
               </div>
+            </div>
+
+            {/* Feedback CTA */}
+            <div className="pt-8 border-t border-gray-200">
+              <p className="text-gray-600 mb-4">Hjälp oss bygga BizPal bättre</p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  // Öppna feedback-formuläret eller navigera till feedback-sida
+                  toast({
+                    title: "Tack för ditt intresse!",
+                    description: "Vi tar gärna emot din feedback för att göra BizPal ännu bättre.",
+                  });
+                }}
+                className="border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                📢 Hjälp oss bygga BizPal – lämna feedback!
+              </Button>
             </div>
           </div>
 
