@@ -28,7 +28,7 @@ export const PRICING_PLANS = {
   PRO: {
     id: 'pro',
     name: 'Pro',
-    price: 199,
+    price: 99,
     currency: 'SEK',
     interval: 'month',
     features: [
@@ -49,7 +49,8 @@ export const PRICING_PLANS = {
 
 // Stripe price IDs - replace with your actual price IDs
 export const STRIPE_PRICE_IDS = {
-  PRO_MONTHLY: 'price_your_pro_monthly_price_id_here'
+  PRO_MONTHLY: 'price_1Rt5J1BK2aelwOoZwlbWikOe',
+  FREE_MONTHLY: 'price_1Rt5IaBK2aelwOoZUhe1kzdl'
 };
 
 // Check if user has access to feature based on their plan

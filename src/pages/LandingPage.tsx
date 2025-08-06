@@ -462,7 +462,7 @@ export default function Landing() {
                   className="text-sm text-gray-600"
                   data-testid="text-pricing-info"
                 >
-                  Endast 199kr/månad - ingen bindningstid
+                  Endast 99kr/månad - ingen bindningstid
                 </p>
                 
                 {/* Quick Social Proof */}
@@ -973,7 +973,7 @@ export default function Landing() {
               </div>
               <div className="flex items-center space-x-2">
                 <Check className="w-4 h-4" strokeWidth={1.5} />
-                <span>Endast 199kr/månad sedan</span>
+                <span>Endast 99kr/månad sedan</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Check className="w-4 h-4" strokeWidth={1.5} />
