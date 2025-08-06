@@ -27,6 +27,7 @@ import { PricingSection } from "@/components/PricingSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { FeedbackForm } from "@/components/FeedbackForm";
 import { GuestLoginButton } from "@/components/GuestLoginButton";
+import { CompetitorComparison } from "@/components/CompetitorComparison";
 import { redirectToCheckout } from "@/lib/stripe-client";
 import {
   ShoppingCart,
@@ -886,6 +887,9 @@ export default function Landing() {
 
       {/* Pricing Section */}
       <PricingSection onUpgrade={handleUpgrade} />
+
+      {/* Competitor Comparison */}
+      <CompetitorComparison onUpgrade={handleCTAClick} />
 
       {/* Features Section */}
       <FeaturesSection />
