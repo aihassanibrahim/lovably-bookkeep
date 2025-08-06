@@ -11,9 +11,11 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Navigation from "@/components/Navigation";
 import MobileNavigation from "@/components/MobileNavigation";
 import SupportButton from "@/components/SupportButton";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import Error500 from "./pages/500";
 import Accounts from "./pages/Accounts";
 import Transactions from "./pages/Transactions";
 import Customers from "./pages/Customers";
@@ -32,7 +34,15 @@ import Invoices from "./pages/Invoices";
 import FAQ from "./pages/FAQ";
 import About from "./pages/About";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      retryDelay: 1000,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 const AppContent = () => {
   const { user, loading } = useAuth();
@@ -53,71 +63,79 @@ const AppContent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-landing">
-      <Navigation />
-      
-      {/* Main content area */}
-      <div className="lg:pl-64 pt-12 lg:pt-0 pb-24 lg:pb-0">
-        <main className="min-h-screen">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            
-            {/* BIZPAL - HUVUDFUNKTIONER */}
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/invoices" element={<Invoices />} />
-            <Route path="/production" element={<Production />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/inventory" element={<Inventory />} />
-            <Route path="/receipts" element={<Receipts />} />
-            
-            {/* BOKFÖRING & EKONOMI */}
-            <Route path="/transactions" element={<Transactions />} />
-            <Route path="/accounts" element={<Accounts />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/expenses" element={<Expenses />} />
-            
-            {/* KUNDER & LEVERANTÖRER */}
-            <Route path="/customers" element={<Customers />} />
-            <Route path="/suppliers" element={<Suppliers />} />
-            
-            {/* INSTÄLLNINGAR & SUPPORT */}
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/about" element={<About />} />
-            
-            {/* CATCH-ALL ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
+    <ErrorBoundary>
+      <div className="min-h-screen bg-landing">
+        <Navigation />
+        
+        {/* Main content area */}
+        <div className="lg:pl-64 pt-12 lg:pt-0 pb-24 lg:pb-0">
+          <main className="min-h-screen">
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              
+              {/* BIZPAL - HUVUDFUNKTIONER */}
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/invoices" element={<Invoices />} />
+              <Route path="/production" element={<Production />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/inventory" element={<Inventory />} />
+              <Route path="/receipts" element={<Receipts />} />
+              
+              {/* BOKFÖRING & EKONOMI */}
+              <Route path="/transactions" element={<Transactions />} />
+              <Route path="/accounts" element={<Accounts />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/expenses" element={<Expenses />} />
+              
+              {/* KUNDER & LEVERANTÖRER */}
+              <Route path="/customers" element={<Customers />} />
+              <Route path="/suppliers" element={<Suppliers />} />
+              
+              {/* INSTÄLLNINGAR & SUPPORT */}
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/om-oss" element={<About />} />
+              
+              {/* ERROR PAGES */}
+              <Route path="/500" element={<Error500 />} />
+              
+              {/* CATCH-ALL ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
+        </div>
+        
+        {/* Mobile Navigation */}
+        <MobileNavigation />
+        
+        {/* Support Button */}
+        <SupportButton />
       </div>
-      
-      {/* Mobile Navigation */}
-      <MobileNavigation />
-      
-      {/* Support Button */}
-      <SupportButton />
-    </div>
+    </ErrorBoundary>
   );
 };
 
 const App = () => (
-  <BrowserRouter>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light" storageKey="bizpal-ui-theme">
-        <AuthProvider>
-          <BizPalProvider>
-            <NavigationProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Sonner />
-                <AppContent />
-              </TooltipProvider>
-            </NavigationProvider>
-          </BizPalProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
-  </BrowserRouter>
+  <ErrorBoundary>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider defaultTheme="light" storageKey="bizpal-ui-theme">
+          <AuthProvider>
+            <BizPalProvider>
+              <NavigationProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Sonner />
+                  <AppContent />
+                </TooltipProvider>
+              </NavigationProvider>
+            </BizPalProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
+  </ErrorBoundary>
 );
 
 export default App;

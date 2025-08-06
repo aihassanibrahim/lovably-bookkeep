@@ -1,48 +1,59 @@
 import { loadStripe } from '@stripe/stripe-js';
 
-// Stripe configuration
-export const STRIPE_PUBLISHABLE_KEY = 'pk_live_51Rt4jwBK2aelwOoZSywqmWu1HwUXgggEnUuIB7RgX11jRv5owMJSC7uekpyVXrN2XlRChyGFrYnFZik30em1jfif00Sp4DWa9e';
+// Stripe configuration and pricing plans
+export const STRIPE_PUBLISHABLE_KEY = import.meta.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_your_stripe_publishable_key_here';
+export const STRIPE_SECRET_KEY = import.meta.env.STRIPE_SECRET_KEY || 'sk_test_your_stripe_secret_key_here';
+export const STRIPE_WEBHOOK_SECRET = import.meta.env.STRIPE_WEBHOOK_SECRET || 'whsec_your_stripe_webhook_secret_here';
+export const STRIPE_PRO_PRICE_ID = import.meta.env.STRIPE_PRO_PRICE_ID || 'price_your_pro_plan_price_id_here';
 
 // Initialize Stripe
 export const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
 
 // Pricing plans configuration
 export const PRICING_PLANS = {
-  FREE: {
-    id: 'free',
+  free: {
     name: 'Gratis',
     price: 0,
     currency: 'SEK',
     interval: 'month',
     features: [
-      'Bokföring (max 50 transaktioner/månad)',
-      'Kundregister (max 20 kunder)',
+      'Bokföring',
+      'Kundregister',
+      'Upp till 10 transaktioner/månad',
+      'Upp till 5 kunder',
       'Grundläggande rapporter',
       'E-post support'
     ],
     limits: {
-      transactions: 50,
-      customers: 20
+      transactions: 10,
+      customers: 5,
+      products: 10,
+      orders: 10,
+      expenses: 10
     }
   },
-  PRO: {
-    id: 'pro',
+  pro: {
     name: 'Pro',
-    price: 99,
+    price: 299,
     currency: 'SEK',
     interval: 'month',
     features: [
-      'Obegränsad bokföring',
-      'Obegränsat kundregister',
-      'Kvittoscanning med AI',
+      'Allt i Gratis-planen',
+      'Kvittoscanning',
       'Momsrapportering',
+      'Obegränsade transaktioner',
+      'Obegränsade kunder',
+      'Avancerade rapporter',
       'Export till Excel/PDF',
       'Prioriterad support',
-      'Avancerade rapporter'
+      'API-åtkomst'
     ],
     limits: {
       transactions: -1, // Unlimited
-      customers: -1 // Unlimited
+      customers: -1, // Unlimited
+      products: -1, // Unlimited
+      orders: -1, // Unlimited
+      expenses: -1 // Unlimited
     }
   }
 };
@@ -56,42 +67,39 @@ export const STRIPE_PRICE_IDS = {
   FREE_MONTHLY: 'price_1Rt5IaBK2aelwOoZUhe1kzdl'
 };
 
-// Check if user has access to feature based on their plan
-export const checkFeatureAccess = (userPlan: string, feature: string): boolean => {
-  const plan = PRICING_PLANS[userPlan as keyof typeof PRICING_PLANS];
-  
-  if (!plan) return false;
-  
-  switch (feature) {
-    case 'receipt_scanning':
-      return userPlan === 'PRO';
-    case 'advanced_reports':
-      return userPlan === 'PRO';
-    case 'export':
-      return userPlan === 'PRO';
-    case 'priority_support':
-      return userPlan === 'PRO';
-    default:
-      return true;
-  }
+// Feature access checking
+export const checkFeatureAccess = (feature: string, plan: 'free' | 'pro'): boolean => {
+  const planFeatures = {
+    free: [
+      'bookkeeping',
+      'customer_register',
+      'basic_reports',
+      'email_support'
+    ],
+    pro: [
+      'bookkeeping',
+      'customer_register',
+      'basic_reports',
+      'email_support',
+      'receipt_scanning',
+      'vat_reporting',
+      'unlimited_transactions',
+      'unlimited_customers',
+      'advanced_reports',
+      'export',
+      'priority_support',
+      'api_access'
+    ]
+  };
+
+  return planFeatures[plan].includes(feature);
 };
 
-// Check if user has reached their plan limits
-export const checkPlanLimits = (
-  userPlan: string, 
-  currentUsage: { transactions: number; customers: number }
-): { canAddTransaction: boolean; canAddCustomer: boolean } => {
-  const plan = PRICING_PLANS[userPlan as keyof typeof PRICING_PLANS];
+// Plan limits checking
+export const checkPlanLimits = (resource: string, currentUsage: number, plan: 'free' | 'pro'): boolean => {
+  const limits = PRICING_PLANS[plan].limits;
+  const limit = limits[resource as keyof typeof limits];
   
-  if (!plan) {
-    return { canAddTransaction: false, canAddCustomer: false };
-  }
-  
-  const canAddTransaction = plan.limits.transactions === -1 || 
-    currentUsage.transactions < plan.limits.transactions;
-    
-  const canAddCustomer = plan.limits.customers === -1 || 
-    currentUsage.customers < plan.limits.customers;
-    
-  return { canAddTransaction, canAddCustomer };
+  if (limit === -1) return true; // Unlimited
+  return currentUsage < limit;
 }; 
