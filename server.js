@@ -13,8 +13,11 @@ app.use(cors());
 app.use(express.json());
 
 // Initialize Stripe
-const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_your_stripe_secret_key_here';
-const stripe = new Stripe(stripeKey);
+const stripeKey = process.env.STRIPE_SECRET_KEY;
+if (!stripeKey) {
+  console.warn('Warning: STRIPE_SECRET_KEY environment variable is not set');
+}
+const stripe = stripeKey ? new Stripe(stripeKey) : null;
 
 // Stripe checkout session endpoint
 app.post('/api/stripe/create-checkout-session', async (req, res) => {
@@ -27,9 +30,9 @@ app.post('/api/stripe/create-checkout-session', async (req, res) => {
 
     console.log('Creating Stripe checkout session for:', { planId, userId });
 
-    // Check if we have a valid Stripe secret key
-    if (!stripeKey.startsWith('sk_')) {
-      console.log('Invalid Stripe key, using development mode...');
+    // Check if we have a valid Stripe configuration
+    if (!stripe || !stripeKey || !stripeKey.startsWith('sk_')) {
+      console.log('Invalid Stripe configuration, using development mode...');
       
       // Simulate successful payment after 2 seconds
       setTimeout(() => {
@@ -81,7 +84,12 @@ app.post('/api/stripe/create-checkout-session', async (req, res) => {
 // Stripe webhook endpoint
 app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
-  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || 'whsec_your_webhook_secret_here';
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!stripe || !endpointSecret) {
+    console.warn('Stripe webhook called but Stripe is not configured');
+    return res.status(400).json({ error: 'Stripe not configured' });
+  }
 
   let event;
 
