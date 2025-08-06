@@ -1,7 +1,6 @@
 import { loadStripe } from '@stripe/stripe-js';
 
-// Stripe public key - replace with your actual key
-const STRIPE_PUBLISHABLE_KEY = process.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_your_stripe_key_here';
+
 
 // Initialize Stripe
 export const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
