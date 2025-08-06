@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { useSubscription } from '@/hooks/useSubscription';
 import { toast } from 'sonner';
 import { checkAndCreateTables } from '@/lib/checkDatabase';
 import { testDatabaseConnection, testCreateProduct } from '@/lib/testDatabase';
@@ -225,6 +226,7 @@ export const useBizPal = () => {
 export const BizPalProvider = ({ children }) => {
   const [state, dispatch] = useReducer(bizPalReducer, { ...initialState, loading: true });
   const { user } = useAuth();
+  const { canPerformAction, updateUsage, isFreePlan } = useSubscription();
 
   // Load all data from Supabase when user changes
   useEffect(() => {
@@ -688,6 +690,15 @@ export const BizPalProvider = ({ children }) => {
         toast.success('Demo order skapad!');
         return demoOrder;
       }
+
+      // Check freemium limits for real users
+      if (isFreePlan()) {
+        const canAdd = canPerformAction('add_transaction');
+        if (!canAdd) {
+          toast.error('Du har nått gränsen för gratisversionen. Uppgradera till Pro för att lägga till fler ordrar.');
+          return null;
+        }
+      }
       
       try {
         // Convert price to number
@@ -704,6 +715,11 @@ export const BizPalProvider = ({ children }) => {
           .single();
 
         if (error) throw error;
+        
+        // Update usage for free plan users
+        if (isFreePlan()) {
+          await updateUsage('transactions');
+        }
         
         dispatch({ type: actionTypes.ADD_ORDER, payload: data });
         toast.success('Order skapad!');
@@ -895,6 +911,15 @@ export const BizPalProvider = ({ children }) => {
         toast.success('Demo kund tillagd!');
         return demoCustomer;
       }
+
+      // Check freemium limits for real users
+      if (isFreePlan()) {
+        const canAdd = canPerformAction('add_customer');
+        if (!canAdd) {
+          toast.error('Du har nått gränsen för gratisversionen. Uppgradera till Pro för att lägga till fler kunder.');
+          return null;
+        }
+      }
       
       try {
         const { data, error } = await supabase
@@ -904,6 +929,11 @@ export const BizPalProvider = ({ children }) => {
           .single();
 
         if (error) throw error;
+        
+        // Update usage for free plan users
+        if (isFreePlan()) {
+          await updateUsage('customers');
+        }
         
         dispatch({ type: actionTypes.ADD_CUSTOMER, payload: data });
         toast.success('Kund tillagd!');

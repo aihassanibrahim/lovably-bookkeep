@@ -72,6 +72,12 @@ export default function Landing() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
   const navigate = useNavigate();
 
   const { signIn, signUp, user } = useAuth();
@@ -238,6 +244,85 @@ export default function Landing() {
     setIsLoginMode(true);
   };
 
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: {[key: string]: string} = {};
+    
+    if (!formData.email) {
+      newErrors.email = 'E-post krävs';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Ange en giltig e-postadress';
+    }
+    
+    if (!formData.password) {
+      newErrors.password = 'Lösenord krävs';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Lösenordet måste vara minst 6 tecken';
+    }
+    
+    if (!isLoginMode && formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Lösenorden matchar inte';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      if (isLoginMode) {
+        await signIn(formData.email, formData.password);
+        toast({
+          title: "Välkommen tillbaka!",
+          description: "Du är nu inloggad.",
+        });
+      } else {
+        await signUp(formData.email, formData.password);
+        toast({
+          title: "Konto skapat!",
+          description: "Du är nu registrerad och kommer att omdirigeras till betalningssidan.",
+        });
+        
+        // Redirect to Stripe checkout after successful signup
+        setTimeout(async () => {
+          try {
+            await redirectToCheckout('pro', user?.id || '');
+          } catch (error) {
+            console.error('Error redirecting to checkout after signup:', error);
+            navigate("/");
+          }
+        }, 1500);
+      }
+      
+      setShowLoginModal(false);
+      setFormData({ email: '', password: '', confirmPassword: '' });
+      setErrors({});
+    } catch (error) {
+      toast({
+        title: isLoginMode ? "Inloggning misslyckades" : "Registrering misslyckades",
+        description: isLoginMode ? "Kontrollera din e-post och lösenord." : "Försök igen eller kontakta support.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleUpgrade = async (planId: string) => {
     if (!user) {
       setShowLoginModal(true);
@@ -287,65 +372,138 @@ export default function Landing() {
                 </p>
               </div>
 
-              {isLoginMode ? (
-                <div className="space-y-4">
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-20" />
-                    <input
-                      type="email"
-                      placeholder="E-post"
-                      className="w-full h-10 rounded-md border border-gray-300 bg-white px-10 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-20" />
-                    <input
-                      type="password"
-                      placeholder="Lösenord"
-                      className="w-full h-10 rounded-md border border-gray-300 bg-white px-10 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <Button 
-                    className="w-full" 
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Loggar in..." : "Logga in"}
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-20" />
-                    <input
-                      type="email"
-                      placeholder="E-post"
-                      className="w-full h-10 rounded-md border border-gray-300 bg-white px-10 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-20" />
-                    <input
-                      type="password"
-                      placeholder="Lösenord"
-                      className="w-full h-10 rounded-md border border-gray-300 bg-white px-10 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-20" />
-                    <input
-                      type="password"
-                      placeholder="Bekräfta lösenord"
-                      className="w-full h-10 rounded-md border border-gray-300 bg-white px-10 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <Button 
-                    className="w-full" 
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Skapar konto..." : "Skapa konto"}
-                  </Button>
-                </div>
-              )}
+                             <form onSubmit={handleFormSubmit} className="space-y-4">
+                 {isLoginMode ? (
+                   <>
+                     <div className="relative">
+                       <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-20" />
+                       <input
+                         type="email"
+                         placeholder="E-post"
+                         value={formData.email}
+                         onChange={(e) => handleInputChange('email', e.target.value)}
+                         className={`w-full h-10 rounded-md border bg-white px-10 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                           errors.email ? 'border-red-500' : 'border-gray-300'
+                         }`}
+                       />
+                       {errors.email && (
+                         <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                       )}
+                     </div>
+                     <div className="relative">
+                       <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-20" />
+                       <input
+                         type="password"
+                         placeholder="Lösenord"
+                         value={formData.password}
+                         onChange={(e) => handleInputChange('password', e.target.value)}
+                         className={`w-full h-10 rounded-md border bg-white px-10 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                           errors.password ? 'border-red-500' : 'border-gray-300'
+                         }`}
+                       />
+                       {errors.password && (
+                         <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                       )}
+                     </div>
+                     <Button 
+                       type="submit"
+                       className="w-full" 
+                       disabled={isLoading}
+                     >
+                       {isLoading ? "Loggar in..." : "Logga in"}
+                     </Button>
+                   </>
+                 ) : (
+                   <>
+                     <div className="relative">
+                       <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-20" />
+                       <input
+                         type="email"
+                         placeholder="E-post"
+                         value={formData.email}
+                         onChange={(e) => handleInputChange('email', e.target.value)}
+                         className={`w-full h-10 rounded-md border bg-white px-10 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                           errors.email ? 'border-red-500' : 'border-gray-300'
+                         }`}
+                       />
+                       {errors.email && (
+                         <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                       )}
+                     </div>
+                     <div className="relative">
+                       <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-20" />
+                       <input
+                         type="password"
+                         placeholder="Lösenord"
+                         value={formData.password}
+                         onChange={(e) => handleInputChange('password', e.target.value)}
+                         className={`w-full h-10 rounded-md border bg-white px-10 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                           errors.password ? 'border-red-500' : 'border-gray-300'
+                         }`}
+                       />
+                       {errors.password && (
+                         <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                       )}
+                     </div>
+                     <div className="relative">
+                       <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-20" />
+                       <input
+                         type="password"
+                         placeholder="Bekräfta lösenord"
+                         value={formData.confirmPassword}
+                         onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                         className={`w-full h-10 rounded-md border bg-white px-10 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                           errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                         }`}
+                       />
+                       {errors.confirmPassword && (
+                         <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+                       )}
+                     </div>
+                     <div className="space-y-3">
+                       <Button 
+                         type="submit"
+                         className="w-full" 
+                         disabled={isLoading}
+                       >
+                         {isLoading ? "Skapar konto..." : "Skapa konto"}
+                       </Button>
+                       <Button 
+                         type="button"
+                         variant="outline"
+                         className="w-full" 
+                         disabled={isLoading}
+                         onClick={async (e) => {
+                           e.preventDefault();
+                           if (!validateForm()) return;
+                           
+                           setIsLoading(true);
+                           try {
+                             await signUp(formData.email, formData.password);
+                             toast({
+                               title: "Konto skapat!",
+                               description: "Du har nu tillgång till gratisversionen av BizPal.",
+                             });
+                             setShowLoginModal(false);
+                             setFormData({ email: '', password: '', confirmPassword: '' });
+                             setErrors({});
+                           } catch (error) {
+                             toast({
+                               title: "Registrering misslyckades",
+                               description: "Försök igen eller kontakta support.",
+                               variant: "destructive",
+                             });
+                           } finally {
+                             setIsLoading(false);
+                           }
+                         }}
+                       >
+                         Prova gratis (begränsad version)
+                       </Button>
+                     </div>
+                   </>
+                 )}
+               </form>
 
               <div className="mt-4 text-center">
                 <button
