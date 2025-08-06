@@ -1,46 +1,30 @@
 import { stripePromise } from './stripe';
 import { STRIPE_PRICE_IDS } from './stripe';
 
-// Create checkout session for subscription
-export const createCheckoutSession = async (priceId: string, userId: string) => {
-  try {
-    const response = await fetch('/api/create-checkout-session', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        priceId,
-        userId,
-        successUrl: `${window.location.origin}/dashboard?success=true`,
-        cancelUrl: `${window.location.origin}/pricing?canceled=true`,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to create checkout session');
-    }
-
-    const { sessionId } = await response.json();
-    return sessionId;
-  } catch (error) {
-    console.error('Error creating checkout session:', error);
-    throw error;
-  }
-};
-
 // Redirect to Stripe Checkout
-export const redirectToCheckout = async (priceId: string, userId: string) => {
+export const redirectToCheckout = async (planId: string, userId: string) => {
   try {
     const stripe = await stripePromise;
     if (!stripe) {
       throw new Error('Stripe failed to load');
     }
 
-    const sessionId = await createCheckoutSession(priceId, userId);
+    // Get the correct price ID based on plan
+    const priceId = planId === 'pro' ? STRIPE_PRICE_IDS.PRO_MONTHLY : STRIPE_PRICE_IDS.FREE_MONTHLY;
     
+    // For now, use a simple redirect to Stripe Checkout
+    // In production, you would create a checkout session first
     const { error } = await stripe.redirectToCheckout({
-      sessionId,
+      lineItems: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: 'subscription',
+      successUrl: `${window.location.origin}/dashboard?success=true`,
+      cancelUrl: `${window.location.origin}/pricing?canceled=true`,
+      clientReferenceId: userId,
     });
 
     if (error) {
@@ -78,7 +62,6 @@ export const createCustomerPortalSession = async (userId: string) => {
   }
 };
 
-// Redirect to customer portal
 export const redirectToCustomerPortal = async (userId: string) => {
   try {
     const url = await createCustomerPortalSession(userId);
@@ -89,12 +72,8 @@ export const redirectToCustomerPortal = async (userId: string) => {
   }
 };
 
-// Mock function for development (when backend is not ready)
 export const mockCheckout = async (planId: string) => {
-  // Simulate API call
   await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // In development, just show success message
   return {
     success: true,
     message: `Mock checkout successful for ${planId} plan`,

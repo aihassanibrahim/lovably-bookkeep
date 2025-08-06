@@ -6,6 +6,7 @@ import { Check, Crown, Zap } from 'lucide-react';
 import { PRICING_PLANS } from '@/lib/stripe';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { toast } from 'sonner';
+import { redirectToCheckout } from '@/lib/stripe-client';
 
 interface PricingSectionProps {
   onUpgrade?: (planId: string) => void;
@@ -14,7 +15,7 @@ interface PricingSectionProps {
 export const PricingSection: React.FC<PricingSectionProps> = ({ onUpgrade }) => {
   const { user } = useAuth();
 
-  const handlePlanSelect = (planId: string) => {
+  const handlePlanSelect = async (planId: string) => {
     if (planId === 'free') {
       toast({
         title: 'Gratis plan vald',
@@ -24,12 +25,23 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onUpgrade }) => 
     }
 
     if (planId === 'pro') {
-      if (onUpgrade) {
-        onUpgrade(planId);
-      } else {
+      if (!user) {
         toast({
-          title: 'Uppgradering',
-          description: 'Kontakta support för att uppgradera din plan.',
+          title: 'Logga in först',
+          description: 'Du måste logga in för att uppgradera din plan.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      try {
+        await redirectToCheckout(PRICING_PLANS.PRO.id, user.id);
+      } catch (error) {
+        console.error('Checkout error:', error);
+        toast({
+          title: 'Något gick fel',
+          description: 'Kunde inte starta betalningsprocessen. Försök igen.',
+          variant: 'destructive',
         });
       }
     }
