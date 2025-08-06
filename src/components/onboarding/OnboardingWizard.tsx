@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { 
   CheckCircle, 
   Circle, 
@@ -14,11 +17,16 @@ import {
   Settings,
   Building2,
   Users,
-  FileText
+  FileText,
+  CreditCard,
+  Check
 } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useDemo } from '@/context/DemoContext';
+import { redirectToCheckout } from '@/lib/stripe-client';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface OnboardingStep {
   id: string;
@@ -32,8 +40,25 @@ interface OnboardingStep {
 const OnboardingWizard: React.FC = () => {
   const { user } = useAuth();
   const { isDemoMode, enableDemoMode } = useDemo();
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  
+  // Form data for company information
+  const [companyData, setCompanyData] = useState({
+    company_name: '',
+    company_org_number: '',
+    company_address: '',
+    company_phone: '',
+    company_email: '',
+    contact_person: '',
+    industry: '',
+    company_size: '',
+  });
+
+  // Plan selection
+  const [selectedPlan, setSelectedPlan] = useState<'free' | 'pro'>('free');
 
   const steps: OnboardingStep[] = [
     {
@@ -45,44 +70,36 @@ const OnboardingWizard: React.FC = () => {
       component: WelcomeStep
     },
     {
-      id: 'demo-mode',
-      title: 'Testa systemet',
-      description: 'Aktivera demo-läge för att utforska funktioner',
-      icon: Settings,
-      completed: completedSteps.includes('demo-mode'),
-      component: DemoModeStep
+      id: 'company-info',
+      title: 'Företagsinformation',
+      description: 'Berätta om ditt företag',
+      icon: Building2,
+      completed: completedSteps.includes('company-info'),
+      component: CompanyInfoStep
     },
     {
-      id: 'first-customer',
-      title: 'Lägg till din första kund',
-      description: 'Skapa en kund för att komma igång',
-      icon: Users,
-      completed: completedSteps.includes('first-customer'),
-      component: FirstCustomerStep
+      id: 'plan-selection',
+      title: 'Välj din plan',
+      description: 'Välj mellan gratis och pro',
+      icon: CreditCard,
+      completed: completedSteps.includes('plan-selection'),
+      component: PlanSelectionStep
     },
     {
-      id: 'first-product',
-      title: 'Skapa din första produkt',
-      description: 'Lägg till en produkt i din katalog',
-      icon: Package,
-      completed: completedSteps.includes('first-product'),
-      component: FirstProductStep
-    },
-    {
-      id: 'first-order',
-      title: 'Skapa din första order',
-      description: 'Registrera en beställning från sociala medier',
-      icon: FileText,
-      completed: completedSteps.includes('first-order'),
-      component: FirstOrderStep
-    },
-    {
-      id: 'first-transaction',
-      title: 'Registrera din första transaktion',
-      description: 'Lägg till en intäkt eller utgift',
+      id: 'payment',
+      title: 'Betalning',
+      description: 'Slutför din prenumeration',
       icon: DollarSign,
-      completed: completedSteps.includes('first-transaction'),
-      component: FirstTransactionStep
+      completed: completedSteps.includes('payment'),
+      component: PaymentStep
+    },
+    {
+      id: 'workspace-setup',
+      title: 'Workspace setup',
+      description: 'Konfigurera ditt arbetsutrymme',
+      icon: Settings,
+      completed: completedSteps.includes('workspace-setup'),
+      component: WorkspaceSetupStep
     },
     {
       id: 'complete',
@@ -111,6 +128,41 @@ const OnboardingWizard: React.FC = () => {
   const prevStep = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleCompleteOnboarding = async () => {
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      // Save company information to profiles table
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          user_id: user.id,
+          ...companyData,
+          onboarding_completed: true,
+          onboarding_step: steps.length,
+        });
+
+      if (profileError) throw profileError;
+
+      // Mark onboarding as completed
+      markStepComplete('complete');
+      
+      toast.success('Onboarding slutförd!');
+      
+      // Redirect to dashboard
+      setTimeout(() => {
+        navigate('/');
+      }, 1500);
+      
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
+      toast.error('Kunde inte slutföra onboarding');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -154,12 +206,23 @@ const OnboardingWizard: React.FC = () => {
           </div>
 
           {/* Current Step Content */}
-          <CurrentStepComponent 
-            onComplete={() => markStepComplete(steps[currentStep].id)}
+          <CurrentStepComponent
+            onComplete={() => {
+              markStepComplete(steps[currentStep].id);
+              if (currentStep < steps.length - 1) {
+                nextStep();
+              }
+            }}
             onNext={nextStep}
             onPrev={prevStep}
             isLastStep={currentStep === steps.length - 1}
             isFirstStep={currentStep === 0}
+            companyData={companyData}
+            setCompanyData={setCompanyData}
+            selectedPlan={selectedPlan}
+            setSelectedPlan={setSelectedPlan}
+            onCompleteOnboarding={handleCompleteOnboarding}
+            loading={loading}
           />
         </CardContent>
       </Card>
@@ -174,7 +237,7 @@ const WelcomeStep: React.FC<{
   onPrev: () => void;
   isLastStep: boolean;
   isFirstStep: boolean;
-}> = ({ onComplete, onNext }) => {
+}> = ({ onComplete }) => {
   return (
     <div className="text-center space-y-6">
       <div className="space-y-4">
@@ -211,54 +274,237 @@ const WelcomeStep: React.FC<{
   );
 };
 
-const DemoModeStep: React.FC<{
+const CompanyInfoStep: React.FC<{
   onComplete: () => void;
   onNext: () => void;
   onPrev: () => void;
   isLastStep: boolean;
   isFirstStep: boolean;
-}> = ({ onComplete, onNext, onPrev }) => {
-  const { isDemoMode, enableDemoMode } = useDemo();
+  companyData: any;
+  setCompanyData: (data: any) => void;
+}> = ({ onComplete, onPrev, companyData, setCompanyData }) => {
+  const handleInputChange = (field: string, value: string) => {
+    setCompanyData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onComplete();
+  };
 
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold mb-4">Testa systemet först</h2>
+        <h2 className="text-2xl font-bold mb-4">Berätta om ditt företag</h2>
         <p className="text-muted-foreground">
-          Aktivera demo-läge för att utforska alla funktioner utan att spara permanent data.
+          Vi behöver lite grundläggande information för att anpassa BizPal för ditt företag.
         </p>
       </div>
 
-      <Card className="p-6">
-        <div className="flex items-center justify-between">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <h3 className="font-semibold">Demo-läge</h3>
-            <p className="text-sm text-muted-foreground">
-              Testa alla funktioner med exempeldata
-            </p>
+            <Label htmlFor="company_name">Företagsnamn *</Label>
+            <Input
+              id="company_name"
+              value={companyData.company_name}
+              onChange={(e) => handleInputChange('company_name', e.target.value)}
+              placeholder="Ditt företagsnamn"
+              required
+            />
           </div>
-          <Badge variant={isDemoMode ? "default" : "secondary"}>
-            {isDemoMode ? "Aktiverat" : "Inaktiverat"}
-          </Badge>
+          <div>
+            <Label htmlFor="company_org_number">Organisationsnummer</Label>
+            <Input
+              id="company_org_number"
+              value={companyData.company_org_number}
+              onChange={(e) => handleInputChange('company_org_number', e.target.value)}
+              placeholder="123456-7890"
+            />
+          </div>
         </div>
-        
-        {!isDemoMode && (
-          <Button 
-            onClick={() => { enableDemoMode(); onComplete(); }} 
-            className="mt-4"
-            variant="outline"
-          >
-            Aktivera demo-läge
+
+        <div>
+          <Label htmlFor="company_address">Adress</Label>
+          <Input
+            id="company_address"
+            value={companyData.company_address}
+            onChange={(e) => handleInputChange('company_address', e.target.value)}
+            placeholder="Gatan 1, 12345 Stockholm"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="company_phone">Telefon</Label>
+            <Input
+              id="company_phone"
+              value={companyData.company_phone}
+              onChange={(e) => handleInputChange('company_phone', e.target.value)}
+              placeholder="070-123 45 67"
+            />
+          </div>
+          <div>
+            <Label htmlFor="company_email">E-post</Label>
+            <Input
+              id="company_email"
+              type="email"
+              value={companyData.company_email}
+              onChange={(e) => handleInputChange('company_email', e.target.value)}
+              placeholder="info@företag.se"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="contact_person">Kontaktperson</Label>
+            <Input
+              id="contact_person"
+              value={companyData.contact_person}
+              onChange={(e) => handleInputChange('contact_person', e.target.value)}
+              placeholder="Ditt namn"
+            />
+          </div>
+          <div>
+            <Label htmlFor="industry">Bransch</Label>
+            <Input
+              id="industry"
+              value={companyData.industry}
+              onChange={(e) => handleInputChange('industry', e.target.value)}
+              placeholder="Handel, tillverkning, etc."
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-between">
+          <Button variant="outline" onClick={onPrev}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Tillbaka
           </Button>
-        )}
-      </Card>
+          <Button type="submit">
+            Fortsätt
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+const PlanSelectionStep: React.FC<{
+  onComplete: () => void;
+  onNext: () => void;
+  onPrev: () => void;
+  isLastStep: boolean;
+  isFirstStep: boolean;
+  selectedPlan: 'free' | 'pro';
+  setSelectedPlan: (plan: 'free' | 'pro') => void;
+}> = ({ onComplete, onPrev, selectedPlan, setSelectedPlan }) => {
+  return (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-4">Välj din plan</h2>
+        <p className="text-muted-foreground">
+          Välj den plan som passar ditt företag bäst. Du kan alltid uppgradera senare.
+        </p>
+      </div>
+
+      <RadioGroup value={selectedPlan} onValueChange={(value: 'free' | 'pro') => setSelectedPlan(value)}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className={`cursor-pointer transition-all ${selectedPlan === 'free' ? 'ring-2 ring-primary' : ''}`}>
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="free" id="free" />
+                <Label htmlFor="free" className="text-lg font-semibold">Gratis</Label>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold mb-2">0 kr/månad</div>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center">
+                  <Check className="h-4 w-4 text-green-600 mr-2" />
+                  Bokföring
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-4 w-4 text-green-600 mr-2" />
+                  Kundregister
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-4 w-4 text-green-600 mr-2" />
+                  Upp till 10 transaktioner/månad
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-4 w-4 text-green-600 mr-2" />
+                  Upp till 5 kunder
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-4 w-4 text-green-600 mr-2" />
+                  Grundläggande rapporter
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-4 w-4 text-green-600 mr-2" />
+                  E-post support
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className={`cursor-pointer transition-all ${selectedPlan === 'pro' ? 'ring-2 ring-primary' : ''}`}>
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="pro" id="pro" />
+                <Label htmlFor="pro" className="text-lg font-semibold">Pro</Label>
+                <Badge variant="secondary">Populärast</Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold mb-2">99 kr/månad</div>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center">
+                  <Check className="h-4 w-4 text-green-600 mr-2" />
+                  Allt i Gratis-planen
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-4 w-4 text-green-600 mr-2" />
+                  Kvittoscanning
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-4 w-4 text-green-600 mr-2" />
+                  Momsrapportering
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-4 w-4 text-green-600 mr-2" />
+                  Obegränsade transaktioner
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-4 w-4 text-green-600 mr-2" />
+                  Obegränsade kunder
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-4 w-4 text-green-600 mr-2" />
+                  Avancerade rapporter
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-4 w-4 text-green-600 mr-2" />
+                  Export till Excel/PDF
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-4 w-4 text-green-600 mr-2" />
+                  Prioriterad support
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+      </RadioGroup>
 
       <div className="flex justify-between">
         <Button variant="outline" onClick={onPrev}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Tillbaka
         </Button>
-        <Button onClick={onNext}>
+        <Button onClick={onComplete}>
           Fortsätt
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
@@ -267,46 +513,87 @@ const DemoModeStep: React.FC<{
   );
 };
 
-const FirstCustomerStep: React.FC<{
+const PaymentStep: React.FC<{
   onComplete: () => void;
   onNext: () => void;
   onPrev: () => void;
   isLastStep: boolean;
   isFirstStep: boolean;
-}> = ({ onComplete, onNext, onPrev }) => {
+  selectedPlan: 'free' | 'pro';
+}> = ({ onComplete, onPrev, selectedPlan }) => {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+
+  const handlePayment = async () => {
+    if (selectedPlan === 'free') {
+      onComplete();
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await redirectToCheckout('pro', user?.id || '');
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast.error('Kunde inte starta betalningsprocessen');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (selectedPlan === 'free') {
+    return (
+      <div className="text-center space-y-6">
+        <div className="space-y-4">
+          <CheckCircle className="h-16 w-16 text-green-600 mx-auto" />
+          <h2 className="text-2xl font-bold">Gratis plan vald!</h2>
+          <p className="text-muted-foreground">
+            Du har valt den gratis planen. Du kan alltid uppgradera till Pro senare.
+          </p>
+        </div>
+
+        <div className="flex justify-between">
+          <Button variant="outline" onClick={onPrev}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Tillbaka
+          </Button>
+          <Button onClick={onComplete}>
+            Fortsätt
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-4">Lägg till din första kund</h2>
+    <div className="text-center space-y-6">
+      <div className="space-y-4">
+        <CreditCard className="h-16 w-16 text-primary mx-auto" />
+        <h2 className="text-2xl font-bold">Slutför din prenumeration</h2>
         <p className="text-muted-foreground">
-          Skapa en kund för att kunna registrera ordrar och transaktioner.
+          Du kommer att skickas till Stripe för att slutföra din Pro-prenumeration för 99 kr/månad.
         </p>
       </div>
 
-      <Card className="p-6">
-        <div className="space-y-4">
-          <div className="flex items-center space-x-4">
-            <Users className="h-6 w-6 text-primary" />
-            <div>
-              <h3 className="font-semibold">Exempel: Anna Andersson</h3>
-              <p className="text-sm text-muted-foreground">
-                @anna_handmade • anna@example.com • 070-123 45 67
-              </p>
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Du kan lägga till kunder senare i "Kunder"-sektionen.
-          </p>
-        </div>
-      </Card>
+      <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+        <h3 className="font-semibold mb-2">Pro Plan - 99 kr/månad</h3>
+        <ul className="text-sm text-muted-foreground space-y-1">
+          <li>• Obegränsade transaktioner</li>
+          <li>• Kvittoscanning</li>
+          <li>• Momsrapportering</li>
+          <li>• Export-funktioner</li>
+          <li>• Prioriterad support</li>
+        </ul>
+      </div>
 
       <div className="flex justify-between">
         <Button variant="outline" onClick={onPrev}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Tillbaka
         </Button>
-        <Button onClick={() => { onComplete(); onNext(); }}>
-          Fortsätt
+        <Button onClick={handlePayment} disabled={loading}>
+          {loading ? 'Laddar...' : 'Fortsätt till betalning'}
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
@@ -314,139 +601,78 @@ const FirstCustomerStep: React.FC<{
   );
 };
 
-const FirstProductStep: React.FC<{
+const WorkspaceSetupStep: React.FC<{
   onComplete: () => void;
   onNext: () => void;
   onPrev: () => void;
   isLastStep: boolean;
   isFirstStep: boolean;
-}> = ({ onComplete, onNext, onPrev }) => {
+}> = ({ onComplete, onPrev }) => {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold mb-4">Skapa din första produkt</h2>
+        <h2 className="text-2xl font-bold mb-4">Workspace setup</h2>
         <p className="text-muted-foreground">
-          Lägg till produkter i din katalog för att kunna skapa ordrar.
+          Vi konfigurerar ditt arbetsutrymme med grundläggande inställningar.
         </p>
       </div>
 
-      <Card className="p-6">
-        <div className="space-y-4">
-          <div className="flex items-center space-x-4">
-            <Package className="h-6 w-6 text-primary" />
-            <div>
-              <h3 className="font-semibold">Exempel: Handgjord halsband</h3>
-              <p className="text-sm text-muted-foreground">
-                Kategori: Smycken • Pris: 299 SEK
-              </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <h3 className="font-semibold">Grundläggande inställningar</h3>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="text-sm">Svensk moms (25%, 12%, 6%, 0%)</span>
             </div>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Du kan lägga till produkter senare i "Produkter"-sektionen.
-          </p>
-        </div>
-      </Card>
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="text-sm">SEK som valuta</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="text-sm">Europe/Stockholm tidszon</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="text-sm">Svenska som språk</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <h3 className="font-semibold">Standardkonton</h3>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="text-sm">Kassa</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="text-sm">Bankkonto</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="text-sm">Försäljning</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="text-sm">Kostnader</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="flex justify-between">
         <Button variant="outline" onClick={onPrev}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Tillbaka
         </Button>
-        <Button onClick={() => { onComplete(); onNext(); }}>
-          Fortsätt
-          <ArrowRight className="h-4 w-4 ml-2" />
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-const FirstOrderStep: React.FC<{
-  onComplete: () => void;
-  onNext: () => void;
-  onPrev: () => void;
-  isLastStep: boolean;
-  isFirstStep: boolean;
-}> = ({ onComplete, onNext, onPrev }) => {
-  return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-4">Skapa din första order</h2>
-        <p className="text-muted-foreground">
-          Registrera beställningar från sociala medier och håll koll på leveranser.
-        </p>
-      </div>
-
-      <Card className="p-6">
-        <div className="space-y-4">
-          <div className="flex items-center space-x-4">
-            <FileText className="h-6 w-6 text-primary" />
-            <div>
-              <h3 className="font-semibold">Exempel: ORD-001</h3>
-              <p className="text-sm text-muted-foreground">
-                Anna Andersson • Handgjord halsband • 299 SEK • Status: Beställd
-              </p>
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Du kan skapa ordrar senare i "Ordrar"-sektionen eller via Quick Actions.
-          </p>
-        </div>
-      </Card>
-
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onPrev}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Tillbaka
-        </Button>
-        <Button onClick={() => { onComplete(); onNext(); }}>
-          Fortsätt
-          <ArrowRight className="h-4 w-4 ml-2" />
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-const FirstTransactionStep: React.FC<{
-  onComplete: () => void;
-  onNext: () => void;
-  onPrev: () => void;
-  isLastStep: boolean;
-  isFirstStep: boolean;
-}> = ({ onComplete, onNext, onPrev }) => {
-  return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-4">Registrera din första transaktion</h2>
-        <p className="text-muted-foreground">
-          Lägg till intäkter och utgifter för att hålla koll på din ekonomi.
-        </p>
-      </div>
-
-      <Card className="p-6">
-        <div className="space-y-4">
-          <div className="flex items-center space-x-4">
-            <DollarSign className="h-6 w-6 text-primary" />
-            <div>
-              <h3 className="font-semibold">Exempel: Försäljning halsband</h3>
-              <p className="text-sm text-muted-foreground">
-                Intäkt: 299 SEK • Kategori: Försäljning • Datum: Idag
-              </p>
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Du kan registrera transaktioner via Quick Actions eller i "Transaktioner"-sektionen.
-          </p>
-        </div>
-      </Card>
-
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onPrev}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Tillbaka
-        </Button>
-        <Button onClick={() => { onComplete(); onNext(); }}>
+        <Button onClick={onComplete}>
           Fortsätt
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
@@ -461,7 +687,9 @@ const CompleteStep: React.FC<{
   onPrev: () => void;
   isLastStep: boolean;
   isFirstStep: boolean;
-}> = ({ onComplete, onPrev }) => {
+  onCompleteOnboarding: () => void;
+  loading: boolean;
+}> = ({ onPrev, onCompleteOnboarding, loading }) => {
   return (
     <div className="text-center space-y-6">
       <div className="space-y-4">
@@ -497,20 +725,17 @@ const CompleteStep: React.FC<{
         </Card>
       </div>
 
-      <div className="flex justify-center space-x-4">
+      <div className="flex justify-center">
         <Button variant="outline" onClick={onPrev}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Tillbaka
         </Button>
         <Button 
-          onClick={() => { 
-            onComplete(); 
-            localStorage.setItem('bizpal-onboarding-completed', 'true');
-            window.location.href = '/';
-          }}
-          className="px-8"
+          onClick={onCompleteOnboarding}
+          disabled={loading}
+          className="ml-4 px-8"
         >
-          Börja använda BizPal
+          {loading ? 'Slutför...' : 'Börja använda BizPal'}
         </Button>
       </div>
     </div>

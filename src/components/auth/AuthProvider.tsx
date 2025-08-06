@@ -107,13 +107,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${window.location.origin}/dashboard`,
         },
       });
 
       if (error) {
         console.error('Sign up error:', error);
         return { error };
+      }
+
+      // Create initial profile record for new user
+      if (user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: user.id,
+            onboarding_completed: false,
+            onboarding_step: 0,
+          });
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+        }
       }
 
       return { error: null };

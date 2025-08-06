@@ -82,25 +82,42 @@ export default function Landing() {
 
 
   const handleCTAClick = async () => {
-    if (user) {
-      // User is logged in, redirect to Stripe checkout
-      try {
-        await redirectToCheckout('pro', user.id);
-        toast({
-          title: 'Omdirigerar till betalning',
-          description: 'Du kommer att skickas till Stripe för att slutföra din prenumeration.',
-        });
-      } catch (error) {
-        toast({
-          title: 'Något gick fel',
-          description: 'Kunde inte starta betalningsprocessen. Försök igen.',
-          variant: 'destructive',
-        });
-      }
-    } else {
+    if (!user) {
       // User is not logged in, show login modal
       setShowLoginModal(true);
-      setIsLoginMode(true);
+      setIsLoginMode(false); // Show signup form
+      return;
+    }
+
+    // User is logged in, check subscription status
+    try {
+      // Check if user has active Pro subscription
+      const { data: subscription } = await supabase
+        .from('user_subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (subscription && subscription.plan_id === 'pro') {
+        // User already has Pro, go to dashboard
+        navigate('/');
+        return;
+      }
+
+      // User doesn't have Pro, redirect to Stripe checkout
+      await redirectToCheckout('pro', user.id);
+      toast({
+        title: 'Omdirigerar till betalning',
+        description: 'Du kommer att skickas till Stripe för att slutföra din prenumeration.',
+      });
+    } catch (error) {
+      console.error('CTA error:', error);
+      toast({
+        title: 'Något gick fel',
+        description: 'Kunde inte starta betalningsprocessen. Försök igen.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -170,17 +187,12 @@ export default function Landing() {
         }
         toast({
           title: "Konto skapat!",
-          description: "Du är nu registrerad och kommer att omdirigeras till betalningssidan.",
+          description: "Du är nu registrerad och kommer att omdirigeras till onboarding.",
         });
         
-        // Redirect to Stripe checkout after successful signup
-        setTimeout(async () => {
-          try {
-            await redirectToCheckout('pro', user?.id || '');
-          } catch (error) {
-            console.error('Error redirecting to checkout after signup:', error);
-            navigate("/");
-          }
+        // Redirect to onboarding after successful signup
+        setTimeout(() => {
+          navigate("/onboarding");
         }, 1500);
       }
       
@@ -201,19 +213,14 @@ export default function Landing() {
   const handleUpgrade = async (planId: string) => {
     if (!user) {
       setShowLoginModal(true);
-      setIsLoginMode(true);
+      setIsLoginMode(false);
       return;
     }
 
     try {
-      if (planId === 'pro') {
-        await redirectToCheckout(planId, user.id);
-        toast({
-          title: 'Uppgradering påbörjad',
-          description: 'Du kommer att omdirigeras till betalningssidan.',
-        });
-      }
+      await redirectToCheckout(planId, user.id);
     } catch (error) {
+      console.error('Upgrade error:', error);
       toast({
         title: 'Något gick fel',
         description: 'Kunde inte starta uppgraderingen. Försök igen.',
@@ -365,9 +372,9 @@ export default function Landing() {
                              setShowLoginModal(false);
                              setFormData({ email: '', password: '', confirmPassword: '' });
                              setErrors({});
-                             // Navigate to dashboard after successful signup
+                             // Navigate to onboarding after successful signup
                              setTimeout(() => {
-                               navigate("/");
+                               navigate("/onboarding");
                              }, 1000);
                            } catch (error) {
                              toast({
