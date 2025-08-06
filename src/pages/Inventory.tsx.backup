@@ -222,158 +222,157 @@ const Inventory = () => {
                 Lägg till material
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingItem ? "Redigera material" : "Lägg till nytt material"}
-                </DialogTitle>
-                <DialogDescription>
-                  {editingItem ? "Uppdatera materialinformation" : "Lägg till ett nytt material i lagret"}
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="space-y-6">
-                {/* Basic Info */}
-                <div className="space-y-4">
-                  <h3 className="font-medium text-lg">Grundinfo</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Materialnummer *</Label>
-                      <Input 
-                        value={newItem.item_number}
-                        onChange={(e) => setNewItem({...newItem, item_number: e.target.value})}
-                        placeholder="ITEM-001"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label>Materialnamn *</Label>
-                      <Input 
-                        value={newItem.name}
-                        onChange={(e) => setNewItem({...newItem, name: e.target.value})}
-                        placeholder="Bomullstyg blå, Silver tråd, Akrylfärg röd..."
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label>Kategori</Label>
-                      <div className="flex gap-2">
-                        <Select value={newItem.category} onValueChange={(value) => setNewItem({...newItem, category: value})}>
-                          <SelectTrigger className="flex-1">
-                            <SelectValue placeholder="Välj kategori" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {categories.map(category => (
-                              <SelectItem key={category} value={category}>{category}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <div className="flex gap-1">
-                          <Input 
-                            placeholder="Ny kategori"
-                            value={newCategory}
-                            onChange={(e) => setNewCategory(e.target.value)}
-                            className="w-24"
-                          />
-                          <Button type="button" size="sm" onClick={addNewCategory}>+</Button>
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Leverantör ID</Label>
-                      <Input 
-                        value={newItem.supplier_id}
-                        onChange={(e) => setNewItem({...newItem, supplier_id: e.target.value})}
-                        placeholder="SUP-001 eller leverantörsnamn"
-                      />
-                    </div>
-                    <div>
-                      <Label>Placering</Label>
-                      <Input 
-                        value={newItem.location}
-                        onChange={(e) => setNewItem({...newItem, location: e.target.value})}
-                        placeholder="Hylla A3, Låda 1, Förråd..."
-                      />
-                    </div>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingItem ? "Redigera material" : "Lägg till nytt material"}
+              </DialogTitle>
+              <DialogDescription>
+                {editingItem ? "Uppdatera materialinformation" : "Lägg till ett nytt material i lagret"}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              {/* Basic Info */}
+              <div className="space-y-4">
+                <h3 className="font-medium text-lg">Grundinfo</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Materialnummer *</Label>
+                    <Input 
+                      value={newItem.item_number}
+                      onChange={(e) => setNewItem({...newItem, item_number: e.target.value})}
+                      placeholder="ITEM-001"
+                      required
+                    />
                   </div>
-                </div>
-
-                {/* Stock Info */}
-                <div className="space-y-4">
-                  <h3 className="font-medium text-lg">Lagerinfo</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Nuvarande lager</Label>
-                      <Input 
-                        type="number"
-                        step="0.1"
-                        value={newItem.current_stock}
-                        onChange={(e) => setNewItem({...newItem, current_stock: e.target.value})}
-                        placeholder="10"
-                      />
-                    </div>
-                    <div>
-                      <Label>Minimumnivå</Label>
-                      <Input 
-                        type="number"
-                        step="0.1"
-                        value={newItem.min_stock}
-                        onChange={(e) => setNewItem({...newItem, min_stock: e.target.value})}
-                        placeholder="2"
-                      />
-                    </div>
-                    <div>
-                      <Label>Enhet</Label>
-                      <Select value={newItem.unit} onValueChange={(value) => setNewItem({...newItem, unit: value})}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Välj enhet" />
+                  <div>
+                    <Label>Materialnamn *</Label>
+                    <Input 
+                      value={newItem.name}
+                      onChange={(e) => setNewItem({...newItem, name: e.target.value})}
+                      placeholder="Bomullstyg blå, Silver tråd, Akrylfärg röd..."
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label>Kategori</Label>
+                    <div className="flex gap-2">
+                      <Select value={newItem.category} onValueChange={(value) => setNewItem({...newItem, category: value})}>
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Välj kategori" />
                         </SelectTrigger>
                         <SelectContent>
-                          {units.map(unit => (
-                            <SelectItem key={unit} value={unit}>{unit}</SelectItem>
+                          {categories.map(category => (
+                            <SelectItem key={category} value={category}>{category}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                    </div>
-                    <div>
-                      <Label>Kostnad per enhet (SEK)</Label>
-                      <Input 
-                        type="number"
-                        step="0.01"
-                        value={newItem.cost_per_unit}
-                        onChange={(e) => setNewItem({...newItem, cost_per_unit: e.target.value})}
-                        placeholder="25.50"
-                      />
+                      <div className="flex gap-1">
+                        <Input 
+                          placeholder="Ny kategori"
+                          value={newCategory}
+                          onChange={(e) => setNewCategory(e.target.value)}
+                          className="w-24"
+                        />
+                        <Button type="button" size="sm" onClick={addNewCategory}>+</Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                {/* Description */}
-                <div>
-                  <Label>Beskrivning</Label>
-                  <Textarea 
-                    value={newItem.description}
-                    onChange={(e) => setNewItem({...newItem, description: e.target.value})}
-                    placeholder="Beskrivning av materialets egenskaper, kvalitet, användningsområde..."
-                  />
-                </div>
-
-                <div className="flex justify-end space-x-2">
-                  <Button variant="outline" onClick={() => {
-                    setShowNewItemDialog(false);
-                    setEditingItem(null);
-                    resetForm();
-                  }}>
-                    Avbryt
-                  </Button>
-                  <Button onClick={handleAddOrEditItem} disabled={submitting} className="bg-emerald-600 hover:bg-emerald-700">
-                    {submitting ? 'Sparar...' : (editingItem ? "Uppdatera" : "Lägg till")}
-                  </Button>
+                  <div>
+                    <Label>Leverantör ID</Label>
+                    <Input 
+                      value={newItem.supplier_id}
+                      onChange={(e) => setNewItem({...newItem, supplier_id: e.target.value})}
+                      placeholder="SUP-001 eller leverantörsnamn"
+                    />
+                  </div>
+                  <div>
+                    <Label>Placering</Label>
+                    <Input 
+                      value={newItem.location}
+                      onChange={(e) => setNewItem({...newItem, location: e.target.value})}
+                      placeholder="Hylla A3, Låda 1, Förråd..."
+                    />
+                  </div>
                 </div>
               </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+
+              {/* Stock Info */}
+              <div className="space-y-4">
+                <h3 className="font-medium text-lg">Lagerinfo</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Nuvarande lager</Label>
+                    <Input 
+                      type="number"
+                      step="0.1"
+                      value={newItem.current_stock}
+                      onChange={(e) => setNewItem({...newItem, current_stock: e.target.value})}
+                      placeholder="10"
+                    />
+                  </div>
+                  <div>
+                    <Label>Minimumnivå</Label>
+                    <Input 
+                      type="number"
+                      step="0.1"
+                      value={newItem.min_stock}
+                      onChange={(e) => setNewItem({...newItem, min_stock: e.target.value})}
+                      placeholder="2"
+                    />
+                  </div>
+                  <div>
+                    <Label>Enhet</Label>
+                    <Select value={newItem.unit} onValueChange={(value) => setNewItem({...newItem, unit: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Välj enhet" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {units.map(unit => (
+                          <SelectItem key={unit} value={unit}>{unit}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Kostnad per enhet (SEK)</Label>
+                    <Input 
+                      type="number"
+                      step="0.01"
+                      value={newItem.cost_per_unit}
+                      onChange={(e) => setNewItem({...newItem, cost_per_unit: e.target.value})}
+                      placeholder="25.50"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <Label>Beskrivning</Label>
+                <Textarea 
+                  value={newItem.description}
+                  onChange={(e) => setNewItem({...newItem, description: e.target.value})}
+                  placeholder="Beskrivning av materialets egenskaper, kvalitet, användningsområde..."
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => {
+                  setShowNewItemDialog(false);
+                  setEditingItem(null);
+                  resetForm();
+                }}>
+                  Avbryt
+                </Button>
+                <Button onClick={handleAddOrEditItem} className="bg-emerald-600 hover:bg-emerald-700">
+                  {editingItem ? "Uppdatera" : "Lägg till"}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Stats Cards - Now using real data from context */}

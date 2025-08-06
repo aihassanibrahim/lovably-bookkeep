@@ -354,38 +354,60 @@ const Invoices: React.FC = () => {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Fakturarader</h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
-                    <Input
-                      placeholder="Beskrivning"
-                      value={itemForm.description}
-                      onChange={(e) => setItemForm({...itemForm, description: e.target.value})}
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Antal"
-                      value={itemForm.quantity}
-                      onChange={(e) => setItemForm({...itemForm, quantity: parseInt(e.target.value) || 0})}
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Pris"
-                      value={itemForm.unit_price}
-                      onChange={(e) => setItemForm({...itemForm, unit_price: parseFloat(e.target.value) || 0})}
-                    />
-                    <Select value={itemForm.vat_rate.toString()} onValueChange={(value) => setItemForm({...itemForm, vat_rate: parseInt(value)})}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">0%</SelectItem>
-                        <SelectItem value="6">6%</SelectItem>
-                        <SelectItem value="12">12%</SelectItem>
-                        <SelectItem value="25">25%</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button onClick={addItem} className="button-landing-secondary">
-                      <Plus className="h-4 w-4" />
-                    </Button>
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
+                      <div>
+                        <Label className="text-sm font-medium">Beskrivning</Label>
+                        <Input
+                          placeholder="T.ex. Keramikskål, Halsband..."
+                          value={itemForm.description}
+                          onChange={(e) => setItemForm({...itemForm, description: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Antal</Label>
+                        <Input
+                          type="number"
+                          placeholder="1"
+                          value={itemForm.quantity}
+                          onChange={(e) => setItemForm({...itemForm, quantity: parseInt(e.target.value) || 0})}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Enhetspris (SEK)</Label>
+                        <Input
+                          type="number"
+                          placeholder="150"
+                          value={itemForm.unit_price}
+                          onChange={(e) => setItemForm({...itemForm, unit_price: parseFloat(e.target.value) || 0})}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Moms</Label>
+                        <Select value={itemForm.vat_rate.toString()} onValueChange={(value) => setItemForm({...itemForm, vat_rate: parseInt(value)})}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="0">0%</SelectItem>
+                            <SelectItem value="6">6%</SelectItem>
+                            <SelectItem value="12">12%</SelectItem>
+                            <SelectItem value="25">25%</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-end">
+                        <Button onClick={addItem} className="button-landing-secondary w-full">
+                          <Plus className="h-4 w-4 mr-1" />
+                          Lägg till
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      <p><strong>Antal:</strong> Hur många av denna produkt/tjänst</p>
+                      <p><strong>Enhetspris:</strong> Pris per styck i SEK</p>
+                      <p><strong>Moms:</strong> Mervärdesskatt (25% är standard för de flesta varor)</p>
+                    </div>
                   </div>
 
                   {/* Lista över rader */}

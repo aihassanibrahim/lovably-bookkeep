@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Plus, Edit, Trash2, Tag, DollarSign, Package, Image } from 'lucide-react';
 import { useBizPal } from "@/context/BizPalContext";
+import { testCreateProduct, checkProductsTable, detailedDatabaseTest } from "@/lib/testDatabase";
 
 const Products = () => {
   // Use global state instead of local state
@@ -18,17 +19,12 @@ const Products = () => {
   const [showNewProductDialog, setShowNewProductDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [newProduct, setNewProduct] = useState({
+    product_number: "",
     name: "",
     category: "",
-    basePrice: "",
-    description: "",
-    materials: "",
-    sizes: [],
-    colors: [],
-    variations: "",
-    customizable: false,
-    productionTime: "",
-    imageUrl: ""
+    price: "",
+    cost: "",
+    description: ""
   });
 
   const defaultCategories = [
@@ -39,19 +35,32 @@ const Products = () => {
   const [categories, setCategories] = useState(defaultCategories);
   const [newCategory, setNewCategory] = useState("");
 
-  const defaultSizes = ["XS", "S", "M", "L", "XL", "XXL"];
-  const defaultColors = [
-    "Svart", "Vit", "Grå", "Brun", "Beige", "Röd", "Rosa", 
-    "Orange", "Gul", "Grön", "Blå", "Lila", "Silver", "Guld"
-  ];
-
   const handleAddOrEditProduct = () => {
+    // Validate required fields
+    if (!newProduct.name.trim()) {
+      alert('Produktnamn är obligatoriskt');
+      return;
+    }
+    
+    if (!newProduct.product_number.trim()) {
+      alert('Produktnummer är obligatoriskt');
+      return;
+    }
+
     if (editingProduct) {
       updateProduct({ ...newProduct, id: editingProduct.id });
       setEditingProduct(null);
     } else {
-      const nextId = Math.max(0, ...products.map(p => p.id)) + 1;
-      addProduct({ ...newProduct, id: nextId });
+      // Generate product number if not provided
+      const productData = {
+        ...newProduct,
+        product_number: newProduct.product_number || `PROD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        price: parseFloat(newProduct.price) || 0,
+        cost: parseFloat(newProduct.cost) || 0
+      };
+      
+      console.log('Creating product with data:', productData);
+      addProduct(productData);
     }
     
     setShowNewProductDialog(false);
@@ -70,35 +79,12 @@ const Products = () => {
 
   const resetForm = () => {
     setNewProduct({
+      product_number: "",
       name: "",
       category: "",
-      basePrice: "",
-      description: "",
-      materials: "",
-      sizes: [],
-      colors: [],
-      variations: "",
-      customizable: false,
-      productionTime: "",
-      imageUrl: ""
-    });
-  };
-
-  const toggleSize = (size) => {
-    setNewProduct({
-      ...newProduct,
-      sizes: newProduct.sizes.includes(size)
-        ? newProduct.sizes.filter(s => s !== size)
-        : [...newProduct.sizes, size]
-    });
-  };
-
-  const toggleColor = (color) => {
-    setNewProduct({
-      ...newProduct,
-      colors: newProduct.colors.includes(color)
-        ? newProduct.colors.filter(c => c !== color)
-        : [...newProduct.colors, color]
+      price: "",
+      cost: "",
+      description: ""
     });
   };
 
@@ -111,7 +97,7 @@ const Products = () => {
   };
 
   const averagePrice = products.length > 0 
-    ? Math.round(products.reduce((sum, p) => sum + (parseFloat(p.basePrice) || 0), 0) / products.length)
+    ? Math.round(products.reduce((sum, p) => sum + (parseFloat(p.price) || 0), 0) / products.length)
     : 0;
 
   // Filter
@@ -129,182 +115,130 @@ const Products = () => {
           <p className="text-gray-600 dark:text-gray-400 mt-1">Hantera din produktkatalog</p>
         </div>
         
-        <Dialog open={showNewProductDialog} onOpenChange={setShowNewProductDialog}>
-          <DialogTrigger asChild>
-            <Button className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-600">
-              <Plus className="w-4 h-4 mr-2" />
-              {editingProduct ? "Redigera Produkt" : "Ny Produkt"}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {editingProduct ? "Redigera produkt" : "Lägg till ny produkt"}
-              </DialogTitle>
-              <DialogDescription>
-                {editingProduct ? "Uppdatera produktinformation" : "Skapa en ny produkt för din katalog"}
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-6">
-              {/* Basic Info */}
-              <div className="space-y-4">
-                <h3 className="font-medium text-lg">Grundinfo</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Produktnamn</Label>
-                    <Input 
-                      value={newProduct.name}
-                      onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
-                      placeholder="T-shirt, Halsband, Keramikskål..."
-                    />
-                  </div>
-                  <div>
-                    <Label>Kategori</Label>
-                    <div className="flex gap-2">
-                      <Select value={newProduct.category} onValueChange={(value) => setNewProduct({...newProduct, category: value})}>
-                        <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Välj kategori" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categories.map(category => (
-                            <SelectItem key={category} value={category}>{category}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <div className="flex gap-1">
-                        <Input 
-                          placeholder="Ny kategori"
-                          value={newCategory}
-                          onChange={(e) => setNewCategory(e.target.value)}
-                          className="w-24"
-                        />
-                        <Button type="button" size="sm" onClick={addNewCategory}>+</Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              detailedDatabaseTest().then(result => {
+                alert(result);
+              });
+            }}
+          >
+            Test Database
+          </Button>
+          <Dialog open={showNewProductDialog} onOpenChange={setShowNewProductDialog}>
+            <DialogTrigger asChild>
+              <Button className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-600">
+                <Plus className="w-4 h-4 mr-2" />
+                {editingProduct ? "Redigera Produkt" : "Ny Produkt"}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingProduct ? "Redigera produkt" : "Lägg till ny produkt"}
+                </DialogTitle>
+                <DialogDescription>
+                  {editingProduct ? "Uppdatera produktinformation" : "Skapa en ny produkt för din katalog"}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-6">
+                {/* Basic Info */}
+                <div className="space-y-4">
+                  <h3 className="font-medium text-lg">Grundinfo</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Produktnummer *</Label>
+                      <Input 
+                        value={newProduct.product_number}
+                        onChange={(e) => setNewProduct({...newProduct, product_number: e.target.value})}
+                        placeholder="PROD-001"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label>Produktnamn *</Label>
+                      <Input 
+                        value={newProduct.name}
+                        onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                        placeholder="T-shirt, Halsband, Keramikskål..."
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label>Kategori</Label>
+                      <div className="flex gap-2">
+                        <Select value={newProduct.category} onValueChange={(value) => setNewProduct({...newProduct, category: value})}>
+                          <SelectTrigger className="flex-1">
+                            <SelectValue placeholder="Välj kategori" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map(category => (
+                              <SelectItem key={category} value={category}>{category}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <div className="flex gap-1">
+                          <Input 
+                            placeholder="Ny kategori"
+                            value={newCategory}
+                            onChange={(e) => setNewCategory(e.target.value)}
+                            className="w-24"
+                          />
+                          <Button type="button" size="sm" onClick={addNewCategory}>+</Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div>
-                    <Label>Grundpris (SEK)</Label>
-                    <Input 
-                      type="number"
-                      value={newProduct.basePrice}
-                      onChange={(e) => setNewProduct({...newProduct, basePrice: e.target.value})}
-                      placeholder="250"
-                    />
-                  </div>
-                  <div>
-                    <Label>Produktionstid (dagar)</Label>
-                    <Input 
-                      type="number"
-                      value={newProduct.productionTime}
-                      onChange={(e) => setNewProduct({...newProduct, productionTime: e.target.value})}
-                      placeholder="3"
-                    />
+                    <div>
+                      <Label>Pris (SEK)</Label>
+                      <Input 
+                        type="number"
+                        value={newProduct.price}
+                        onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                        placeholder="250"
+                      />
+                    </div>
+                    <div>
+                      <Label>Kostnad (SEK)</Label>
+                      <Input 
+                        type="number"
+                        value={newProduct.cost}
+                        onChange={(e) => setNewProduct({...newProduct, cost: e.target.value})}
+                        placeholder="150"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Description & Materials */}
-              <div className="space-y-4">
-                <div>
-                  <Label>Beskrivning</Label>
-                  <Textarea 
-                    value={newProduct.description}
-                    onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
-                    placeholder="Beskrivning av produkten, dess egenskaper och användning..."
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
+                {/* Description */}
+                <div className="space-y-4">
                   <div>
-                    <Label>Material</Label>
-                    <Input 
-                      value={newProduct.materials}
-                      onChange={(e) => setNewProduct({...newProduct, materials: e.target.value})}
-                      placeholder="Bomull, silver, keramik, trä..."
-                    />
-                  </div>
-                  <div>
-                    <Label>Variationer</Label>
-                    <Input 
-                      value={newProduct.variations}
-                      onChange={(e) => setNewProduct({...newProduct, variations: e.target.value})}
-                      placeholder="Mönster, textur, finish..."
+                    <Label>Beskrivning</Label>
+                    <Textarea 
+                      value={newProduct.description}
+                      onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                      placeholder="Beskrivning av produkten, dess egenskaper och användning..."
                     />
                   </div>
                 </div>
-                <div>
-                  <Label>Bild URL (valfritt)</Label>
-                  <Input 
-                    value={newProduct.imageUrl}
-                    onChange={(e) => setNewProduct({...newProduct, imageUrl: e.target.value})}
-                    placeholder="https://example.com/image.jpg"
-                  />
+
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" onClick={() => {
+                    setShowNewProductDialog(false);
+                    setEditingProduct(null);
+                    resetForm();
+                  }}>
+                    Avbryt
+                  </Button>
+                  <Button onClick={handleAddOrEditProduct} className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-600">
+                    {editingProduct ? "Uppdatera" : "Lägg till"}
+                  </Button>
                 </div>
               </div>
-
-              {/* Sizes */}
-              <div className="space-y-2">
-                <Label>Tillgängliga storlekar (om tillämpligt)</Label>
-                <div className="flex flex-wrap gap-2">
-                  {defaultSizes.map(size => (
-                    <Button
-                      key={size}
-                      type="button"
-                      variant={newProduct.sizes.includes(size) ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => toggleSize(size)}
-                    >
-                      {size}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Colors */}
-              <div className="space-y-2">
-                <Label>Tillgängliga färger</Label>
-                <div className="flex flex-wrap gap-2">
-                  {defaultColors.map(color => (
-                    <Button
-                      key={color}
-                      type="button"
-                      variant={newProduct.colors.includes(color) ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => toggleColor(color)}
-                    >
-                      {color}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Customizable */}
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="customizable"
-                  checked={newProduct.customizable}
-                  onChange={(e) => setNewProduct({...newProduct, customizable: e.target.checked})}
-                  className="rounded"
-                />
-                <Label htmlFor="customizable">Kan anpassas (personlig gravyr, specialfärger, etc.)</Label>
-              </div>
-
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => {
-                  setShowNewProductDialog(false);
-                  setEditingProduct(null);
-                  resetForm();
-                }}>
-                  Avbryt
-                </Button>
-                <Button onClick={handleAddOrEditProduct} className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-600">
-                  {editingProduct ? "Uppdatera" : "Lägg till"}
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Stats Cards - Now using real data from context */}
@@ -455,11 +389,11 @@ const Products = () => {
                   
                   <div>
                     <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-                      {parseFloat(product.basePrice || 0).toLocaleString()} SEK
+                      {parseFloat(product.price || 0).toLocaleString()} SEK
                     </p>
-                    {product.productionTime && (
+                    {product.cost && (
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Produktionstid: {product.productionTime} dagar
+                        Kostnad: {parseFloat(product.cost || 0).toLocaleString()} SEK
                       </p>
                     )}
                   </div>
@@ -470,50 +404,11 @@ const Products = () => {
                     </p>
                   )}
 
-                  {product.materials && (
+                  {product.category && (
                     <div>
-                      <h4 className="font-medium text-sm mb-1 text-gray-900 dark:text-gray-100">Material</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{product.materials}</p>
+                      <h4 className="font-medium text-sm mb-1 text-gray-900 dark:text-gray-100">Kategori</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{product.category}</p>
                     </div>
-                  )}
-
-                  {product.variations && (
-                    <div>
-                      <h4 className="font-medium text-sm mb-1 text-gray-900 dark:text-gray-100">Variationer</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{product.variations}</p>
-                    </div>
-                  )}
-
-                  {product.sizes.length > 0 && (
-                    <div>
-                      <h4 className="font-medium text-sm mb-2 text-gray-900 dark:text-gray-100">Storlekar</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {product.sizes.map(size => (
-                          <Badge key={size} variant="outline" className="text-xs">
-                            {size}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {product.colors.length > 0 && (
-                    <div>
-                      <h4 className="font-medium text-sm mb-2 text-gray-900 dark:text-gray-100">Färger</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {product.colors.map(color => (
-                          <Badge key={color} variant="outline" className="text-xs">
-                            {color}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {product.customizable && (
-                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
-                      Kan anpassas
-                    </Badge>
                   )}
                 </CardContent>
               </Card>

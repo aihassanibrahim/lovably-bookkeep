@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { 
   Users, 
   Plus, 
@@ -18,110 +19,118 @@ import {
   Calendar,
   MessageSquare
 } from 'lucide-react';
+import { useBizPal } from "@/context/BizPalContext";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const Customers = () => {
-  const [customers, setCustomers] = useState([
-    {
-      id: 1,
-      name: "Anna Andersson",
-      email: "anna.andersson@email.com",
-      phone: "070-123 45 67",
-      address: "Storgatan 1, 12345 Stockholm",
-      status: "Aktiv",
-      totalOrders: 5,
-      totalSpent: 2500,
-      lastOrder: "2024-01-15",
-      notes: "Föredrar keramikprodukter"
-    },
-    {
-      id: 2,
-      name: "Erik Eriksson",
-      email: "erik.eriksson@email.com",
-      phone: "070-987 65 43",
-      address: "Lillgatan 5, 54321 Göteborg",
-      status: "Aktiv",
-      totalOrders: 3,
-      totalSpent: 1800,
-      lastOrder: "2024-01-13",
-      notes: "Intresserad av silverhalsband"
-    },
-    {
-      id: 3,
-      name: "Maria Svensson",
-      email: "maria.svensson@email.com",
-      phone: "070-555 12 34",
-      address: "Mellangatan 10, 67890 Malmö",
-      status: "Inaktiv",
-      totalOrders: 1,
-      totalSpent: 299,
-      lastOrder: "2023-12-20",
-      notes: "Köpte en keramikskål"
-    }
-  ]);
+  // Use global state instead of local state
+  const { customers, addCustomer, updateCustomer, deleteCustomer, loading } = useBizPal();
+  const { user } = useAuth();
 
   const [showNewCustomerDialog, setShowNewCustomerDialog] = useState(false);
   const [showNotesDialog, setShowNotesDialog] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [editingCustomer, setEditingCustomer] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
   const [newCustomer, setNewCustomer] = useState({
-    name: "",
+    customer_number: "",
+    company_name: "",
+    contact_person: "",
     email: "",
     phone: "",
     address: "",
-    notes: ""
+    org_number: ""
   });
 
-  const addNewCustomer = () => {
-    const customer = {
-      id: Math.max(0, ...customers.map(c => c.id)) + 1,
-      name: newCustomer.name,
-      email: newCustomer.email,
-      phone: newCustomer.phone,
-      address: newCustomer.address,
-      status: "Aktiv",
-      totalOrders: 0,
-      totalSpent: 0,
-      lastOrder: null,
-      notes: newCustomer.notes
-    };
+  const handleAddOrEditCustomer = async () => {
+    if (!user) return;
+    
+    setSubmitting(true);
+    
+    try {
+      if (editingCustomer) {
+        await updateCustomer({
+          ...newCustomer,
+          id: editingCustomer.id
+        });
+        setEditingCustomer(null);
+      } else {
+        await addCustomer(newCustomer);
+      }
+      
+      setShowNewCustomerDialog(false);
+      resetForm();
+    } catch (error) {
+      console.error('Error saving customer:', error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-    setCustomers([...customers, customer]);
-    setShowNewCustomerDialog(false);
+  const handleEditCustomer = (customer) => {
     setNewCustomer({
-      name: "",
+      customer_number: customer.customer_number || '',
+      company_name: customer.company_name || '',
+      contact_person: customer.contact_person || '',
+      email: customer.email || '',
+      phone: customer.phone || '',
+      address: customer.address || '',
+      org_number: customer.org_number || ''
+    });
+    setEditingCustomer(customer);
+    setShowNewCustomerDialog(true);
+  };
+
+  const handleDeleteCustomer = async (customerId) => {
+    try {
+      await deleteCustomer(customerId);
+    } catch (error) {
+      console.error('Error deleting customer:', error);
+    }
+  };
+
+  const resetForm = () => {
+    setNewCustomer({
+      customer_number: "",
+      company_name: "",
+      contact_person: "",
       email: "",
       phone: "",
       address: "",
-      notes: ""
+      org_number: ""
     });
+    setEditingCustomer(null);
   };
 
-  const deleteCustomer = (id: number) => {
-    setCustomers(customers.filter(c => c.id !== id));
-  };
-
-  const updateCustomerNotes = (customerId: number, notes: string) => {
-    setCustomers(customers.map(c => 
-      c.id === customerId ? { ...c, notes } : c
-    ));
-    setShowNotesDialog(false);
-    setSelectedCustomer(null);
-    toast.success('Anteckningar uppdaterade');
-  };
+  // Calculate stats from global state
+  const totalCustomers = customers.length;
+  const activeCustomers = customers.filter(c => c.is_active).length;
 
   const filteredCustomers = customers.filter(customer => {
-    const matchesSearch = customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         customer.phone.includes(searchTerm);
-    const matchesStatus = selectedStatus === "all" || customer.status === selectedStatus;
+    const matchesSearch = customer.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         customer.contact_person?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         customer.phone?.includes(searchTerm);
+    const matchesStatus = selectedStatus === "all" || 
+                         (selectedStatus === "active" && customer.is_active) ||
+                         (selectedStatus === "inactive" && !customer.is_active);
     return matchesSearch && matchesStatus;
   });
 
-  const totalCustomers = customers.length;
-  const activeCustomers = customers.filter(c => c.status === "Aktiv").length;
-  const totalRevenue = customers.reduce((sum, c) => sum + c.totalSpent, 0);
-  const averageOrderValue = totalRevenue / customers.reduce((sum, c) => sum + c.totalOrders, 0);
+  if (loading) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Laddar kunder...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -141,18 +150,40 @@ const Customers = () => {
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Lägg till ny kund</DialogTitle>
+              <DialogTitle>
+                {editingCustomer ? 'Redigera Kund' : 'Lägg till ny kund'}
+              </DialogTitle>
               <DialogDescription>
-                Skapa en ny kund i registret
+                {editingCustomer ? 'Uppdatera kundinformation' : 'Skapa en ny kund i registret'}
               </DialogDescription>
             </DialogHeader>
             
             <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Kundnummer *</Label>
+                  <Input 
+                    value={newCustomer.customer_number}
+                    onChange={(e) => setNewCustomer({...newCustomer, customer_number: e.target.value})}
+                    placeholder="KUND-001"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label>Företagsnamn *</Label>
+                  <Input 
+                    value={newCustomer.company_name}
+                    onChange={(e) => setNewCustomer({...newCustomer, company_name: e.target.value})}
+                    placeholder="Anna Andersson AB"
+                    required
+                  />
+                </div>
+              </div>
               <div>
-                <Label>Namn</Label>
+                <Label>Kontaktperson</Label>
                 <Input 
-                  value={newCustomer.name}
-                  onChange={(e) => setNewCustomer({...newCustomer, name: e.target.value})}
+                  value={newCustomer.contact_person}
+                  onChange={(e) => setNewCustomer({...newCustomer, contact_person: e.target.value})}
                   placeholder="Anna Andersson"
                 />
               </div>
@@ -182,11 +213,11 @@ const Customers = () => {
                 />
               </div>
               <div>
-                <Label>Anteckningar</Label>
-                <Textarea 
-                  value={newCustomer.notes}
-                  onChange={(e) => setNewCustomer({...newCustomer, notes: e.target.value})}
-                  placeholder="Valfria anteckningar om kunden..."
+                <Label>Organisationsnummer</Label>
+                <Input 
+                  value={newCustomer.org_number}
+                  onChange={(e) => setNewCustomer({...newCustomer, org_number: e.target.value})}
+                  placeholder="556123-4567"
                 />
               </div>
 
@@ -194,8 +225,8 @@ const Customers = () => {
                 <Button variant="outline" onClick={() => setShowNewCustomerDialog(false)}>
                   Avbryt
                 </Button>
-                <Button onClick={addNewCustomer} className="bg-blue-600 hover:bg-blue-700">
-                  Lägg till
+                <Button onClick={handleAddOrEditCustomer} disabled={submitting} className="bg-blue-600 hover:bg-blue-700">
+                  {submitting ? 'Sparar...' : (editingCustomer ? 'Uppdatera' : 'Lägg till')}
                 </Button>
               </div>
             </div>
@@ -227,21 +258,21 @@ const Customers = () => {
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Intäkt</CardTitle>
+            <CardTitle className="text-sm font-medium">Kundnummer</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{totalRevenue.toLocaleString()} kr</div>
+            <div className="text-2xl font-bold text-blue-600">{totalCustomers}</div>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Genomsnittlig Order</CardTitle>
+            <CardTitle className="text-sm font-medium">Inaktiva Kunder</CardTitle>
             <Phone className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{isNaN(averageOrderValue) ? 0 : averageOrderValue.toFixed(0)} kr</div>
+            <div className="text-2xl font-bold text-orange-600">{totalCustomers - activeCustomers}</div>
           </CardContent>
         </Card>
       </div>
@@ -265,9 +296,9 @@ const Customers = () => {
             onChange={(e) => setSelectedStatus(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="all">Alla status</option>
-            <option value="Aktiv">Aktiv</option>
-            <option value="Inaktiv">Inaktiv</option>
+            <option value="all">Alla kunder</option>
+            <option value="active">Aktiva</option>
+            <option value="inactive">Inaktiva</option>
           </select>
         </div>
       </div>
@@ -296,14 +327,14 @@ const Customers = () => {
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-lg">{customer.name}</CardTitle>
+                      <CardTitle className="text-lg">{customer.company_name}</CardTitle>
                       <CardDescription>
-                        {customer.email} • {customer.phone}
+                        {customer.customer_number} • {customer.contact_person}
                       </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge className={customer.status === "Aktiv" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
-                        {customer.status}
+                      <Badge className={customer.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
+                        {customer.is_active ? "Aktiv" : "Inaktiv"}
                       </Badge>
                     </div>
                   </div>
@@ -311,74 +342,57 @@ const Customers = () => {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex items-center text-sm">
-                      <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                      <span className="text-gray-600">{customer.address}</span>
+                      <Mail className="w-4 h-4 mr-2 text-gray-400" />
+                      <span className="text-gray-600">{customer.email || "Ingen e-post"}</span>
                     </div>
+                    <div className="flex items-center text-sm">
+                      <Phone className="w-4 h-4 mr-2 text-gray-400" />
+                      <span className="text-gray-600">{customer.phone || "Inget telefonnummer"}</span>
+                    </div>
+                    {customer.address && (
+                      <div className="flex items-center text-sm">
+                        <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                        <span className="text-gray-600">{customer.address}</span>
+                      </div>
+                    )}
+                    {customer.org_number && (
+                      <div className="flex items-center text-sm">
+                        <span className="text-gray-500 mr-2">Org.nr:</span>
+                        <span className="text-gray-600">{customer.org_number}</span>
+                      </div>
+                    )}
                   </div>
-                  
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">Orders:</span>
-                      <p className="font-semibold">{customer.totalOrders}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Totalt spenderat:</span>
-                      <p className="font-semibold">{customer.totalSpent.toLocaleString()} kr</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Senaste order:</span>
-                      <p className="font-semibold">{customer.lastOrder || "Ingen"}</p>
-                    </div>
-                  </div>
-                  
-                  {customer.notes && (
-                    <div>
-                      <p className="text-sm text-gray-600">{customer.notes}</p>
-                    </div>
-                  )}
                   
                   <div className="flex justify-end space-x-2">
-                    <Dialog open={showNotesDialog} onOpenChange={setShowNotesDialog}>
-                      <DialogTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setSelectedCustomer(customer)}
-                        >
-                          <MessageSquare className="w-4 h-4" />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditCustomer(customer)}
+                    >
+                      <Edit className="w-4 h-4 mr-1" />
+                      Redigera
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <Trash2 className="w-4 h-4" />
                         </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Anteckningar - {selectedCustomer?.name}</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <Label>Anteckningar</Label>
-                            <Textarea
-                              value={selectedCustomer?.notes || ''}
-                              onChange={(e) => setSelectedCustomer({...selectedCustomer, notes: e.target.value})}
-                              placeholder="Lägg till anteckningar om kunden..."
-                              rows={4}
-                            />
-                          </div>
-                          <div className="flex justify-end space-x-2">
-                            <Button variant="outline" onClick={() => setShowNotesDialog(false)}>
-                              Avbryt
-                            </Button>
-                            <Button onClick={() => updateCustomerNotes(selectedCustomer.id, selectedCustomer.notes)}>
-                              Spara
-                            </Button>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                    <Button variant="outline" size="sm">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => deleteCustomer(customer.id)}>
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Är du säker?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Detta kommer att ta bort kunden permanent. Denna åtgärd kan inte ångras.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDeleteCustomer(customer.id)}>
+                            Ta bort
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </CardContent>
               </Card>

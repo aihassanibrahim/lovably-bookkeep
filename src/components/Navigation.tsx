@@ -250,9 +250,6 @@ const Topbar = () => {
       <div className="flex items-center gap-2">
         <QuickActions />
       </div>
-      <div className="flex items-center gap-2">
-        <ThemeToggle />
-      </div>
     </div>
   );
 };
@@ -305,9 +302,12 @@ const Navigation = () => {
       <nav className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:bg-background lg:z-40">
         {/* Logo and Topbar */}
         <div className="flex items-center justify-between flex-shrink-0 px-6 py-4 border-b">
-          <div className="flex items-center">
+          <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
             <Building2 className="h-8 w-8 text-primary" />
             <span className="ml-2 text-xl font-bold text-foreground">BizPal</span>
+          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
           </div>
         </div>
 
@@ -336,10 +336,10 @@ const Navigation = () => {
       {/* Mobile Header */}
       <div className="lg:hidden">
         <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-4 py-3">
-          <div className="flex items-center">
+          <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
             <Building2 className="h-6 w-6 text-primary" />
             <span className="ml-2 text-lg font-bold text-foreground">BizPal</span>
-          </div>
+          </Link>
           <div className="flex items-center gap-2">
             <QuickActions />
             <ThemeToggle />

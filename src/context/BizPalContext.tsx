@@ -2,6 +2,8 @@ import React, { createContext, useContext, useReducer, useEffect, useState } fro
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { toast } from 'sonner';
+import { checkAndCreateTables } from '@/lib/checkDatabase';
+import { testDatabaseConnection, testCreateProduct } from '@/lib/testDatabase';
 
 // Initial state
 const initialState = {
@@ -227,7 +229,21 @@ export const BizPalProvider = ({ children }) => {
   // Load all data from Supabase when user changes
   useEffect(() => {
     if (user) {
-      loadAllData();
+      // First check and create tables if they don't exist
+      checkAndCreateTables().then(() => {
+        // Test database connection
+        testDatabaseConnection().then(() => {
+          // Test product creation
+          testCreateProduct().then((success) => {
+            if (success) {
+              console.log('✅ Database is fully functional');
+            } else {
+              console.log('❌ Database has issues');
+            }
+            loadAllData();
+          });
+        });
+      });
     } else {
       dispatch({ type: actionTypes.CLEAR_ALL_DATA });
       dispatch({ type: actionTypes.SET_LOADING, payload: false });
@@ -292,10 +308,33 @@ export const BizPalProvider = ({ children }) => {
       if (expensesError) throw expensesError;
       dispatch({ type: actionTypes.SET_EXPENSES, payload: expenses || [] });
 
-      // Note: production_tasks and inventory_items tables don't exist yet
-      // We'll keep them as empty arrays until you create those tables
-      dispatch({ type: actionTypes.SET_PRODUCTION_TASKS, payload: [] });
-      dispatch({ type: actionTypes.SET_INVENTORY_ITEMS, payload: [] });
+      // Load production tasks
+      const { data: productionTasks, error: productionTasksError } = await supabase
+        .from('production_tasks')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (productionTasksError) {
+        console.log('Production tasks error:', productionTasksError.message);
+        dispatch({ type: actionTypes.SET_PRODUCTION_TASKS, payload: [] });
+      } else {
+        dispatch({ type: actionTypes.SET_PRODUCTION_TASKS, payload: productionTasks || [] });
+      }
+
+      // Load inventory items
+      const { data: inventoryItems, error: inventoryItemsError } = await supabase
+        .from('inventory_items')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('name');
+
+      if (inventoryItemsError) {
+        console.log('Inventory items error:', inventoryItemsError.message);
+        dispatch({ type: actionTypes.SET_INVENTORY_ITEMS, payload: [] });
+      } else {
+        dispatch({ type: actionTypes.SET_INVENTORY_ITEMS, payload: inventoryItems || [] });
+      }
 
     } catch (error) {
       console.error('Error loading data:', error);
@@ -662,23 +701,39 @@ export const BizPalProvider = ({ children }) => {
 
     // Products
     addProduct: async (productData) => {
-      if (!user) return;
+      if (!user) {
+        console.error('No user found');
+        toast.error('Du måste vara inloggad');
+        return;
+      }
       
       try {
+        console.log('Attempting to add product with data:', { ...productData, user_id: user.id });
+        
         const { data, error } = await supabase
           .from('products')
           .insert({ ...productData, user_id: user.id })
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase error:', error);
+          throw error;
+        }
         
+        console.log('Product added successfully:', data);
         dispatch({ type: actionTypes.ADD_PRODUCT, payload: data });
         toast.success('Produkt tillagd!');
         return data;
       } catch (error) {
         console.error('Error adding product:', error);
-        toast.error('Kunde inte lägga till produkt');
+        console.error('Error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
+        toast.error(`Kunde inte lägga till produkt: ${error.message}`);
         throw error;
       }
     },

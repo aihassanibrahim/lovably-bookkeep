@@ -52,34 +52,25 @@ const Production = () => {
     "cancelled": "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
   };
 
+
+
   const handleAddOrEditTask = async () => {
     if (!user) return;
     
     setSubmitting(true);
     
     try {
-      // Convert empty strings to null for numeric, date, and UUID fields
-      const taskData = {
-        ...newTask,
-        estimated_hours: newTask.estimated_hours === "" ? null : parseFloat(newTask.estimated_hours) || null,
-        actual_hours: newTask.actual_hours === "" ? null : parseFloat(newTask.actual_hours) || null,
-        due_date: newTask.due_date === "" ? null : newTask.due_date,
-        order_id: newTask.order_id === "" ? null : newTask.order_id,
-        product_id: newTask.product_id === "" ? null : newTask.product_id
-      };
-      
       // Log the data being sent for debugging
-      console.log('Saving production task:', taskData);
-      
+      console.log('Saving production task:', newTask);
       if (editingTask) {
         await updateProductionTask({
-          ...taskData,
+          ...newTask,
           id: editingTask.id
         });
         setEditingTask(null);
         toast.success('Produktionsuppgift uppdaterad!');
       } else {
-        await addProductionTask(taskData);
+        await addProductionTask(newTask);
         toast.success('Produktionsuppgift tillagd!');
       }
       
@@ -147,6 +138,13 @@ const Production = () => {
     }
   };
 
+  const urgentTasks = productionTasks.filter(task => {
+    const today = new Date();
+    const dueDate = new Date(task.due_date);
+    const daysUntilDue = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+    return daysUntilDue <= 3 && task.status !== "completed";
+  }).length;
+
   // Filter options
   const [statusFilter, setStatusFilter] = useState("active");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -195,251 +193,252 @@ const Production = () => {
             Test Production
           </Button>
           <Dialog open={showNewTaskDialog} onOpenChange={setShowNewTaskDialog}>
-            <DialogTrigger asChild>
-              <Button className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600">
-                <Plus className="w-4 h-4 mr-2" />
-                {editingTask ? "Redigera Uppgift" : "Ny Produktionsuppgift"}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle>{editingTask ? "Redigera produktionsuppgift" : "Lägg till produktionsuppgift"}</DialogTitle>
-                <DialogDescription>
-                  {editingTask ? "Uppdatera uppgiftsinformation" : "Skapa en ny uppgift för produktion"}
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Uppgiftsnummer *</Label>
-                    <Input 
-                      value={newTask.task_number}
-                      onChange={(e) => setNewTask({...newTask, task_number: e.target.value})}
-                      placeholder="TASK-001"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label>Titel *</Label>
-                    <Input 
-                      value={newTask.title}
-                      onChange={(e) => setNewTask({...newTask, title: e.target.value})}
-                      placeholder="Tillverka keramikskål"
-                      required
-                    />
-                  </div>
-                </div>
+          <DialogTrigger asChild>
+            <Button className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600">
+              <Plus className="w-4 h-4 mr-2" />
+              {editingTask ? "Redigera Uppgift" : "Ny Produktionsuppgift"}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>{editingTask ? "Redigera produktionsuppgift" : "Lägg till produktionsuppgift"}</DialogTitle>
+              <DialogDescription>
+                {editingTask ? "Uppdatera uppgiftsinformation" : "Skapa en ny uppgift för produktion"}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Beskrivning</Label>
-                  <Textarea 
-                    value={newTask.description}
-                    onChange={(e) => setNewTask({...newTask, description: e.target.value})}
-                    placeholder="Detaljerad beskrivning av uppgiften..."
+                  <Label>Uppgiftsnummer *</Label>
+                  <Input 
+                    value={newTask.task_number}
+                    onChange={(e) => setNewTask({...newTask, task_number: e.target.value})}
+                    placeholder="TASK-001"
+                    required
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Order ID</Label>
-                    <Input 
-                      value={newTask.order_id}
-                      onChange={(e) => setNewTask({...newTask, order_id: e.target.value})}
-                      placeholder="ORD-001"
-                    />
-                  </div>
-                  <div>
-                    <Label>Produkt ID</Label>
-                    <Input 
-                      value={newTask.product_id}
-                      onChange={(e) => setNewTask({...newTask, product_id: e.target.value})}
-                      placeholder="PROD-001"
-                    />
-                  </div>
-                  <div>
-                    <Label>Status</Label>
-                    <Select value={newTask.status} onValueChange={(value) => setNewTask({...newTask, status: value})}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pending">Väntar</SelectItem>
-                        <SelectItem value="in_progress">Pågående</SelectItem>
-                        <SelectItem value="completed">Slutförd</SelectItem>
-                        <SelectItem value="cancelled">Avbruten</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Prioritet</Label>
-                    <Select value={newTask.priority} onValueChange={(value) => setNewTask({...newTask, priority: value})}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="low">Låg</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">Hög</SelectItem>
-                        <SelectItem value="urgent">Akut</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Uppskattat timmar</Label>
-                    <Input 
-                      type="number"
-                      step="0.5"
-                      value={newTask.estimated_hours}
-                      onChange={(e) => setNewTask({...newTask, estimated_hours: e.target.value})}
-                      placeholder="8"
-                    />
-                  </div>
-                  <div>
-                    <Label>Faktiska timmar</Label>
-                    <Input 
-                      type="number"
-                      step="0.5"
-                      value={newTask.actual_hours}
-                      onChange={(e) => setNewTask({...newTask, actual_hours: e.target.value})}
-                      placeholder="0"
-                    />
-                  </div>
-                  <div>
-                    <Label>Slutdatum</Label>
-                    <Input 
-                      type="date"
-                      value={newTask.due_date}
-                      onChange={(e) => setNewTask({...newTask, due_date: e.target.value})}
-                    />
-                  </div>
-                  <div>
-                    <Label>Tilldelad till</Label>
-                    <Input 
-                      value={newTask.assigned_to}
-                      onChange={(e) => setNewTask({...newTask, assigned_to: e.target.value})}
-                      placeholder="Anna Andersson"
-                    />
-                  </div>
-                </div>
                 <div>
-                  <Label>Anteckningar</Label>
-                  <Textarea 
-                    value={newTask.notes}
-                    onChange={(e) => setNewTask({...newTask, notes: e.target.value})}
-                    placeholder="Speciella instruktioner..."
+                  <Label>Titel *</Label>
+                  <Input 
+                    value={newTask.title}
+                    onChange={(e) => setNewTask({...newTask, title: e.target.value})}
+                    placeholder="Tillverka keramikskål"
+                    required
                   />
-                </div>
-
-                <div className="flex justify-end space-x-2">
-                  <Button variant="outline" onClick={() => {
-                    setShowNewTaskDialog(false);
-                    setEditingTask(null);
-                    resetForm();
-                  }}>
-                    Avbryt
-                  </Button>
-                  <Button onClick={handleAddOrEditTask} disabled={submitting} className="bg-purple-600 hover:bg-purple-700">
-                    {submitting ? 'Sparar...' : (editingTask ? "Uppdatera" : "Lägg till")}
-                  </Button>
                 </div>
               </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+              <div>
+                <Label>Beskrivning</Label>
+                <Textarea 
+                  value={newTask.description}
+                  onChange={(e) => setNewTask({...newTask, description: e.target.value})}
+                  placeholder="Detaljerad beskrivning av uppgiften..."
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Order ID</Label>
+                  <Input 
+                    value={newTask.order_id}
+                    onChange={(e) => setNewTask({...newTask, order_id: e.target.value})}
+                    placeholder="ORD-001"
+                  />
+                </div>
+                <div>
+                  <Label>Produkt ID</Label>
+                  <Input 
+                    value={newTask.product_id}
+                    onChange={(e) => setNewTask({...newTask, product_id: e.target.value})}
+                    placeholder="PROD-001"
+                  />
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <Select value={newTask.status} onValueChange={(value) => setNewTask({...newTask, status: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Väntar</SelectItem>
+                      <SelectItem value="in_progress">Pågående</SelectItem>
+                      <SelectItem value="completed">Slutförd</SelectItem>
+                      <SelectItem value="cancelled">Avbruten</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Prioritet</Label>
+                  <Select value={newTask.priority} onValueChange={(value) => setNewTask({...newTask, priority: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Låg</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">Hög</SelectItem>
+                      <SelectItem value="urgent">Akut</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Uppskattat timmar</Label>
+                  <Input 
+                    type="number"
+                    step="0.5"
+                    value={newTask.estimated_hours}
+                    onChange={(e) => setNewTask({...newTask, estimated_hours: e.target.value})}
+                    placeholder="8"
+                  />
+                </div>
+                <div>
+                  <Label>Faktiska timmar</Label>
+                  <Input 
+                    type="number"
+                    step="0.5"
+                    value={newTask.actual_hours}
+                    onChange={(e) => setNewTask({...newTask, actual_hours: e.target.value})}
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <Label>Slutdatum</Label>
+                  <Input 
+                    type="date"
+                    value={newTask.due_date}
+                    onChange={(e) => setNewTask({...newTask, due_date: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>Tilldelad till</Label>
+                  <Input 
+                    value={newTask.assigned_to}
+                    onChange={(e) => setNewTask({...newTask, assigned_to: e.target.value})}
+                    placeholder="Anna Andersson"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Anteckningar</Label>
+                <Textarea 
+                  value={newTask.notes}
+                  onChange={(e) => setNewTask({...newTask, notes: e.target.value})}
+                  placeholder="Speciella instruktioner..."
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => {
+                  setShowNewTaskDialog(false);
+                  setEditingTask(null);
+                  resetForm();
+                }}>
+                  Avbryt
+                </Button>
+                <Button onClick={handleAddOrEditTask} disabled={submitting} className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600">
+                  {submitting ? 'Sparar...' : (editingTask ? "Uppdatera" : "Lägg till")}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards - Now using real data from context */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+        <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Aktiva uppgifter</CardTitle>
-            <Scissors className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100">Aktiva uppgifter</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground dark:text-gray-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{productionTasks.filter(task => task.status !== 'completed').length}</div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.production.active}</div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Brådskande</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100">Totalt timmar</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground dark:text-gray-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {productionTasks.filter(task => task.priority === 'urgent' || task.priority === 'high').length}
+            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              {productionTasks.reduce((sum, task) => sum + (task.estimated_hours || 0), 0)}h
             </div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Slutförda</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100">Brådskande</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-muted-foreground dark:text-gray-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {productionTasks.filter(task => task.status === 'completed').length}
-            </div>
+            <div className="text-2xl font-bold text-red-600 dark:text-red-400">{urgentTasks}</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-4">
-        <div>
-          <Label className="text-sm font-medium">Status</Label>
+      {/* Filter Controls */}
+      <div className="flex items-center gap-4 flex-wrap">
+        <div className="flex items-center gap-2">
+          <Label className="text-sm font-medium text-gray-900 dark:text-gray-100">Status:</Label>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-40">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alla</SelectItem>
               <SelectItem value="active">Aktiva</SelectItem>
+              <SelectItem value="all">Alla</SelectItem>
+              <SelectItem value="Planerad">Planerad</SelectItem>
+              <SelectItem value="Pågående">Pågående</SelectItem>
               <SelectItem value="completed">Slutförda</SelectItem>
-              <SelectItem value="pending">Väntande</SelectItem>
-              <SelectItem value="in_progress">Pågående</SelectItem>
             </SelectContent>
           </Select>
         </div>
         
-        <div>
-          <Label className="text-sm font-medium">Prioritet</Label>
+        <div className="flex items-center gap-2">
+          <Label className="text-sm font-medium text-gray-900 dark:text-gray-100">Prioritet:</Label>
           <Select value={priorityFilter} onValueChange={setPriorityFilter}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Alla</SelectItem>
-              <SelectItem value="low">Låg</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="high">Hög</SelectItem>
-              <SelectItem value="urgent">Akut</SelectItem>
+              <SelectItem value="Hög">Hög</SelectItem>
+              <SelectItem value="Medium">Medium</SelectItem>
+              <SelectItem value="Låg">Låg</SelectItem>
             </SelectContent>
           </Select>
         </div>
+        
+        <span className="text-sm text-gray-500 dark:text-gray-400">
+          Visar {filteredTasks.length} av {productionTasks.length} uppgifter
+        </span>
       </div>
 
-      {/* Production Tasks List */}
+      {/* Production Tasks */}
       <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Produktionsuppgifter</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Visar {filteredTasks.length} av {productionTasks.length} uppgifter
-          </p>
-        </div>
-        
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Produktionsuppgifter</h2>
         {filteredTasks.length === 0 ? (
-          <Card>
+          <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <Scissors className="h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Inga produktionsuppgifter ännu</h3>
-              <p className="text-gray-500 text-center mb-4">
-                Skapa din första produktionsuppgift för att komma igång
+              <Scissors className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                {statusFilter === "active" ? "Inga aktiva uppgifter" : "Inga uppgifter matchar filtret"}
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 text-center mb-4">
+                {statusFilter === "active" 
+                  ? "Lägg till din första produktionsuppgift för att komma igång"
+                  : "Prova att ändra filtreringsinställningarna"
+                }
               </p>
-              <Button onClick={() => setShowNewTaskDialog(true)} className="bg-purple-600 hover:bg-purple-700">
-                <Plus className="w-4 h-4 mr-2" />
-                Lägg till uppgift
-              </Button>
+              {statusFilter === "active" && (
+                <Button onClick={() => setShowNewTaskDialog(true)} className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Lägg till uppgift
+                </Button>
+              )}
             </CardContent>
           </Card>
         ) : (
