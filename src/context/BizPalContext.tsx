@@ -500,9 +500,23 @@ export const BizPalProvider = ({ children }) => {
       if (!user) return;
       
       try {
+        // Ensure we're using the correct column names
+        const expenseDataToInsert = {
+          expense_number: expenseData.expense_number,
+          supplier_name: expenseData.supplier_name,
+          expense_date: expenseData.expense_date,
+          description: expenseData.description,
+          kostnad_med_moms: expenseData.kostnad_med_moms,
+          amount: expenseData.kostnad_med_moms, // Also populate the old column for compatibility
+          category: expenseData.category,
+          receipt_url: expenseData.receipt_url,
+          notes: expenseData.notes,
+          user_id: user.id
+        };
+
         const { data, error } = await supabase
           .from('expenses')
-          .insert({ ...expenseData, user_id: user.id })
+          .insert(expenseDataToInsert)
           .select()
           .single();
 
@@ -695,6 +709,36 @@ export const BizPalProvider = ({ children }) => {
       } catch (error) {
         console.error('Error deleting supplier:', error);
         toast.error('Kunde inte radera leverantör');
+        throw error;
+      }
+    },
+
+    // Income Transactions
+    addIncomeTransaction: async (incomeData) => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('transactions')
+          .insert({
+            user_id: user.id,
+            transaction_date: incomeData.date,
+            description: incomeData.description,
+            total_amount: parseFloat(incomeData.amount),
+            transaction_type: 'income',
+            category: incomeData.category,
+            reference_number: `INC-${Date.now()}`
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        
+        toast.success('Intäkt registrerad!');
+        return data;
+      } catch (error) {
+        console.error('Error adding income transaction:', error);
+        toast.error('Kunde inte registrera intäkt');
         throw error;
       }
     },

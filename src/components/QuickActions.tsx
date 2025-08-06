@@ -7,11 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Minus, DollarSign, Calendar, FileText } from 'lucide-react';
 import { useAuth } from "@/components/auth/AuthProvider";
-import { supabase } from "@/integrations/supabase/client";
+import { useBizPal } from "@/context/BizPalContext";
 import { toast } from "sonner";
 
 const QuickActions = () => {
   const { user } = useAuth();
+  const { addExpense, addIncomeTransaction } = useBizPal();
   const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -30,6 +31,8 @@ const QuickActions = () => {
     date: new Date().toISOString().split('T')[0]
   });
 
+
+
   const incomeCategories = [
     { value: 'sales', label: 'Försäljning' },
     { value: 'services', label: 'Tjänster' },
@@ -45,25 +48,20 @@ const QuickActions = () => {
     { value: 'other', label: 'Övrigt' }
   ];
 
+
+
   const handleIncomeSubmit = async (e) => {
     e.preventDefault();
     if (!user) return;
 
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('transactions')
-        .insert({
-          user_id: user.id,
-          transaction_date: incomeData.date,
-          description: incomeData.description,
-          total_amount: parseFloat(incomeData.amount),
-          transaction_type: 'income',
-          category: incomeData.category,
-          created_at: new Date().toISOString()
-        });
-
-      if (error) throw error;
+      await addIncomeTransaction({
+        date: incomeData.date,
+        description: incomeData.description,
+        amount: incomeData.amount,
+        category: incomeData.category
+      });
 
       toast.success('Intäkt registrerad!');
       setIsIncomeModalOpen(false);
@@ -87,19 +85,17 @@ const QuickActions = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('transactions')
-        .insert({
-          user_id: user.id,
-          transaction_date: expenseData.date,
-          description: expenseData.description,
-          total_amount: parseFloat(expenseData.amount),
-          transaction_type: 'expense',
-          category: expenseData.category,
-          created_at: new Date().toISOString()
-        });
-
-      if (error) throw error;
+      // Create expense using BizPalContext
+      await addExpense({
+        expense_number: `EXP-${Date.now()}`,
+        supplier_name: 'Quick Expense',
+        expense_date: expenseData.date,
+        description: expenseData.description,
+        kostnad_med_moms: parseFloat(expenseData.amount),
+        category: expenseData.category,
+        receipt_url: '',
+        notes: 'Created via QuickActions'
+      });
 
       toast.success('Utgift registrerad!');
       setIsExpenseModalOpen(false);
@@ -116,6 +112,8 @@ const QuickActions = () => {
       setLoading(false);
     }
   };
+
+
 
   return (
     <>
@@ -296,6 +294,8 @@ const QuickActions = () => {
           </form>
         </DialogContent>
       </Dialog>
+
+
     </>
   );
 };

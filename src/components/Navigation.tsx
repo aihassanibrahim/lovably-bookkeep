@@ -25,10 +25,10 @@ import {
   Receipt,
   MoreHorizontal,
   User,
-  CreditCard
+  CreditCard,
+  TrendingDown
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import QuickActions from "@/components/QuickActions";
 
 // Navigation sections configuration
 const navigationSections = [
@@ -107,6 +107,12 @@ const navigationSections = [
         href: '/transactions',
         icon: DollarSign,
         description: 'Ekonomi'
+      },
+      {
+        name: 'Utgifter',
+        href: '/expenses',
+        icon: TrendingDown,
+        description: 'Hantera utgifter'
       },
       {
         name: 'Kvitton',
@@ -243,16 +249,7 @@ const NavigationSection = ({ section, isMobile, expandedSections, toggleSection 
   );
 };
 
-// Topbar Component
-const Topbar = () => {
-  return (
-    <div className="flex items-center justify-between px-6 py-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex items-center gap-2">
-        <QuickActions />
-      </div>
-    </div>
-  );
-};
+
 
 // User Profile Component
 const UserProfile = ({ user, signOut }) => {
@@ -311,8 +308,7 @@ const Navigation = () => {
           </div>
         </div>
 
-        {/* Topbar with Quick Actions */}
-        <Topbar />
+
 
         {/* Navigation Content */}
         <div className="flex-1 flex flex-col overflow-y-auto">
@@ -341,7 +337,6 @@ const Navigation = () => {
             <span className="ml-2 text-lg font-bold text-foreground">BizPal</span>
           </Link>
           <div className="flex items-center gap-2">
-            <QuickActions />
             <ThemeToggle />
             <Button
               variant="outline"

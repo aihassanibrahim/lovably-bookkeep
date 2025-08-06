@@ -19,14 +19,17 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { OrderForm } from "@/components/orders/OrderForm";
-import { ExpenseForm } from "@/components/expenses/ExpenseForm";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useBizPal } from "@/context/BizPalContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import QuickActions from "@/components/QuickActions";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 interface FinancialData {
   totalIncome: number;
@@ -49,8 +52,15 @@ interface DashboardStats {
 }
 
 export default function Dashboard() {
-  const [showOrderForm, setShowOrderForm] = useState(false);
-  const [showExpenseForm, setShowExpenseForm] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [orderLoading, setOrderLoading] = useState(false);
+  const [orderData, setOrderData] = useState({
+    customer_name: '',
+    product_name: '',
+    price: '',
+    order_date: new Date().toISOString().split('T')[0],
+    notes: ''
+  });
   const [financialData, setFinancialData] = useState<FinancialData>({
     totalIncome: 0,
     totalExpenses: 0,
@@ -70,7 +80,7 @@ export default function Dashboard() {
     pendingProductionTasks: 0
   });
   const { user } = useAuth();
-  const { orders, products, customers, suppliers, expenses, stats, loading } = useBizPal();
+  const { orders, products, customers, suppliers, expenses, stats, loading, addOrder } = useBizPal();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -143,6 +153,53 @@ export default function Dashboard() {
     return new Date(dateString).toLocaleDateString('sv-SE');
   };
 
+  const generateOrderNumber = () => {
+    const timestamp = Date.now();
+    const randomNum = Math.floor(Math.random() * 1000);
+    return `ORD-${timestamp}-${randomNum}`;
+  };
+
+  const handleOrderSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    setOrderLoading(true);
+    try {
+      await addOrder({
+        order_number: generateOrderNumber(),
+        customer_name: orderData.customer_name,
+        customer_social_media: '',
+        customer_phone: '',
+        customer_address: '',
+        product_name: orderData.product_name,
+        product_details: '',
+        product_customizations: '',
+        price: parseFloat(orderData.price) || 0,
+        status: 'Beställd',
+        order_date: orderData.order_date,
+        estimated_completion: '',
+        notes: orderData.notes
+      });
+
+      toast.success('Order skapad!');
+      setIsOrderModalOpen(false);
+      setOrderData({
+        customer_name: '',
+        product_name: '',
+        price: '',
+        order_date: new Date().toISOString().split('T')[0],
+        notes: ''
+      });
+      fetchFinancialData();
+      calculateDashboardStats();
+    } catch (error) {
+      console.error('Error adding order:', error);
+      toast.error('Kunde inte skapa order');
+    } finally {
+      setOrderLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-6 p-4 lg:space-y-8 lg:p-6">
@@ -181,35 +238,19 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2 lg:gap-3">
-          <Button 
-            onClick={() => setShowOrderForm(true)}
-            className="px-4 py-2 lg:px-6 lg:py-2.5 text-sm lg:text-base rounded-lg"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">Ny Order</span>
-            <span className="sm:hidden">Order</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => setShowExpenseForm(true)}
-            className="px-4 py-2 lg:px-6 lg:py-2.5 text-sm lg:text-base rounded-lg"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">Ny Utgift</span>
-            <span className="sm:hidden">Utgift</span>
-          </Button>
+          <QuickActions />
         </div>
       </div>
 
       {/* Quick Action Cards */}
       <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setShowOrderForm(true)}>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setIsOrderModalOpen(true)}>
           <CardContent className="p-6">
             <div className="flex items-center justify-center w-12 h-12 bg-pink-100 dark:bg-pink-900/20 rounded-full mb-4">
               <Plus className="h-6 w-6 text-pink-600" />
             </div>
             <h3 className="font-semibold text-lg mb-2">Ny Order</h3>
-            <p className="text-sm text-muted-foreground">Lägg till beställning från sociala medier</p>
+            <p className="text-sm text-muted-foreground">Lägg till beställning</p>
           </CardContent>
         </Card>
 
@@ -304,7 +345,7 @@ export default function Dashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            Dina senaste beställningar från sociala medier
+            Dina senaste beställningar
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -313,7 +354,7 @@ export default function Dashboard() {
               <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">Inga ordrar än</p>
               <Button 
-                onClick={() => setShowOrderForm(true)}
+                onClick={() => setIsOrderModalOpen(true)}
                 className="mt-4"
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -424,35 +465,86 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Modals */}
-      <Dialog open={showOrderForm} onOpenChange={setShowOrderForm}>
-        <DialogContent className="max-w-2xl">
+      {/* Order Modal */}
+      <Dialog open={isOrderModalOpen} onOpenChange={setIsOrderModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Skapa ny order</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-indigo-600" />
+              Skapa ny order
+            </DialogTitle>
+            <DialogDescription>
+              Lägg till en ny order från sociala medier.
+            </DialogDescription>
           </DialogHeader>
-          <OrderForm 
-            onSuccess={() => {
-              setShowOrderForm(false);
-              fetchFinancialData();
-              calculateDashboardStats();
-            }}
-            onCancel={() => setShowOrderForm(false)}
-          />
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showExpenseForm} onOpenChange={setShowExpenseForm}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Registrera ny utgift</DialogTitle>
-          </DialogHeader>
-          <ExpenseForm 
-            onSuccess={() => {
-              setShowExpenseForm(false);
-              fetchFinancialData();
-            }}
-            onCancel={() => setShowExpenseForm(false)}
-          />
+          <form onSubmit={handleOrderSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="order-customer">Kundnamn</Label>
+              <Input
+                id="order-customer"
+                value={orderData.customer_name}
+                onChange={(e) => setOrderData({...orderData, customer_name: e.target.value})}
+                placeholder="Kundens namn"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="order-product">Produkt</Label>
+              <Input
+                id="order-product"
+                value={orderData.product_name}
+                onChange={(e) => setOrderData({...orderData, product_name: e.target.value})}
+                placeholder="Produktnamn"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="order-price">Pris (SEK)</Label>
+                <Input
+                  id="order-price"
+                  type="number"
+                  step="0.01"
+                  value={orderData.price}
+                  onChange={(e) => setOrderData({...orderData, price: e.target.value})}
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="order-date">Orderdatum</Label>
+                <Input
+                  id="order-date"
+                  type="date"
+                  value={orderData.order_date}
+                  onChange={(e) => setOrderData({...orderData, order_date: e.target.value})}
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="order-notes">Anteckningar</Label>
+              <Textarea
+                id="order-notes"
+                value={orderData.notes}
+                onChange={(e) => setOrderData({...orderData, notes: e.target.value})}
+                placeholder="Lägg till anteckningar..."
+                rows={3}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setIsOrderModalOpen(false)}
+              >
+                Avbryt
+              </Button>
+              <Button type="submit" disabled={orderLoading}>
+                {orderLoading ? 'Sparar...' : 'Skapa order'}
+              </Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
