@@ -48,13 +48,6 @@ export default function Landing() {
   const navigate = useNavigate();
 
   const { signIn, signUp, user } = useAuth();
-    resolver: zodResolver(signupSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
-  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -1032,39 +1025,38 @@ export default function Landing() {
             <p className="text-sm text-gray-600 mb-4">
               Eller lämna din e-post så hör vi av oss:
             </p>
-            <Form {...emailForm}>
-              <form
-                onSubmit={emailForm.handleSubmit(onEmailSubmit)}
-                className="flex space-x-3"
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const email = formData.get('email') as string;
+                if (email) {
+                  toast({
+                    title: "Tack för ditt intresse!",
+                    description: "Vi hör av oss inom kort med mer information.",
+                  });
+                  e.currentTarget.reset();
+                }
+              }}
+              className="flex space-x-3"
+            >
+              <input
+                type="email"
+                name="email"
+                placeholder="din@e-post.se"
+                className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-black transition-colors"
+                data-testid="input-email"
+                required
+              />
+              <Button
+                type="submit"
+                className="bg-black text-white px-6 py-3 font-medium rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                data-testid="button-email-submit"
               >
-                <FormField
-                  control={emailForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormControl>
-                        <Input
-                          placeholder="din@e-post.se"
-                          className="px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-black transition-colors"
-                          data-testid="input-email"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  type="submit"
-                  disabled={emailForm.formState.isSubmitting}
-                  className="bg-black text-white px-6 py-3 font-medium rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
-                  data-testid="button-email-submit"
-                >
-                  {emailForm.formState.isSubmitting ? "Skickar..." : "Skicka"}
-                </Button>
-              </form>
-            </Form>
-              </div>
+                Skicka
+              </Button>
+            </form>
+          </div>
         </div>
       </section>
 
