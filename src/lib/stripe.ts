@@ -1,10 +1,10 @@
 import { loadStripe } from '@stripe/stripe-js';
 
 // Stripe configuration and pricing plans
-export const STRIPE_PUBLISHABLE_KEY = import.meta.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_your_stripe_publishable_key_here';
-export const STRIPE_SECRET_KEY = import.meta.env.STRIPE_SECRET_KEY || 'sk_test_your_stripe_secret_key_here';
-export const STRIPE_WEBHOOK_SECRET = import.meta.env.STRIPE_WEBHOOK_SECRET || 'whsec_your_stripe_webhook_secret_here';
-export const STRIPE_PRO_PRICE_ID = import.meta.env.STRIPE_PRO_PRICE_ID || 'price_test_your_pro_price_id_here';
+export const STRIPE_PUBLISHABLE_KEY = import.meta.env.STRIPE_PUBLISHABLE_KEY;
+export const STRIPE_SECRET_KEY = import.meta.env.STRIPE_SECRET_KEY;
+export const STRIPE_WEBHOOK_SECRET = import.meta.env.STRIPE_WEBHOOK_SECRET;
+export const STRIPE_PRO_PRICE_ID = import.meta.env.STRIPE_PRO_PRICE_ID;
 
 // Initialize Stripe
 export const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
