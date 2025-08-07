@@ -26,7 +26,8 @@ import {
   MoreHorizontal,
   User,
   CreditCard,
-  TrendingDown
+  TrendingDown,
+  Play
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -133,6 +134,13 @@ const navigationSections = [
     title: 'Mer',
     items: [
       {
+        name: 'Komma igång',
+        href: '#onboarding',
+        icon: Play,
+        description: 'Sätt upp ditt företag',
+        action: 'onboarding'
+      },
+      {
         name: 'FAQ',
         href: '/faq',
         icon: HelpCircle,
@@ -158,9 +166,18 @@ const navigationSections = [
 const NavigationItem = ({ item, isActive, isMobile }) => {
   const Icon = item.icon;
   
+  const handleClick = (e) => {
+    if (item.action === 'onboarding') {
+      e.preventDefault();
+      // Dispatch a custom event that the Dashboard can listen to
+      window.dispatchEvent(new CustomEvent('openOnboardingModal'));
+    }
+  };
+  
   return (
     <Link
       to={item.href}
+      onClick={handleClick}
       className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
         isActive
           ? 'bg-primary/10 text-primary border-r-2 border-primary'

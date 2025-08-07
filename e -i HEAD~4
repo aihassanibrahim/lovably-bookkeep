@@ -1,0 +1,10 @@
+[33m0e64950[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Remove hardcoded Stripe API key for security
+[33mcfe85ed[m Update LandingPage component and other improvements
+[33m33f2d90[m Remove hardcoded Stripe API keys for security - Replace live Stripe keys with placeholder values - Add environment setup documentation - Ensure no sensitive data is committed to version control
+[33m95fb002[m Fix onboarding flow, Stripe integration, and toast system - Resolve onboarding completion issues and redirect loops - Fix Stripe payment integration with real checkout - Update toast calls to use sonner library format - Add comprehensive error handling and fallback mechanisms - Fix demo account creation and plan limits validation - Add debugging tools and test pages
+[33m2671dc6[m Complete production readiness implementation - Real Stripe integration, onboarding system, freemium model
+[33m48ead66[m Production readiness implementation - Database, Auth, Error Handling, About page
+[33m5e0466c[m Fix login flow - add navigation to dashboard after login and force light mode default
+[33m24be38b[m Fix Stripe checkout flow - implement mock checkout that redirects to dashboard
+[33mf0afc05[m Fix syntax errors in LandingPage.tsx - remove leftover react-hook-form code
+[33maaa5d9b[m Set dark mode to off by default - change default theme from 'system' to 'light'

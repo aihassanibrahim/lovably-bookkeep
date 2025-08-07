@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
   CheckCircle, 
   Circle, 
@@ -19,14 +20,14 @@ import {
   Users,
   FileText,
   CreditCard,
-  Check
+  Check,
+  X
 } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useDemo } from '@/context/DemoContext';
 import { redirectToCheckout } from '@/lib/stripe-client';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
 
 interface OnboardingStep {
   id: string;
@@ -37,13 +38,24 @@ interface OnboardingStep {
   component: React.ComponentType<any>;
 }
 
-const OnboardingWizard: React.FC = () => {
+interface OnboardingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  isNewUser?: boolean;
+}
+
+const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose, isNewUser = false }) => {
   const { user } = useAuth();
   const { isDemoMode, enableDemoMode } = useDemo();
-  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Debug logging
+  console.log('OnboardingModal props:', { isOpen, isNewUser });
+  console.log('OnboardingModal user:', user);
+  console.log('OnboardingModal isOpen value:', isOpen);
+  console.log('OnboardingModal isNewUser value:', isNewUser);
 
   // Handle Stripe return from payment
   useEffect(() => {
@@ -169,7 +181,7 @@ const OnboardingWizard: React.FC = () => {
     }
   };
 
-    const handleCompleteOnboarding = async () => {
+  const handleCompleteOnboarding = async () => {
     if (!user) return;
 
     setLoading(true);
@@ -222,62 +234,70 @@ const OnboardingWizard: React.FC = () => {
         }
       }
 
-             // Mark onboarding as completed
-       markStepComplete('complete');
-       
-       // Also set localStorage as fallback
-       localStorage.setItem('onboarding_completed', 'true');
-       
-       console.log('Onboarding completed successfully:', {
-         userId: user.id,
-         localStorageSet: localStorage.getItem('onboarding_completed'),
-         redirectingTo: '/'
-       });
-       
-       toast.success('Onboarding slutförd!');
+      // Mark onboarding as completed
+      markStepComplete('complete');
       
-       // Redirect to dashboard immediately - FIXED
-       setTimeout(() => {
-         console.log('Redirecting to dashboard...');
-         window.location.href = '/';
-       }, 1000);
+      // Also set localStorage as fallback
+      localStorage.setItem('onboarding_completed', 'true');
       
-         } catch (error) {
-       console.error('Error completing onboarding:', error);
-       
-       // Even if database update fails, set localStorage and redirect
-       console.log('Database update failed, using localStorage fallback');
-       localStorage.setItem('onboarding_completed', 'true');
-       
-       toast.success('Onboarding slutförd! (Fallback mode)');
-       
-       // Redirect to dashboard even if database failed
-       setTimeout(() => {
-         console.log('Redirecting to dashboard (fallback mode)...');
-         window.location.href = '/';
-       }, 1000);
-     } finally {
-       setLoading(false);
-     }
+      console.log('Onboarding completed successfully:', {
+        userId: user.id,
+        localStorageSet: localStorage.getItem('onboarding_completed')
+      });
+      
+      toast.success('Onboarding slutförd!');
+      
+      // Close modal and refresh page
+      setTimeout(() => {
+        console.log('Closing modal and refreshing...');
+        onClose();
+        window.location.reload();
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
+      
+      // Even if database update fails, set localStorage and close modal
+      console.log('Database update failed, using localStorage fallback');
+      localStorage.setItem('onboarding_completed', 'true');
+      
+      toast.success('Onboarding slutförd! (Fallback mode)');
+      
+      // Close modal and refresh page even if database failed
+      setTimeout(() => {
+        console.log('Closing modal and refreshing (fallback mode)...');
+        onClose();
+        window.location.reload();
+      }, 1000);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const CurrentStepComponent = steps[currentStep].component;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-      <Card className="w-full max-w-4xl">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center mb-4">
-            <Building2 className="h-8 w-8 text-primary mr-2" />
-            <h1 className="text-2xl font-bold">BizPal Onboarding</h1>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-6 w-6 text-primary" />
+              <DialogTitle className="text-xl">Komma igång med BizPal</DialogTitle>
+            </div>
+            {!isNewUser && (
+              <Button variant="ghost" size="sm" onClick={onClose}>
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
-          <Progress value={progress} className="w-full" />
+          <Progress value={progress} className="w-full mt-4" />
           <p className="text-sm text-muted-foreground mt-2">
             Steg {currentStep + 1} av {totalSteps} - {progress}% klart
           </p>
-        </CardHeader>
+        </DialogHeader>
         
-        <CardContent>
+        <div className="mt-6">
           {/* Step Navigation - CORRECTED */}
           <div className="flex justify-center mb-8">
             <div className="flex space-x-2">
@@ -329,9 +349,9 @@ const OnboardingWizard: React.FC = () => {
             onCompleteOnboarding={handleCompleteOnboarding}
             loading={loading}
           />
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
@@ -718,21 +738,21 @@ const WorkspaceSetupStep: React.FC<{
 }> = ({ onComplete, onPrev, selectedPlan }) => {
   return (
     <div className="space-y-6">
-              <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Workspace setup</h2>
-          <p className="text-muted-foreground">
-            Vi konfigurerar ditt arbetsutrymme med grundläggande inställningar.
-          </p>
-          {/* Only show payment success message for Pro plan */}
-          {selectedPlan === 'pro' && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
-              <div className="flex items-center">
-                <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
-                <span className="text-green-800 font-medium">Betalning slutförd!</span>
-              </div>
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-4">Workspace setup</h2>
+        <p className="text-muted-foreground">
+          Vi konfigurerar ditt arbetsutrymme med grundläggande inställningar.
+        </p>
+        {/* Only show payment success message for Pro plan */}
+        {selectedPlan === 'pro' && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
+            <div className="flex items-center">
+              <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+              <span className="text-green-800 font-medium">Betalning slutförd!</span>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
@@ -859,4 +879,4 @@ const CompleteStep: React.FC<{
   );
 };
 
-export default OnboardingWizard; 
+export default OnboardingModal;

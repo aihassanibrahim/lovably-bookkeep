@@ -1,4 +1,4 @@
-import express from 'express';
+pimport express from 'express';
 import cors from 'cors';
 import Stripe from 'stripe';
 import dotenv from 'dotenv';
@@ -19,10 +19,115 @@ if (!stripeKey) {
 }
 const stripe = stripeKey ? new Stripe(stripeKey) : null;
 
+// Tax calculation endpoint
+app.post('/api/stripe/calculate-tax', async (req, res) => {
+  try {
+    const { customer, lineItems, currency = 'sek' } = req.body;
+
+    if (!stripe || !stripeKey || !stripeKey.startsWith('sk_')) {
+      console.log('Invalid Stripe configuration, using development mode...');
+      // Return mock tax calculation for development
+      return res.status(200).json({
+        tax_breakdown: {
+          tax_behavior: 'exclusive',
+          taxable_amount: 1000,
+          tax_amount: 250,
+          breakdown: {
+            tax_rates: [
+              {
+                tax_rate: 'txr_mock_swedish_vat',
+                taxable_amount: 1000,
+                tax_amount: 250,
+                display_name: 'Swedish VAT',
+                percentage: 25.0,
+                country: 'SE',
+                state: null,
+                jurisdiction: 'SE',
+                inclusive: false
+              }
+            ]
+          }
+        },
+        isDevelopment: true
+      });
+    }
+
+    // Create tax calculation using Stripe Tax API
+    const calculation = await stripe.tax.calculations.create({
+      currency,
+      line_items: lineItems,
+      customer_details: customer,
+      tax_behavior: 'exclusive',
+    });
+
+    console.log('Tax calculation created:', calculation.id);
+    res.status(200).json(calculation);
+  } catch (error) {
+    console.error('Error calculating tax:', error);
+    res.status(500).json({ error: 'Failed to calculate tax' });
+  }
+});
+
+// Create tax transaction endpoint
+app.post('/api/stripe/create-tax-transaction', async (req, res) => {
+  try {
+    const { calculation, reference, metadata } = req.body;
+
+    if (!stripe || !stripeKey || !stripeKey.startsWith('sk_')) {
+      console.log('Invalid Stripe configuration, using development mode...');
+      return res.status(200).json({
+        id: 'txn_mock_tax_transaction_' + Date.now(),
+        isDevelopment: true
+      });
+    }
+
+    // Create tax transaction to record collected tax
+    const transaction = await stripe.tax.transactions.createFromCalculation({
+      calculation,
+      reference,
+      metadata,
+    });
+
+    console.log('Tax transaction created:', transaction.id);
+    res.status(200).json(transaction);
+  } catch (error) {
+    console.error('Error creating tax transaction:', error);
+    res.status(500).json({ error: 'Failed to create tax transaction' });
+  }
+});
+
+// Create tax transaction reversal endpoint (for refunds)
+app.post('/api/stripe/create-tax-reversal', async (req, res) => {
+  try {
+    const { original_transaction, reference, metadata } = req.body;
+
+    if (!stripe || !stripeKey || !stripeKey.startsWith('sk_')) {
+      console.log('Invalid Stripe configuration, using development mode...');
+      return res.status(200).json({
+        id: 'txn_mock_tax_reversal_' + Date.now(),
+        isDevelopment: true
+      });
+    }
+
+    // Create tax transaction reversal for refunds
+    const reversal = await stripe.tax.transactions.createReversal({
+      original_transaction,
+      reference,
+      metadata,
+    });
+
+    console.log('Tax reversal created:', reversal.id);
+    res.status(200).json(reversal);
+  } catch (error) {
+    console.error('Error creating tax reversal:', error);
+    res.status(500).json({ error: 'Failed to create tax reversal' });
+  }
+});
+
 // Stripe checkout session endpoint
 app.post('/api/stripe/create-checkout-session', async (req, res) => {
   try {
-    const { planId, userId, successUrl, cancelUrl } = req.body;
+    const { planId, userId, successUrl, cancelUrl, customerDetails } = req.body;
 
     if (!planId || !userId) {
       return res.status(400).json({ error: 'Missing required parameters' });
@@ -48,33 +153,81 @@ app.post('/api/stripe/create-checkout-session', async (req, res) => {
       return;
     }
 
+    // Define line items for tax calculation
+    const lineItems = [
+      {
+        amount: 1000, // Amount in cents (10 SEK)
+        reference: 'pro_plan_subscription',
+        tax_behavior: 'exclusive',
+        tax_code: 'txcd_99999999', // General tax code
+      },
+    ];
+
+    // Calculate tax if customer details are provided
+    let taxCalculation = null;
+    if (customerDetails) {
+      try {
+        taxCalculation = await stripe.tax.calculations.create({
+          currency: 'sek',
+          line_items: lineItems,
+          customer_details: customerDetails,
+          tax_behavior: 'exclusive',
+        });
+        console.log('Tax calculation created for checkout:', taxCalculation.id);
+      } catch (taxError) {
+        console.error('Error calculating tax for checkout:', taxError);
+        // Continue without tax calculation if it fails
+      }
+    }
+
     // Create real Stripe checkout session
-    const session = await stripe.checkout.sessions.create({
+    const sessionConfig = {
       payment_method_types: ['card'],
-               line_items: [
-           {
-             price: process.env.STRIPE_PRO_PRICE_ID || 'price_test_your_pro_price_id_here', // Pro plan
-             quantity: 1,
-           },
-         ],
+      line_items: [
+        {
+          price: process.env.STRIPE_PRO_PRICE_ID || 'price_test_your_pro_price_id_here',
+          quantity: 1,
+        },
+      ],
       mode: 'subscription',
-      success_url: successUrl || `http://localhost:8080/onboarding?success=true&plan=${planId}`,
-      cancel_url: cancelUrl || `http://localhost:8080/onboarding?canceled=true`,
+      success_url: successUrl || `http://localhost:8083/?success=true&plan=${planId}`,
+      cancel_url: cancelUrl || `http://localhost:8083/?canceled=true`,
       client_reference_id: userId,
       metadata: {
         userId,
         planId,
+        taxCalculationId: taxCalculation?.id || '',
       },
       subscription_data: {
         metadata: {
           userId,
           planId,
+          taxCalculationId: taxCalculation?.id || '',
         },
       },
-    });
+    };
+
+    // Add tax calculation to session if available
+    if (taxCalculation) {
+      sessionConfig.tax_id_collection = {
+        enabled: true,
+      };
+      sessionConfig.customer_update = {
+        address: 'auto',
+      };
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
 
     console.log('Stripe session created:', session.id);
-    res.status(200).json({ sessionId: session.id });
+    res.status(200).json({ 
+      sessionId: session.id,
+      taxCalculation: taxCalculation ? {
+        id: taxCalculation.id,
+        taxAmount: taxCalculation.tax_breakdown.tax_amount,
+        totalAmount: taxCalculation.amount_total
+      } : null
+    });
   } catch (error) {
     console.error('Error creating checkout session:', error);
     res.status(500).json({ error: 'Failed to create checkout session' });
@@ -105,11 +258,51 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
     case 'checkout.session.completed':
       const session = event.data.object;
       console.log('Payment successful for session:', session.id);
+      
+      // Create tax transaction if tax calculation exists
+      if (session.metadata?.taxCalculationId) {
+        try {
+          const taxTransaction = await stripe.tax.transactions.createFromCalculation({
+            calculation: session.metadata.taxCalculationId,
+            reference: `payment_${session.id}`,
+            metadata: {
+              sessionId: session.id,
+              userId: session.metadata.userId,
+              planId: session.metadata.planId,
+            },
+          });
+          console.log('Tax transaction created for payment:', taxTransaction.id);
+        } catch (taxError) {
+          console.error('Error creating tax transaction:', taxError);
+        }
+      }
+      
       // Here you would typically update your database
       break;
     case 'customer.subscription.created':
       const subscription = event.data.object;
       console.log('Subscription created:', subscription.id);
+      break;
+    case 'charge.refunded':
+      const charge = event.data.object;
+      console.log('Charge refunded:', charge.id);
+      
+      // Create tax reversal if original tax transaction exists
+      if (charge.metadata?.originalTaxTransactionId) {
+        try {
+          const taxReversal = await stripe.tax.transactions.createReversal({
+            original_transaction: charge.metadata.originalTaxTransactionId,
+            reference: `refund_${charge.id}`,
+            metadata: {
+              chargeId: charge.id,
+              refundReason: charge.refunds?.data[0]?.reason || 'customer_requested',
+            },
+          });
+          console.log('Tax reversal created for refund:', taxReversal.id);
+        } catch (taxError) {
+          console.error('Error creating tax reversal:', taxError);
+        }
+      }
       break;
     default:
       console.log(`Unhandled event type ${event.type}`);
@@ -127,6 +320,10 @@ app.listen(port, () => {
   console.log(`🚀 Stripe API server running on http://localhost:${port}`);
   console.log(`📝 API endpoints:`);
   console.log(`   POST /api/stripe/create-checkout-session`);
+  console.log(`   POST /api/stripe/calculate-tax`);
+  console.log(`   POST /api/stripe/create-tax-transaction`);
+  console.log(`   POST /api/stripe/create-tax-reversal`);
   console.log(`   POST /api/stripe/webhook`);
   console.log(`   GET  /api/health`);
+  console.log(`💰 Stripe Tax API: ${stripe && stripeKey ? 'Enabled' : 'Development Mode'}`);
 }); 

@@ -75,7 +75,12 @@ export default function Landing() {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      const headerHeight = 80; // Account for header height and some padding
+      const elementPosition = element.offsetTop - headerHeight;
+      window.scrollTo({
+        top: Math.max(0, elementPosition),
+        behavior: "smooth"
+      });
     }
   };
 
@@ -181,14 +186,23 @@ export default function Landing() {
         if (error) {
           throw error;
         }
-        toast.success("Konto skapat!", {
-          description: "Du är nu registrerad och kommer att omdirigeras till onboarding."
-        });
         
-        // Redirect to onboarding after successful signup
-        setTimeout(() => {
-          window.location.href = "/onboarding";
-        }, 1500);
+        // Try to sign in immediately after signup
+        const { error: signInError } = await signIn(formData.email, formData.password);
+        if (signInError) {
+          // If sign in fails, user might need email verification
+          toast.success("Konto skapat!", {
+            description: "Kontrollera din e-post för verifiering, sedan kan du logga in."
+          });
+        } else {
+          // If sign in succeeds, redirect to dashboard
+          toast.success("Konto skapat!", {
+            description: "Du är nu registrerad och kommer att omdirigeras till dashboard."
+          });
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 1500);
+        }
       }
       
       setShowLoginModal(false);
@@ -361,7 +375,11 @@ export default function Landing() {
                          disabled={isLoading}
                          onClick={async (e) => {
                            e.preventDefault();
-                           if (!validateForm()) return;
+                           // For demo account, we don't need strict validation
+                           if (!formData.email) {
+                             setErrors({ email: 'E-post krävs för demo-konto' });
+                             return;
+                           }
                            
                            setIsLoading(true);
                            try {
@@ -469,6 +487,13 @@ export default function Landing() {
                 data-testid="link-priser"
               >
                 Priser
+              </button>
+              <button
+                onClick={() => scrollToSection("om-oss")}
+                className="text-gray-600 hover:text-black transition-colors"
+                data-testid="link-om-oss"
+              >
+                Om oss
               </button>
               <button
                 onClick={() => scrollToSection("faq")}
@@ -719,17 +744,79 @@ export default function Landing() {
               <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto flex items-center justify-center">
                 <User className="w-8 h-8 text-gray-600" />
               </div>
-              <h3 className="text-xl font-semibold">Hej! Jag heter Hassan</h3>
+              <h3 className="text-xl font-semibold">Vår historia</h3>
               <p className="text-gray-600 leading-relaxed">
-                Jag bygger BizPal tillsammans med småföretagare som du. Efter att ha sett 
+                Vi bygger BizPal tillsammans med småföretagare som du. Efter att ha sett 
                 hur många företag kämpar med flera olika system och krånglig administration, 
-                bestämde jag mig för att skapa något bättre. Något som faktiskt fungerar 
+                bestämde vi oss för att skapa något bättre. Något som faktiskt fungerar 
                 för småföretag i verkligheten.
               </p>
               <p className="text-gray-600 leading-relaxed">
                 BizPal är resultatet av samtal med hundratals företagare och deras feedback. 
                 Vi bygger inte bara ett system – vi bygger en lösning som verkligen hjälper.
               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Om oss Section */}
+      <section id="om-oss" className="py-20 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4">Om oss</h2>
+            <p className="text-xl text-gray-600">
+              Vi bygger BizPal tillsammans med småföretagare för att lösa verkliga problem
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <h3 className="text-2xl font-semibold">Vår vision</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Vi tror att småföretag förtjänar bättre verktyg. Verktyg som faktiskt 
+                fungerar i verkligheten, inte bara på pappret. BizPal är vårt svar på 
+                den utmaningen.
+              </p>
+              <p className="text-gray-600 leading-relaxed">
+                Genom att arbeta nära företagare och lyssna på deras feedback bygger vi 
+                ett system som växer med ditt företag och anpassar sig efter dina behov.
+              </p>
+              
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <p className="text-gray-600">Byggt med verklig feedback från företagare</p>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <p className="text-gray-600">Kontinuerlig utveckling baserat på användarbehov</p>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <p className="text-gray-600">Personlig support på svenska</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-8">
+              <div className="space-y-6">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto flex items-center justify-center mb-4">
+                    <User className="w-8 h-8 text-gray-600" />
+                  </div>
+                  <h4 className="text-lg font-semibold">Vår grundare</h4>
+                </div>
+                <p className="text-gray-600 leading-relaxed text-center">
+                  Efter att ha sett hur många företag kämpar med flera olika system 
+                  och krånglig administration, bestämde vi oss för att skapa något bättre. 
+                  Något som faktiskt fungerar för småföretag i verkligheten.
+                </p>
+                <p className="text-gray-600 leading-relaxed text-center">
+                  BizPal är resultatet av samtal med hundratals företagare och deras feedback. 
+                  Vi bygger inte bara ett system – vi bygger en lösning som verkligen hjälper.
+                </p>
+              </div>
             </div>
           </div>
         </div>

@@ -38,7 +38,7 @@ export function MobileNav({ onNavigate, onLoginClick, onCTAClick }: MobileNavPro
       </Button>
 
       {isOpen && (
-        <div className="absolute top-16 left-0 right-0 bg-white border-b border-gray-200 shadow-lg">
+        <div className="absolute top-16 left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-50">
           <div className="px-4 py-2 space-y-1">
             <button
               onClick={() => handleNavigate("funktioner")}
@@ -51,6 +51,12 @@ export function MobileNav({ onNavigate, onLoginClick, onCTAClick }: MobileNavPro
               className="block w-full text-left px-3 py-2 text-gray-600 hover:text-black hover:bg-gray-50 rounded-md transition-colors"
             >
               Priser
+            </button>
+            <button
+              onClick={() => handleNavigate("om-oss")}
+              className="block w-full text-left px-3 py-2 text-gray-600 hover:text-black hover:bg-gray-50 rounded-md transition-colors"
+            >
+              Om oss
             </button>
             <button
               onClick={() => handleNavigate("faq")}

@@ -1,4 +1,3 @@
-import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -13,8 +12,6 @@ import Navigation from "@/components/Navigation";
 import MobileNavigation from "@/components/MobileNavigation";
 import SupportButton from "@/components/SupportButton";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { OnboardingRedirect } from "@/components/OnboardingRedirect";
-
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Error500 from "./pages/500";
@@ -35,8 +32,6 @@ import Invoices from "./pages/Invoices";
 // NYA SUPPORT-SIDOR
 import FAQ from "./pages/FAQ";
 import About from "./pages/About";
-// ONBOARDING
-import OnboardingWizard from "./components/onboarding/OnboardingWizard";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -68,36 +63,32 @@ const AppContent = () => {
 
   return (
     <ErrorBoundary>
-      <OnboardingRedirect>
-        <div className="min-h-screen bg-landing">
-          <Navigation />
-          
-          {/* Main content area */}
-          <div className="lg:pl-64 pt-12 lg:pt-0 pb-24 lg:pb-0">
-            <main className="min-h-screen">
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                
-                {/* ONBOARDING */}
-                <Route path="/onboarding" element={<OnboardingWizard />} />
-                
-                {/* BIZPAL - HUVUDFUNKTIONER */}
-                <Route path="/orders" element={<Orders />} />
-                <Route path="/invoices" element={<Invoices />} />
-                <Route path="/production" element={<Production />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/inventory" element={<Inventory />} />
-                <Route path="/receipts" element={<Receipts />} />
-                
-                {/* BOKFÖRING & EKONOMI */}
-                <Route path="/transactions" element={<Transactions />} />
-                <Route path="/accounts" element={<Accounts />} />
-                <Route path="/reports" element={<Reports />} />
-                <Route path="/expenses" element={<Expenses />} />
-                
-                {/* KUNDER & LEVERANTÖRER */}
-                <Route path="/customers" element={<Customers />} />
-                <Route path="/suppliers" element={<Suppliers />} />
+      <div className="min-h-screen bg-landing">
+        <Navigation />
+        
+        {/* Main content area */}
+        <div className="lg:pl-64 pt-12 lg:pt-0 pb-24 lg:pb-0">
+          <main className="min-h-screen">
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              
+              {/* BIZPAL - HUVUDFUNKTIONER */}
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/invoices" element={<Invoices />} />
+              <Route path="/production" element={<Production />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/inventory" element={<Inventory />} />
+              <Route path="/receipts" element={<Receipts />} />
+              
+              {/* BOKFÖRING & EKONOMI */}
+              <Route path="/transactions" element={<Transactions />} />
+              <Route path="/accounts" element={<Accounts />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/expenses" element={<Expenses />} />
+              
+              {/* KUNDER & LEVERANTÖRER */}
+              <Route path="/customers" element={<Customers />} />
+              <Route path="/suppliers" element={<Suppliers />} />
                 
                 {/* INSTÄLLNINGAR & SUPPORT */}
                 <Route path="/settings" element={<Settings />} />
@@ -112,7 +103,6 @@ const AppContent = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
-          </div>
           
           {/* Mobile Navigation */}
           <MobileNavigation />
@@ -120,7 +110,7 @@ const AppContent = () => {
           {/* Support Button */}
           <SupportButton />
         </div>
-      </OnboardingRedirect>
+      </div>
     </ErrorBoundary>
   );
 };
@@ -135,7 +125,6 @@ const App = () => (
               <BizPalProvider>
                 <NavigationProvider>
                   <TooltipProvider>
-                    <Toaster />
                     <Sonner />
                     <AppContent />
                   </TooltipProvider>

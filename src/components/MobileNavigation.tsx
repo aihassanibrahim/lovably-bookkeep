@@ -18,7 +18,8 @@ import {
   BarChart3,
   HelpCircle,
   Info,
-  Settings
+  Settings,
+  Play
 } from 'lucide-react';
 
 // Mobile navigation items (main sections only)
@@ -142,6 +143,13 @@ const mobileNavigationSections = [
     title: 'Mer',
     items: [
       {
+        name: 'Komma igång',
+        href: '#onboarding',
+        icon: Play,
+        description: 'Sätt upp ditt företag',
+        action: 'onboarding'
+      },
+      {
         name: 'FAQ',
         href: '/faq',
         icon: HelpCircle,
@@ -186,9 +194,18 @@ const MobileNavItem = ({ item, isActive }) => {
 const MobileMenuItem = ({ item, isActive }) => {
   const Icon = item.icon;
   
+  const handleClick = (e) => {
+    if (item.action === 'onboarding') {
+      e.preventDefault();
+      // Dispatch a custom event that the Dashboard can listen to
+      window.dispatchEvent(new CustomEvent('openOnboardingModal'));
+    }
+  };
+  
   return (
     <Link
       to={item.href}
+      onClick={handleClick}
       className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
         isActive
           ? 'bg-primary/10 text-primary'

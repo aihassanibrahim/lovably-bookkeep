@@ -16,7 +16,8 @@ import {
   ShoppingBag,
   Truck,
   Receipt,
-  Crown
+  Crown,
+  Play
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
@@ -34,6 +35,7 @@ import { toast } from "sonner";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UsageTracker } from "@/components/PlanLimitBanner";
 import { redirectToCheckout } from "@/lib/stripe-client";
+import OnboardingModal from "@/components/onboarding/OnboardingModal";
 
 interface FinancialData {
   totalIncome: number;
@@ -57,6 +59,8 @@ interface DashboardStats {
 
 export default function Dashboard() {
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [isOnboardingModalOpen, setIsOnboardingModalOpen] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(false);
   const [orderLoading, setOrderLoading] = useState(false);
   const [orderData, setOrderData] = useState({
     customer_name: '',
@@ -83,7 +87,7 @@ export default function Dashboard() {
     lowStockItems: 0,
     pendingProductionTasks: 0
   });
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { orders, products, customers, suppliers, expenses, stats, loading, addOrder } = useBizPal();
   const { subscription, usage, isFreePlan, isProPlan, getCurrentPlan } = useSubscription();
   const navigate = useNavigate();
@@ -94,6 +98,108 @@ export default function Dashboard() {
       calculateDashboardStats();
     }
   }, [user, orders, products, customers, suppliers, expenses, stats]);
+
+  // Check if user needs onboarding and auto-open modal for new users
+  useEffect(() => {
+    const checkOnboardingStatus = async () => {
+      console.log('checkOnboardingStatus called, user:', user);
+      console.log('authLoading:', authLoading);
+      console.log('isOnboardingModalOpen state:', isOnboardingModalOpen);
+      console.log('isNewUser state:', isNewUser);
+      
+      if (authLoading) {
+        console.log('Auth still loading, skipping onboarding check');
+        return;
+      }
+      
+      if (!user) {
+        console.log('No user found, skipping onboarding check');
+        return;
+      }
+
+      console.log('Checking onboarding status for user:', user.id);
+
+      try {
+        // Check localStorage first (fallback)
+        const localStorageCompleted = localStorage.getItem('onboarding_completed');
+        console.log('localStorage onboarding_completed:', localStorageCompleted);
+        
+        if (localStorageCompleted === 'true') {
+          console.log('User has completed onboarding (localStorage)');
+          return; // User has completed onboarding
+        }
+
+        // Check database for onboarding status with retry
+        let profile = null;
+        let error = null;
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        while (retryCount < maxRetries) {
+          const result = await supabase
+            .from('profiles')
+            .select('onboarding_completed')
+            .eq('user_id', user.id)
+            .single();
+          
+          profile = result.data;
+          error = result.error;
+          
+          console.log(`Profile check attempt ${retryCount + 1}:`, profile);
+          console.log(`Database error attempt ${retryCount + 1}:`, error);
+          
+          if (profile || (error && error.code === 'PGRST116')) {
+            break; // Found profile or confirmed it doesn't exist
+          }
+          
+          console.log(`Profile not found, retrying in 1 second... (attempt ${retryCount + 1}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          retryCount++;
+        }
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error checking onboarding status:', error);
+        }
+
+        // If no profile exists or onboarding is not completed, open modal
+        if (!profile || !profile.onboarding_completed) {
+          console.log('New user detected, opening onboarding modal');
+          console.log('Setting isNewUser to true');
+          console.log('Setting isOnboardingModalOpen to true');
+          setIsNewUser(true);
+          setIsOnboardingModalOpen(true);
+        } else {
+          console.log('User has completed onboarding (database)');
+        }
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+        // If there's an error, check localStorage as fallback
+        const localStorageCompleted = localStorage.getItem('onboarding_completed');
+        if (localStorageCompleted !== 'true') {
+          console.log('Fallback: Opening onboarding modal due to error');
+          console.log('Setting isNewUser to true');
+          console.log('Setting isOnboardingModalOpen to true');
+          setIsNewUser(true);
+          setIsOnboardingModalOpen(true);
+        }
+      }
+    };
+
+    checkOnboardingStatus();
+  }, [user, authLoading]);
+
+  // Listen for custom event to open onboarding modal from navigation
+  useEffect(() => {
+    const handleOpenOnboardingModal = () => {
+      setIsOnboardingModalOpen(true);
+    };
+
+    window.addEventListener('openOnboardingModal', handleOpenOnboardingModal);
+
+    return () => {
+      window.removeEventListener('openOnboardingModal', handleOpenOnboardingModal);
+    };
+  }, []);
 
   const fetchFinancialData = async () => {
     try {
@@ -269,9 +375,20 @@ export default function Dashboard() {
             Översikt av din verksamhet - {new Date().toLocaleDateString('sv-SE')}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2 lg:gap-3">
-          <QuickActions />
-        </div>
+                  <div className="flex flex-wrap gap-2 lg:gap-3">
+            <QuickActions />
+            <Button 
+              onClick={() => {
+                console.log('Manual test: Opening onboarding modal');
+                setIsOnboardingModalOpen(true);
+                setIsNewUser(true);
+              }}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              Test Onboarding Modal
+            </Button>
+          </div>
       </div>
 
       {/* Plan Information and Usage */}
@@ -625,6 +742,16 @@ export default function Dashboard() {
           </form>
         </DialogContent>
       </Dialog>
+
+              {/* Onboarding Modal */}
+        <OnboardingModal
+          isOpen={isOnboardingModalOpen}
+          onClose={() => {
+            setIsOnboardingModalOpen(false);
+            setIsNewUser(false);
+          }}
+          isNewUser={isNewUser}
+        />
     </div>
   );
 }
