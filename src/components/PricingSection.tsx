@@ -17,25 +17,20 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onUpgrade }) => 
 
   const handleUpgrade = async (planId: string) => {
     if (!user) {
-      toast({
-        title: 'Logga in först',
+      toast.error('Logga in först', {
         description: 'Du måste logga in för att uppgradera din plan.',
-        variant: 'destructive',
       });
       return;
     }
 
     try {
       await redirectToCheckout(planId, user.id);
-      toast({
-        title: 'Omdirigerar till betalning',
+      toast.success('Omdirigerar till betalning', {
         description: 'Du kommer att skickas till Stripe för att slutföra din prenumeration.',
       });
     } catch (error) {
-      toast({
-        title: 'Något gick fel',
+      toast.error('Något gick fel', {
         description: 'Kunde inte starta uppgraderingen. Försök igen.',
-        variant: 'destructive',
       });
     }
   };

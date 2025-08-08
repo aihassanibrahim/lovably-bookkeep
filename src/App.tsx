@@ -71,6 +71,7 @@ const AppContent = () => {
           <main className="min-h-screen">
             <Routes>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               
               {/* BIZPAL - HUVUDFUNKTIONER */}
               <Route path="/orders" element={<Orders />} />

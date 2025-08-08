@@ -164,8 +164,8 @@ export const redirectToCheckout = async (
         planId,
         userId,
         customerDetails,
-        successUrl: `${window.location.origin}/onboarding?success=true&plan=${planId}`,
-        cancelUrl: `${window.location.origin}/onboarding?canceled=true`,
+        successUrl: `${window.location.origin}/?success=true&plan=${planId}`,
+        cancelUrl: `${window.location.origin}/?canceled=true`,
       }),
     });
 
@@ -181,8 +181,8 @@ export const redirectToCheckout = async (
       console.log('Development mode: Simulating payment success...');
       // In development mode, redirect directly to success URL
       setTimeout(() => {
-        window.location.href = `${window.location.origin}/onboarding?success=true&plan=${planId}`;
-      }, 2000);
+        window.location.href = `${window.location.origin}/?success=true&plan=${planId}`;
+      }, 1000);
       return;
     }
     

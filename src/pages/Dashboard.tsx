@@ -89,7 +89,7 @@ export default function Dashboard() {
   });
   const { user, loading: authLoading } = useAuth();
   const { orders, products, customers, suppliers, expenses, stats, loading, addOrder } = useBizPal();
-  const { subscription, usage, isFreePlan, isProPlan, getCurrentPlan } = useSubscription();
+  const { subscription, usage, isFreePlan, isProPlan, getCurrentPlan, reload } = useSubscription();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -98,6 +98,41 @@ export default function Dashboard() {
       calculateDashboardStats();
     }
   }, [user, orders, products, customers, suppliers, expenses, stats]);
+
+  // Handle Stripe success/cancel query params and persist subscription (client-side fallback)
+  useEffect(() => {
+    if (!user) return;
+    const url = new URL(window.location.href);
+    const success = url.searchParams.get('success');
+    const plan = url.searchParams.get('plan');
+
+    const persistProIfNeeded = async () => {
+      if (success === 'true' && plan === 'pro') {
+        try {
+          // Upsert subscription as pro for current user (RLS should allow self-upsert)
+          await supabase
+            .from('user_subscriptions')
+            .upsert({
+              user_id: user.id,
+              plan_id: 'pro',
+              status: 'active',
+              updated_at: new Date().toISOString(),
+            });
+          await reload?.();
+          toast.success('Betalning slutförd! Pro-planen är aktiverad.');
+        } catch (e) {
+          console.error('Failed to persist Pro subscription after success param:', e);
+        } finally {
+          // Clean the URL to avoid repeating this on refresh
+          url.searchParams.delete('success');
+          url.searchParams.delete('plan');
+          window.history.replaceState({}, document.title, url.pathname);
+        }
+      }
+    };
+
+    persistProIfNeeded();
+  }, [user]);
 
   // Check if user needs onboarding and auto-open modal for new users
   useEffect(() => {

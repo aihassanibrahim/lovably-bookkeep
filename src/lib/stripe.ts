@@ -1,13 +1,14 @@
 import { loadStripe } from '@stripe/stripe-js';
 
 // Stripe configuration and pricing plans
-export const STRIPE_PUBLISHABLE_KEY = import.meta.env.STRIPE_PUBLISHABLE_KEY;
+// Note: Vite only exposes variables prefixed with VITE_ to the client
+export const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string | undefined;
 export const STRIPE_SECRET_KEY = import.meta.env.STRIPE_SECRET_KEY;
 export const STRIPE_WEBHOOK_SECRET = import.meta.env.STRIPE_WEBHOOK_SECRET;
 export const STRIPE_PRO_PRICE_ID = import.meta.env.STRIPE_PRO_PRICE_ID;
 
-// Initialize Stripe
-export const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
+// Initialize Stripe (publishable key is required only when redirecting to real Checkout)
+export const stripePromise = STRIPE_PUBLISHABLE_KEY ? loadStripe(STRIPE_PUBLISHABLE_KEY) : Promise.resolve(null as any);
 
 // Pricing plans configuration
 export const PRICING_PLANS = {
@@ -34,9 +35,9 @@ export const PRICING_PLANS = {
   },
   pro: {
     name: 'Pro',
-    price: 299,
+    price: 99,
     currency: 'SEK',
-    interval: 'month',
+    interval: 'mån',
     features: [
       'Allt i Free-planen',
       'Kvittoscanning',
