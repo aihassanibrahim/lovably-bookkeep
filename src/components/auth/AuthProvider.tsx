@@ -32,6 +32,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
 
+  // Prefer explicit app URL env; fallback to window origin
+  const appUrl = (import.meta.env.VITE_PUBLIC_APP_URL || import.meta.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')) as string;
+
   useEffect(() => {
     // Check for demo mode first
     const demoMode = localStorage.getItem('bizpal-demo-mode');
@@ -107,7 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${appUrl}/dashboard`,
         },
       });
 
@@ -129,8 +132,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (profileError) {
           console.error('Profile creation error:', profileError);
-          // Don't fail the signup if profile creation fails
-          // The profile can be created later during onboarding
         } else {
           console.log('Profile created successfully for user:', data.user.id);
         }
@@ -174,7 +175,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetPassword = async (email: string) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: `${appUrl}/auth/reset-password`,
       });
 
       if (error) {
@@ -213,7 +214,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         type: 'signup',
         email: email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${appUrl}/dashboard`,
         },
       });
 

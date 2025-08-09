@@ -164,6 +164,16 @@ export const createCheckoutSession = async (priceId: string): Promise<string | n
       throw new Error('User not authenticated');
     }
 
+    // Check if we have the required environment variables
+    const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+    if (!publishableKey) {
+      console.error('Stripe publishable key not found');
+      throw new Error('Stripe configuration missing');
+    }
+
+    // Create real Stripe checkout session
+    console.log('Creating real Stripe checkout session');
+    
     const response = await fetch('/api/stripe/create-checkout-session', {
       method: 'POST',
       headers: {
@@ -186,7 +196,7 @@ export const createCheckoutSession = async (priceId: string): Promise<string | n
     return sessionId;
   } catch (error) {
     console.error('Error creating checkout session:', error);
-    return null;
+    throw error;
   }
 };
 

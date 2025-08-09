@@ -25,7 +25,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onUpgrade }) => 
 
     try {
       // Use the actual Stripe price ID from environment variables
-      const priceId = planId === 'pro' ? import.meta.env.VITE_STRIPE_PRO_PRICE_ID || 'price_1RuD20BK2aelwOoZFGExG9jq' : 'price_bizpal_free';
+      const priceId = planId === 'pro' ? import.meta.env.VITE_STRIPE_PRO_PRICE_ID || 'price_1Rt5J1BK2aelwOoZwlbWikOe' : 'price_bizpal_free';
       
       console.log('Price ID being used:', priceId);
       console.log('Environment variable:', import.meta.env.VITE_STRIPE_PRO_PRICE_ID);
@@ -33,17 +33,21 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onUpgrade }) => 
       const sessionId = await createCheckoutSession(priceId);
       
       if (sessionId) {
-        // Redirect to Stripe Checkout
+        // Redirect to real Stripe Checkout
+        toast.success('Omdirigerar till betalning', {
+          description: 'Du kommer att skickas till Stripe för att slutföra din prenumeration.',
+        });
+        
         const stripe = await import('@stripe/stripe-js');
         const stripeInstance = await stripe.loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
         if (stripeInstance) {
           await stripeInstance.redirectToCheckout({ sessionId });
+        } else {
+          throw new Error('Failed to load Stripe');
         }
+      } else {
+        throw new Error('Failed to create checkout session');
       }
-      
-      toast.success('Omdirigerar till betalning', {
-        description: 'Du kommer att skickas till Stripe för att slutföra din prenumeration.',
-      });
     } catch (error) {
       console.error('Payment error:', error);
       toast.error('Något gick fel', {

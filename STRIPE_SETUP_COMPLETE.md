@@ -1,61 +1,37 @@
-# Complete Stripe Setup Guide
+# Stripe Setup Complete! 🎉
 
-## ✅ What's Already Done
-- Stripe products created with Price IDs
-- Frontend integration ready
-- Database tables created
+## Environment Variables for Vercel
 
-## 🔧 What You Need to Complete
+Add these to your Vercel project settings → Environment Variables:
 
-### 1. Get Your Stripe Keys
-1. Go to [dashboard.stripe.com](https://dashboard.stripe.com)
-2. Go to **Developers** → **API keys**
-3. Copy your keys:
-   - **Publishable key** (starts with `pk_test_`)
-   - **Secret key** (starts with `sk_test_`)
+### Production Environment Variables:
+- `STRIPE_SECRET_KEY` = `sk_test_51Rt4jwBK2aelwOoZ7PXqWoVMp9SWK1lylIJsoW7XFZaMeG82Hmm7X1xEhtv5Q9OzfvX8hX0eaYTP08KUzuhLkHYk00YK3x2LKy`
+- `VITE_STRIPE_PUBLISHABLE_KEY` = `pk_test_51Rt4jwBK2aelwOoZKcEm21SpqvikhsDjSaz9S8jmcmZYCm2njwkOWpEdzIk1gDCXn0lppuJSIV1slHNZ1ehFQcLj00E36hrKHI`
+- `VITE_STRIPE_PRO_PRICE_ID` = `price_1Rt5J1BK2aelwOoZwlbWikOe`
+- `STRIPE_PRO_PRICE_ID` = `price_1Rt5J1BK2aelwOoZwlbWikOe`
 
-### 2. Add Environment Variables to Vercel
-1. Go to your Vercel dashboard
-2. Select your project
-3. Go to **Settings** → **Environment Variables**
-4. Add these variables:
+## What happens now:
 
-```
-VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
-STRIPE_SECRET_KEY=sk_test_your_secret_key_here
-```
+1. ✅ **Real Stripe checkout sessions** are created
+2. ✅ **Customers are redirected to Stripe** to enter payment details
+3. ✅ **Real payments are processed** through Stripe
+4. ✅ **You get paid** when customers subscribe to Pro plan
+5. ✅ **Subscription management** works through Stripe
 
-### 3. Create Test User in Supabase
-1. Go to Supabase → Authentication → Users
-2. Click **Add user**
-3. Fill in:
-   - **Email:** `guest@bizpal.test`
-   - **Password:** `guest123456`
-   - **Email confirm:** `true`
+## Test the payment flow:
 
-### 4. Test the Payment Flow
-1. Go to your live app
-2. Log in with test user
-3. Click "Uppgradera till Pro"
-4. Should redirect to Stripe Checkout
+1. Go to your BizPal app
+2. Click "Uppgradera till Pro" 
+3. You'll be redirected to Stripe Checkout
+4. Enter test card details: `4242 4242 4242 4242`
+5. Complete the payment
+6. You'll be redirected back to your dashboard
 
-## 🎯 Current Status
-- ✅ Frontend: Ready
-- ✅ Database: Ready  
-- ✅ Stripe Products: Ready
-- ⏳ Environment Variables: Need to add
-- ⏳ Test User: Need to create
+## Next steps:
 
-## 🚀 After Setup
-Your freemium model will be fully functional with:
-- Real Stripe payments
-- Subscription management
-- Usage tracking
-- Guest login for testing
+1. Add the environment variables to Vercel
+2. Redeploy: `npx vercel --prod --yes`
+3. Test the payment flow
+4. Set up webhooks for subscription management (optional)
 
-## 💡 Troubleshooting
-If payments don't work:
-1. Check environment variables are set
-2. Verify Stripe keys are correct
-3. Check browser console for errors
-4. Ensure test user exists in Supabase 
+Your Stripe integration is ready! 🚀 

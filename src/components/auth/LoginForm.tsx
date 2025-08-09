@@ -20,6 +20,8 @@ export const LoginForm: React.FC = () => {
   const [resetLoading, setResetLoading] = useState(false);
   const { signIn, signUp } = useAuth();
 
+  const appUrl = (import.meta.env.VITE_PUBLIC_APP_URL || import.meta.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')) as string;
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -61,7 +63,7 @@ export const LoginForm: React.FC = () => {
     setResetLoading(true);
     
     const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${appUrl}/auth/reset-password`,
     });
     
     if (error) {

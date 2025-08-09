@@ -1,10 +1,6 @@
-const Stripe = require('stripe');
+import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-07-30.basil',
-});
-
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -20,21 +16,34 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { priceId, userId, successUrl, cancelUrl } = req.body;
+    const { priceId, userId, successUrl, cancelUrl } = req.body || {};
 
-    console.log('Environment variables check:');
-    console.log('STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
-    console.log('STRIPE_SECRET_KEY starts with:', process.env.STRIPE_SECRET_KEY?.substring(0, 10));
-    console.log('Price ID received:', priceId);
-    console.log('User ID received:', userId);
+    const hasSecret = !!process.env.STRIPE_SECRET_KEY;
+    const secretPrefix = process.env.STRIPE_SECRET_KEY?.slice(0, 7) || 'NOT_SET';
+    const proPriceEnv = process.env.STRIPE_PRO_PRICE_ID || 'NOT_SET';
+
+    console.log('[Stripe] Creating checkout session:', {
+      priceId,
+      userId,
+      successUrl,
+      cancelUrl,
+      hasSecret,
+      secretPrefix,
+      proPriceEnv,
+    });
 
     if (!priceId || !userId) {
       return res.status(400).json({ error: 'Missing required parameters' });
     }
 
-    // Create checkout session
-    console.log('Creating Stripe checkout session with price ID:', priceId);
-    
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return res.status(500).json({ error: 'Stripe not configured: missing STRIPE_SECRET_KEY' });
+    }
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-07-30.basil',
+    });
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -47,15 +56,14 @@ module.exports = async (req, res) => {
       success_url: successUrl || `${req.headers.origin}/dashboard?success=true`,
       cancel_url: cancelUrl || `${req.headers.origin}/pricing?canceled=true`,
       client_reference_id: userId,
-      metadata: {
-        userId: userId,
-      },
+      metadata: { userId },
     });
 
-    console.log('Stripe session created successfully:', session.id);
+    console.log('[Stripe] Session created:', session.id);
     res.status(200).json({ sessionId: session.id });
   } catch (error) {
-    console.error('Error creating checkout session:', error);
-    res.status(500).json({ error: 'Failed to create checkout session' });
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[Stripe] Create session error:', message, error);
+    res.status(500).json({ error: 'Failed to create checkout session', message });
   }
-};
+}

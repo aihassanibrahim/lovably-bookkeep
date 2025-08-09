@@ -1,5 +1,4 @@
 import { stripePromise } from './stripe';
-import { STRIPE_PRO_PRICE_ID } from './stripe';
 
 // Tax calculation interface
 export interface CustomerDetails {
@@ -120,40 +119,20 @@ export const createTaxReversal = async (
   }
 };
 
-// Redirect to Stripe Checkout with tax calculation
+// Redirect to Stripe Checkout (production + dev)
 export const redirectToCheckout = async (
-  planId: string, 
-  userId: string, 
-  customerDetails?: CustomerDetails
+  planId: string,
+  userId: string,
+  _customerDetails?: CustomerDetails
 ) => {
   try {
     console.log(`Creating Stripe checkout session for ${planId} plan...`);
-    
-    // For development, use real Stripe checkout (remove simulation)
-    console.log('Creating real Stripe checkout session...');
-    
-    // Define line items for tax calculation
-    const lineItems: LineItem[] = [
-      {
-        amount: 1000, // Amount in cents (10 SEK)
-        reference: 'pro_plan_subscription',
-        tax_behavior: 'exclusive',
-        tax_code: 'txcd_99999999', // General tax code
-      },
-    ];
 
-    // Calculate tax if customer details are provided
-    let taxCalculation = null;
-    if (customerDetails) {
-      try {
-        taxCalculation = await calculateTax(customerDetails, lineItems, 'sek');
-        console.log('Tax calculation completed:', taxCalculation.id);
-      } catch (taxError) {
-        console.error('Tax calculation failed, proceeding without tax:', taxError);
-      }
+    const priceId = import.meta.env.VITE_STRIPE_PRO_PRICE_ID;
+    if (!priceId) {
+      throw new Error('Missing VITE_STRIPE_PRO_PRICE_ID');
     }
-    
-    // Use Stripe API (works in both dev and production)
+
     const apiUrl = import.meta.env.DEV ? 'http://localhost:3001' : '';
     const response = await fetch(`${apiUrl}/api/stripe/create-checkout-session`, {
       method: 'POST',
@@ -161,41 +140,23 @@ export const redirectToCheckout = async (
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        planId,
+        priceId,
         userId,
-        customerDetails,
-        successUrl: `${window.location.origin}/?success=true&plan=${planId}`,
-        cancelUrl: `${window.location.origin}/?canceled=true`,
+        successUrl: `${window.location.origin}/dashboard?success=true`,
+        cancelUrl: `${window.location.origin}/pricing?canceled=true`,
       }),
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.error || 'Failed to create checkout session');
     }
 
-    const responseData = await response.json();
-    const { sessionId, isDevelopment, taxCalculation: sessionTaxCalculation } = responseData;
-    
-    if (isDevelopment) {
-      console.log('Development mode: Simulating payment success...');
-      // In development mode, redirect directly to success URL
-      setTimeout(() => {
-        window.location.href = `${window.location.origin}/?success=true&plan=${planId}`;
-      }, 1000);
-      return;
-    }
-    
-    // Redirect to real Stripe Checkout
-    const stripe = await stripePromise;
-    const { error } = await stripe!.redirectToCheckout({
-      sessionId,
-    });
+    const { sessionId } = await response.json();
 
-    if (error) {
-      throw error;
-    }
-    
+    const stripe = await stripePromise;
+    const { error } = await stripe!.redirectToCheckout({ sessionId });
+    if (error) throw error;
   } catch (error) {
     console.error('Error redirecting to checkout:', error);
     throw error;

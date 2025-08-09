@@ -1,6 +1,6 @@
-const express = require('express');
-const cors = require('cors');
-const Stripe = require('stripe');
+import express from 'express';
+import cors from 'cors';
+import Stripe from 'stripe';
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -10,9 +10,9 @@ app.use(cors());
 app.use(express.json());
 
 // Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-07-30.basil',
-});
+}) : null;
 
 // Debug endpoint
 app.get('/api/debug', (req, res) => {
@@ -55,6 +55,15 @@ app.post('/api/stripe/create-checkout-session', async (req, res) => {
 
     if (!priceId || !userId) {
       return res.status(400).json({ error: 'Missing required parameters' });
+    }
+
+    if (!stripe) {
+      console.log('Stripe not configured, returning mock response');
+      return res.json({ 
+        sessionId: 'cs_test_mock_session_' + Date.now(),
+        isDevelopment: true,
+        message: 'Development mode: Mock session created'
+      });
     }
 
     // Create checkout session
