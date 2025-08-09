@@ -1,8 +1,17 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
 import Stripe from 'stripe';
+import { createClient } from '@supabase/supabase-js';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2025-07-30.basil',
+});
 
-export default async function handler(req, res) {
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -15,14 +24,8 @@ export default async function handler(req, res) {
     }
 
     // Get user's subscription from Supabase
-    const { createClient } = require('@supabase/supabase-js');
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    );
-
     const { data: subscription, error } = await supabase
-      .from('user_subscriptions')
+      .from('subscriptions')
       .select('stripe_customer_id')
       .eq('user_id', userId)
       .single();
@@ -42,4 +45,4 @@ export default async function handler(req, res) {
     console.error('Error creating portal session:', error);
     res.status(500).json({ error: 'Failed to create portal session' });
   }
-} 
+}

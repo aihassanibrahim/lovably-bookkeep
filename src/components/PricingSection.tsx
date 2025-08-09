@@ -3,9 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Check, X, Star } from 'lucide-react';
-import { PRICING_PLANS, checkFeatureAccess } from '@/lib/stripe';
+import { PRICING_PLANS } from '@/lib/supabase-stripe';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { redirectToCheckout } from '@/lib/stripe-client';
+import { createCheckoutSession } from '@/lib/supabase-stripe';
 import { toast } from 'sonner';
 
 interface PricingSectionProps {
@@ -24,18 +24,38 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onUpgrade }) => 
     }
 
     try {
-      await redirectToCheckout(planId, user.id);
+      // Use the actual Stripe price ID from environment variables
+      const priceId = planId === 'pro' ? import.meta.env.VITE_STRIPE_PRO_PRICE_ID || 'price_1RuD20BK2aelwOoZFGExG9jq' : 'price_bizpal_free';
+      
+      console.log('Price ID being used:', priceId);
+      console.log('Environment variable:', import.meta.env.VITE_STRIPE_PRO_PRICE_ID);
+      
+      const sessionId = await createCheckoutSession(priceId);
+      
+      if (sessionId) {
+        // Redirect to Stripe Checkout
+        const stripe = await import('@stripe/stripe-js');
+        const stripeInstance = await stripe.loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+        if (stripeInstance) {
+          await stripeInstance.redirectToCheckout({ sessionId });
+        }
+      }
+      
       toast.success('Omdirigerar till betalning', {
         description: 'Du kommer att skickas till Stripe för att slutföra din prenumeration.',
       });
     } catch (error) {
+      console.error('Payment error:', error);
       toast.error('Något gick fel', {
-        description: 'Kunde inte starta uppgraderingen. Försök igen.',
+        description: `Kunde inte starta uppgraderingen: ${error instanceof Error ? error.message : 'Unknown error'}`,
       });
     }
   };
 
-  const plans = Object.values(PRICING_PLANS);
+  const plans = [
+    { id: 'free', ...PRICING_PLANS.free },
+    { id: 'pro', ...PRICING_PLANS.pro }
+  ];
 
   return (
     <section id="priser" className="py-20 bg-gray-50">
