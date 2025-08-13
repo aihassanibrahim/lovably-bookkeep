@@ -109,6 +109,13 @@ const Products = () => {
     setEditingProduct(null);
   };
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('sv-SE', {
+      style: 'currency',
+      currency: 'SEK'
+    }).format(amount);
+  };
+
   const filteredProducts = categoryFilter === "all" 
     ? products 
     : products.filter(product => product.category === categoryFilter);

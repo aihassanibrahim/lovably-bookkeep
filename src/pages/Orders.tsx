@@ -139,6 +139,17 @@ const Orders = () => {
     setEditingOrder(null);
   };
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('sv-SE', {
+      style: 'currency',
+      currency: 'SEK'
+    }).format(amount || 0);
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('sv-SE');
+  };
+
   const updateOrderStatus = async (orderId, newStatus) => {
     const orderToUpdate = orders.find(order => order.id === orderId);
     if (orderToUpdate) {
