@@ -1,25 +1,11 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { 
-  TrendingUp, 
-  Package, 
-  Users, 
-  ShoppingBag,
-  Plus,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  ArrowUpRight
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React from 'react';
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useBizPal } from "@/context/BizPalContext";
 import { useNavigate } from "react-router-dom";
-import { SubscriptionStatus } from "@/components/SubscriptionStatus";
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { orders, products, customers, stats, loading } = useBizPal();
+  const { orders, products, customers, loading } = useBizPal();
   const navigate = useNavigate();
 
   const formatCurrency = (amount: number) => {
@@ -33,274 +19,336 @@ export default function Dashboard() {
     return new Date(dateString).toLocaleDateString('sv-SE');
   };
 
-  const recentOrders = orders
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 5);
-
-  const ordersByStatus = {
-    'Beställd': orders.filter(o => o.status === 'Beställd').length,
-    'I produktion': orders.filter(o => o.status === 'I produktion').length,
-    'Klar': orders.filter(o => o.status === 'Klar').length,
-    'Levererad': orders.filter(o => o.status === 'Levererad').length
+  const stats = {
+    totalOrders: orders?.length || 0,
+    activeOrders: orders?.filter(o => o.status !== "Levererad" && o.status !== "Avbruten").length || 0,
+    completedOrders: orders?.filter(o => o.status === "Levererad").length || 0,
+    totalRevenue: orders?.filter(o => o.status === "Levererad").reduce((sum, order) => sum + (order.price || 0), 0) || 0
   };
+
+  const recentOrders = orders
+    ?.sort((a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime())
+    ?.slice(0, 5) || [];
 
   if (loading) {
     return (
-      <div className="space-y-6 p-6 lg:space-y-8 lg:p-8 bg-gray-50 min-h-screen">
-        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-black text-slate-800">Dashboard</h1>
-            <p className="text-gray-600 text-lg">Laddar data...</p>
-          </div>
-        </div>
-        <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
-            <Card key={i} className="finpay-card animate-pulse">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <div className="h-4 w-24 bg-gray-200 rounded" />
-                <div className="h-8 w-8 bg-gray-200 rounded-lg" />
-              </CardHeader>
-              <CardContent>
-                <div className="h-8 w-20 bg-gray-200 rounded mb-2" />
-                <div className="h-4 w-32 bg-gray-200 rounded" />
-              </CardContent>
-            </Card>
-          ))}
+      <div style={{ 
+        padding: '48px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            border: '3px solid #e2e8f0',
+            borderTop: '3px solid #2dd4bf',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 16px'
+          }}></div>
+          <p style={{ color: '#64748b' }}>Laddar data...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 p-6 lg:space-y-8 lg:p-8 bg-gray-50 min-h-screen">
+    <div style={{ 
+      padding: '48px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '32px',
+      backgroundColor: '#f8fafc',
+      minHeight: '100vh'
+    }}>
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
-        <div className="space-y-2">
-          <h1 className="text-5xl font-black text-slate-800 tracking-tight">Dashboard</h1>
-          <p className="text-gray-600 text-lg">
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        gap: '16px'
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <h1 style={{ 
+            fontSize: '48px', 
+            fontWeight: '900', 
+            color: '#1e293b',
+            lineHeight: '1.1',
+            letterSpacing: '-0.025em'
+          }}>
+            Dashboard
+          </h1>
+          <p style={{ 
+            color: '#64748b', 
+            fontSize: '18px',
+            lineHeight: '1.6'
+          }}>
             Översikt av din verksamhet - {new Date().toLocaleDateString('sv-SE')}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2 lg:gap-3">
-          <Button 
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button 
             onClick={() => navigate('/orders')}
-            className="bg-teal-400 hover:bg-teal-500 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200"
+            className="finpay-button-primary"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <span style={{ marginRight: '8px' }}>➕</span>
             Ny Order
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="finpay-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Aktiva Ordrar</CardTitle>
-            <Package className="h-5 w-5 text-teal-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-black text-slate-800">{stats.orders.active}</div>
-            <p className="text-xs text-gray-600">
-              {stats.orders.total} totalt
-            </p>
-          </CardContent>
-        </Card>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '24px'
+      }}>
+        <div className="finpay-card" style={{ padding: '24px' }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '8px'
+          }}>
+            <span style={{ fontSize: '14px', fontWeight: '500', color: '#64748b' }}>Aktiva Ordrar</span>
+            <span style={{ fontSize: '20px' }}>📦</span>
+          </div>
+          <div style={{ fontSize: '48px', fontWeight: '900', color: '#1e293b' }}>{stats.activeOrders}</div>
+          <p style={{ fontSize: '12px', color: '#64748b' }}>
+            {stats.totalOrders} totalt
+          </p>
+        </div>
         
-        <Card className="finpay-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Månadens Intäkter</CardTitle>
-            <TrendingUp className="h-5 w-5 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-black text-green-600">
-              {formatCurrency(stats.orders.revenue)}
-            </div>
-            <p className="text-xs text-gray-600">
-              {stats.orders.completed} levererade
-            </p>
-          </CardContent>
-        </Card>
+        <div className="finpay-card" style={{ padding: '24px' }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '8px'
+          }}>
+            <span style={{ fontSize: '14px', fontWeight: '500', color: '#64748b' }}>Månadens Intäkter</span>
+            <span style={{ fontSize: '20px' }}>📈</span>
+          </div>
+          <div style={{ fontSize: '48px', fontWeight: '900', color: '#22c55e' }}>
+            {formatCurrency(stats.totalRevenue)}
+          </div>
+          <p style={{ fontSize: '12px', color: '#64748b' }}>
+            {stats.completedOrders} levererade
+          </p>
+        </div>
         
-        <Card className="finpay-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Produkter</CardTitle>
-            <ShoppingBag className="h-5 w-5 text-purple-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-black text-slate-800">{products.length}</div>
-            <p className="text-xs text-gray-600">
-              I katalogen
-            </p>
-          </CardContent>
-        </Card>
+        <div className="finpay-card" style={{ padding: '24px' }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '8px'
+          }}>
+            <span style={{ fontSize: '14px', fontWeight: '500', color: '#64748b' }}>Produkter</span>
+            <span style={{ fontSize: '20px' }}>🛍️</span>
+          </div>
+          <div style={{ fontSize: '48px', fontWeight: '900', color: '#1e293b' }}>{products?.length || 0}</div>
+          <p style={{ fontSize: '12px', color: '#64748b' }}>
+            I katalogen
+          </p>
+        </div>
         
-        <Card className="finpay-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Kunder</CardTitle>
-            <Users className="h-5 w-5 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-black text-slate-800">{customers.length}</div>
-            <p className="text-xs text-gray-600">
-              Registrerade
-            </p>
-          </CardContent>
-        </Card>
+        <div className="finpay-card" style={{ padding: '24px' }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '8px'
+          }}>
+            <span style={{ fontSize: '14px', fontWeight: '500', color: '#64748b' }}>Kunder</span>
+            <span style={{ fontSize: '20px' }}>👥</span>
+          </div>
+          <div style={{ fontSize: '48px', fontWeight: '900', color: '#1e293b' }}>{customers?.length || 0}</div>
+          <p style={{ fontSize: '12px', color: '#64748b' }}>
+            Registrerade
+          </p>
+        </div>
       </div>
-
-      {/* Order Status Overview */}
-      <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="finpay-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Beställda</CardTitle>
-            <AlertCircle className="h-5 w-5 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-black text-blue-600">{ordersByStatus['Beställd']}</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="finpay-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">I Produktion</CardTitle>
-            <Clock className="h-5 w-5 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-black text-orange-600">{ordersByStatus['I produktion']}</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="finpay-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Klara</CardTitle>
-            <CheckCircle className="h-5 w-5 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-black text-purple-600">{ordersByStatus['Klar']}</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="finpay-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Levererade</CardTitle>
-            <CheckCircle className="h-5 w-5 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-black text-green-600">{ordersByStatus['Levererad']}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Subscription Status */}
-      <SubscriptionStatus />
 
       {/* Recent Orders */}
-      <Card className="finpay-card">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-xl font-bold text-slate-800">
-              <Package className="h-5 w-5" />
-              Senaste Ordrar
-            </CardTitle>
-            <Button 
-              variant="outline" 
-              size="sm"
+      <div className="finpay-card" style={{ padding: '32px' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '24px'
+        }}>
+          <h2 style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontSize: '20px',
+            fontWeight: 'bold',
+            color: '#1e293b'
+          }}>
+            <span>📦</span>
+            Senaste Ordrar
+          </h2>
+          <button 
+            onClick={() => navigate('/orders')}
+            className="finpay-button-secondary"
+          >
+            Se alla →
+          </button>
+        </div>
+        
+        {recentOrders.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '32px' }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📦</div>
+            <p style={{ color: '#64748b', marginBottom: '16px' }}>Inga ordrar än</p>
+            <button 
               onClick={() => navigate('/orders')}
-              className="finpay-button-secondary"
+              className="finpay-button-primary"
             >
-              Se alla
-              <ArrowUpRight className="ml-2 h-4 w-4" />
-            </Button>
+              <span style={{ marginRight: '8px' }}>➕</span>
+              Skapa första ordern
+            </button>
           </div>
-        </CardHeader>
-        <CardContent>
-          {recentOrders.length === 0 ? (
-            <div className="text-center py-8">
-              <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 mb-4">Inga ordrar än</p>
-              <Button 
-                onClick={() => navigate('/orders')}
-                className="finpay-button-primary"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Skapa första ordern
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {recentOrders.map((order) => (
-                <div key={order.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center justify-center w-10 h-10 bg-teal-400/10 rounded-xl">
-                      <Package className="h-5 w-5 text-teal-400" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-slate-800">{order.order_number}</h4>
-                      <p className="text-sm text-gray-600">{order.customer_name}</p>
-                      <p className="text-xs text-gray-500">{order.product_name}</p>
-                    </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {recentOrders.map((order) => (
+              <div key={order.id} style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '16px',
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px',
+                backgroundColor: '#fafafa',
+                transition: 'background-color 0.2s ease'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '40px',
+                    height: '40px',
+                    backgroundColor: 'rgba(45, 212, 191, 0.1)',
+                    borderRadius: '12px'
+                  }}>
+                    <span style={{ fontSize: '20px' }}>📦</span>
                   </div>
-                  <div className="text-right">
-                    <div className="font-medium text-slate-800">{formatCurrency(order.price || 0)}</div>
-                    <Badge 
-                      className={
-                        order.status === 'Levererad' ? 'bg-green-100 text-green-800 border-0' :
-                        order.status === 'Klar' ? 'bg-purple-100 text-purple-800 border-0' :
-                        order.status === 'I produktion' ? 'bg-orange-100 text-orange-800 border-0' :
-                        'bg-blue-100 text-blue-800 border-0'
-                      }
-                    >
-                      {order.status}
-                    </Badge>
+                  <div>
+                    <h4 style={{ fontWeight: '500', color: '#1e293b' }}>{order.order_number}</h4>
+                    <p style={{ fontSize: '14px', color: '#64748b' }}>{order.customer_name}</p>
+                    <p style={{ fontSize: '12px', color: '#64748b' }}>{order.product_name}</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontWeight: '500', color: '#1e293b' }}>{formatCurrency(order.price || 0)}</div>
+                  <span style={{
+                    backgroundColor: order.status === 'Levererad' ? '#dcfce7' : 
+                                   order.status === 'Klar' ? '#f3e8ff' :
+                                   order.status === 'I produktion' ? '#fed7aa' : '#dbeafe',
+                    color: order.status === 'Levererad' ? '#166534' :
+                           order.status === 'Klar' ? '#7c3aed' :
+                           order.status === 'I produktion' ? '#ea580c' : '#2563eb',
+                    padding: '4px 12px',
+                    borderRadius: '20px',
+                    fontSize: '12px',
+                    fontWeight: '500'
+                  }}>
+                    {order.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card 
-          className="finpay-card hover:shadow-lg transition-all duration-300 cursor-pointer border-teal-200 hover:border-teal-400" 
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: '24px'
+      }}>
+        <div 
+          className="finpay-card" 
+          style={{ 
+            padding: '24px',
+            cursor: 'pointer',
+            border: '1px solid #2dd4bf',
+            transition: 'all 0.3s ease'
+          }}
           onClick={() => navigate('/orders')}
         >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-center w-12 h-12 bg-teal-400/10 rounded-xl mb-4">
-              <Plus className="h-6 w-6 text-teal-400" />
-            </div>
-            <h3 className="font-semibold text-lg mb-2 text-slate-800">Ny Order</h3>
-            <p className="text-sm text-gray-600">Lägg till ny beställning</p>
-          </CardContent>
-        </Card>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '48px',
+            height: '48px',
+            backgroundColor: 'rgba(45, 212, 191, 0.1)',
+            borderRadius: '12px',
+            marginBottom: '16px'
+          }}>
+            <span style={{ fontSize: '24px' }}>➕</span>
+          </div>
+          <h3 style={{ fontWeight: '600', fontSize: '18px', marginBottom: '8px', color: '#1e293b' }}>Ny Order</h3>
+          <p style={{ fontSize: '14px', color: '#64748b' }}>Lägg till ny beställning</p>
+        </div>
 
-        <Card 
-          className="finpay-card hover:shadow-lg transition-all duration-300 cursor-pointer border-green-200 hover:border-green-400" 
+        <div 
+          className="finpay-card" 
+          style={{ 
+            padding: '24px',
+            cursor: 'pointer',
+            border: '1px solid #22c55e',
+            transition: 'all 0.3s ease'
+          }}
           onClick={() => navigate('/products')}
         >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-xl mb-4">
-              <ShoppingBag className="h-6 w-6 text-green-600" />
-            </div>
-            <h3 className="font-semibold text-lg mb-2 text-slate-800">Hantera Produkter</h3>
-            <p className="text-sm text-gray-600">Uppdatera produktkatalog</p>
-          </CardContent>
-        </Card>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '48px',
+            height: '48px',
+            backgroundColor: '#dcfce7',
+            borderRadius: '12px',
+            marginBottom: '16px'
+          }}>
+            <span style={{ fontSize: '24px' }}>🛍️</span>
+          </div>
+          <h3 style={{ fontWeight: '600', fontSize: '18px', marginBottom: '8px', color: '#1e293b' }}>Hantera Produkter</h3>
+          <p style={{ fontSize: '14px', color: '#64748b' }}>Uppdatera produktkatalog</p>
+        </div>
 
-        <Card 
-          className="finpay-card hover:shadow-lg transition-all duration-300 cursor-pointer border-purple-200 hover:border-purple-400" 
+        <div 
+          className="finpay-card" 
+          style={{ 
+            padding: '24px',
+            cursor: 'pointer',
+            border: '1px solid #8b5cf6',
+            transition: 'all 0.3s ease'
+          }}
           onClick={() => navigate('/customers')}
         >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-xl mb-4">
-              <Users className="h-6 w-6 text-purple-600" />
-            </div>
-            <h3 className="font-semibold text-lg mb-2 text-slate-800">Kundregister</h3>
-            <p className="text-sm text-gray-600">Hantera kunder</p>
-          </CardContent>
-        </Card>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '48px',
+            height: '48px',
+            backgroundColor: '#f3e8ff',
+            borderRadius: '12px',
+            marginBottom: '16px'
+          }}>
+            <span style={{ fontSize: '24px' }}>👥</span>
+          </div>
+          <h3 style={{ fontWeight: '600', fontSize: '18px', marginBottom: '8px', color: '#1e293b' }}>Kundregister</h3>
+          <p style={{ fontSize: '14px', color: '#64748b' }}>Hantera kunder</p>
+        </div>
       </div>
     </div>
   );

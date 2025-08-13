@@ -1,24 +1,5 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { 
-  ArrowRight, 
-  Check, 
-  Package, 
-  Users, 
-  TrendingUp, 
-  Shield,
-  Zap,
-  BarChart3,
-  CreditCard,
-  Building2,
-  Star,
-  ChevronDown
-} from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { MobileNav } from '@/components/ui/mobile-nav';
+import { useNavigate } from 'react-router-dom';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -40,160 +21,248 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div style={{ minHeight: '100vh', backgroundColor: 'white' }}>
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div className="flex items-center">
-              <Building2 className="h-8 w-8 text-teal-400" />
-              <span className="ml-2 text-xl font-bold text-slate-800">BizPal</span>
+      <nav style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid #e2e8f0'
+      }}>
+        <div style={{
+          maxWidth: '1280px',
+          margin: '0 auto',
+          padding: '0 24px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          height: '64px'
+        }}>
+          {/* Logo */}
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{
+              width: '32px',
+              height: '32px',
+              backgroundColor: '#2dd4bf',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: '8px'
+            }}>
+              <span style={{ color: 'white', fontWeight: 'bold', fontSize: '18px' }}>B</span>
             </div>
+            <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#1e293b' }}>BizPal</span>
+          </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              <button 
-                onClick={() => scrollToSection('funktioner')}
-                className="text-gray-600 hover:text-slate-800 transition-colors font-medium"
-              >
-                Funktioner
-              </button>
-              <button 
-                onClick={() => scrollToSection('priser')}
-                className="text-gray-600 hover:text-slate-800 transition-colors font-medium"
-              >
-                Priser
-              </button>
-              <button 
-                onClick={() => scrollToSection('om-oss')}
-                className="text-gray-600 hover:text-slate-800 transition-colors font-medium"
-              >
-                Om oss
-              </button>
-              <button 
-                onClick={() => scrollToSection('faq')}
-                className="text-gray-600 hover:text-slate-800 transition-colors font-medium"
-              >
-                FAQ
-              </button>
-            </div>
+          {/* Desktop Navigation */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+            <button 
+              onClick={() => scrollToSection('funktioner')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#64748b',
+                fontWeight: '500',
+                cursor: 'pointer',
+                fontSize: '16px'
+              }}
+            >
+              Funktioner
+            </button>
+            <button 
+              onClick={() => scrollToSection('priser')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#64748b',
+                fontWeight: '500',
+                cursor: 'pointer',
+                fontSize: '16px'
+              }}
+            >
+              Priser
+            </button>
+            <button 
+              onClick={() => scrollToSection('om-oss')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#64748b',
+                fontWeight: '500',
+                cursor: 'pointer',
+                fontSize: '16px'
+              }}
+            >
+              Om oss
+            </button>
+          </div>
 
-            {/* Desktop CTA */}
-            <div className="hidden md:flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
-                onClick={handleLoginClick}
-                className="text-gray-600 hover:text-slate-800 hover:bg-gray-50"
-              >
-                Logga in
-              </Button>
-              <Button 
-                onClick={handleGetStarted}
-                className="bg-teal-400 hover:bg-teal-500 text-white px-6 py-2 rounded-xl font-semibold"
-              >
-                Kom igång gratis
-              </Button>
-            </div>
-
-            {/* Mobile Menu */}
-            <MobileNav 
-              onNavigate={scrollToSection}
-              onLoginClick={handleLoginClick}
-              onCTAClick={handleGetStarted}
-            />
+          {/* CTA Buttons */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button 
+              onClick={handleLoginClick}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#64748b',
+                fontWeight: '500',
+                cursor: 'pointer',
+                padding: '8px 16px',
+                borderRadius: '8px'
+              }}
+            >
+              Logga in
+            </button>
+            <button 
+              onClick={handleGetStarted}
+              className="finpay-button-primary"
+            >
+              Kom igång gratis
+            </button>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-24 pb-16 lg:pt-32 lg:pb-24 bg-gradient-to-br from-slate-50 to-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <div className="space-y-6">
-                <h1 className="text-5xl lg:text-6xl font-black text-slate-800 leading-tight tracking-tight">
-                  Hantera ordrar enkelt,
-                  <br />
-                  <span className="text-teal-400">spara tid automatiskt</span>
-                  <br />
-                  för ditt företag.
-                </h1>
-                <p className="text-xl text-slate-600 max-w-lg leading-relaxed">
-                  Stöd små företag med enkel orderhantering, kraftfulla integrationer och verktyg för kassaflödeshantering.
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 max-w-md">
-                <Input
-                  type="email"
-                  placeholder="Din företags-email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 h-12 rounded-xl border-gray-200 focus:border-teal-400 focus:ring-teal-400"
-                />
-                <Button 
-                  onClick={handleGetStarted}
-                  className="bg-teal-400 hover:bg-teal-500 text-white h-12 px-8 whitespace-nowrap rounded-xl font-semibold"
-                >
-                  Kom igång
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-
-              {/* Trust indicators */}
-              <div className="flex items-center gap-8 pt-4">
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Building2 className="h-4 w-4" />
-                  <span>Svenskt företag</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Shield className="h-4 w-4" />
-                  <span>GDPR-säkert</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Star className="h-4 w-4" />
-                  <span>5-stjärnigt stöd</span>
-                </div>
-              </div>
+      <section style={{
+        paddingTop: '96px',
+        paddingBottom: '64px',
+        background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'
+      }}>
+        <div style={{
+          maxWidth: '1280px',
+          margin: '0 auto',
+          padding: '0 24px',
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '48px',
+          alignItems: 'center'
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <h1 className="finpay-heading">
+                Hantera ordrar enkelt,
+                <br />
+                <span style={{ color: '#2dd4bf' }}>spara tid automatiskt</span>
+                <br />
+                för ditt företag.
+              </h1>
+              <p className="finpay-subheading">
+                Stöd små företag med enkel orderhantering, kraftfulla integrationer och verktyg för kassaflödeshantering.
+              </p>
             </div>
 
-            {/* Hero Visual */}
-            <div className="relative">
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-xl p-8 max-w-sm mx-auto lg:mx-0">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-teal-400 rounded-lg flex items-center justify-center">
-                        <Package className="h-4 w-4 text-white" />
-                      </div>
-                      <span className="font-medium text-gray-600">Dina ordrar</span>
-                    </div>
-                    <Badge className="bg-green-100 text-green-800 border-0">Aktiv</Badge>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div className="text-5xl font-black text-slate-800 leading-none">
-                      234 ordrar
-                    </div>
-                    <div className="text-sm text-slate-500 font-medium">April 2024</div>
-                  </div>
+            <div style={{ display: 'flex', gap: '16px', maxWidth: '400px' }}>
+              <input
+                type="email"
+                placeholder="Din företags-email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  flex: 1,
+                  height: '48px',
+                  padding: '0 16px',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  fontSize: '16px',
+                  outline: 'none'
+                }}
+              />
+              <button 
+                onClick={handleGetStarted}
+                className="finpay-button-primary"
+                style={{ whiteSpace: 'nowrap' }}
+              >
+                Kom igång →
+              </button>
+            </div>
 
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <span className="text-sm font-medium">Orderhantering</span>
-                      <Check className="h-4 w-4 text-green-600" />
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <span className="text-sm font-medium">Kundregister</span>
-                      <Check className="h-4 w-4 text-green-600" />
-                    </div>
-                  </div>
+            {/* Trust indicators */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '32px', paddingTop: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#64748b' }}>
+                <span>🏢</span>
+                <span>Svenskt företag</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#64748b' }}>
+                <span>🔒</span>
+                <span>GDPR-säkert</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#64748b' }}>
+                <span>⭐</span>
+                <span>5-stjärnigt stöd</span>
+              </div>
+            </div>
+          </div>
 
-                  <Button className="w-full bg-teal-400 hover:bg-teal-500 text-white h-12 rounded-xl font-semibold">
-                    Hantera
-                  </Button>
+          {/* Hero Visual */}
+          <div style={{ position: 'relative' }}>
+            <div className="finpay-card" style={{ padding: '32px', maxWidth: '400px', margin: '0 auto' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      backgroundColor: '#2dd4bf',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <span style={{ color: 'white', fontSize: '16px' }}>📦</span>
+                    </div>
+                    <span style={{ fontWeight: '500', color: '#64748b' }}>Dina ordrar</span>
+                  </div>
+                  <span style={{
+                    backgroundColor: '#dcfce7',
+                    color: '#166534',
+                    padding: '4px 12px',
+                    borderRadius: '20px',
+                    fontSize: '12px',
+                    fontWeight: '500'
+                  }}>
+                    Aktiv
+                  </span>
                 </div>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div className="finpay-stats-number">234 ordrar</div>
+                  <div className="finpay-stats-label">April 2024</div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '12px',
+                    backgroundColor: '#f8fafc',
+                    borderRadius: '8px'
+                  }}>
+                    <span style={{ fontSize: '14px', fontWeight: '500' }}>Orderhantering</span>
+                    <span style={{ color: '#22c55e' }}>✓</span>
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '12px',
+                    backgroundColor: '#f8fafc',
+                    borderRadius: '8px'
+                  }}>
+                    <span style={{ fontSize: '14px', fontWeight: '500' }}>Kundregister</span>
+                    <span style={{ color: '#22c55e' }}>✓</span>
+                  </div>
+                </div>
+
+                <button className="finpay-button-primary" style={{ width: '100%' }}>
+                  Hantera
+                </button>
               </div>
             </div>
           </div>
@@ -201,50 +270,90 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section */}
-      <section id="funktioner" className="py-16 lg:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <Badge className="bg-teal-400/10 text-teal-600 border-0 mb-4 px-4 py-2 rounded-full font-medium">
-              FRAMTIDA BETALNING
-            </Badge>
-            <h2 className="text-4xl font-bold text-slate-800 mb-6 leading-tight">
+      <section id="funktioner" style={{ padding: '64px 0', backgroundColor: 'white' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+            <div style={{
+              backgroundColor: 'rgba(45, 212, 191, 0.1)',
+              color: '#2dd4bf',
+              padding: '8px 16px',
+              borderRadius: '20px',
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'inline-block',
+              marginBottom: '16px'
+            }}>
+              FUNKTIONER
+            </div>
+            <h2 className="finpay-heading" style={{ marginBottom: '24px' }}>
               Upplevelse som växer
               <br />
               med din skala.
             </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
-              Designa ett finansiellt operativsystem som fungerar för ditt företag och strömlinjeforma kassaflödeshantering
+            <p className="finpay-subheading" style={{ maxWidth: '600px', margin: '0 auto' }}>
+              Designa ett operativsystem som fungerar för ditt företag och strömlinjeforma orderhantering
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto">
-                <CreditCard className="h-8 w-8 text-teal-400" />
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '48px'
+          }}>
+            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                backgroundColor: '#f8fafc',
+                borderRadius: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto'
+              }}>
+                <span style={{ fontSize: '32px' }}>💳</span>
               </div>
-              <h3 className="text-xl font-semibold text-slate-800">Gratis överföringar</h3>
-              <p className="text-gray-600">
-                Skapa en finansiell upplevelse och automatisera återkommande inköp genom att schemalägga återkommande betalningar.
+              <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1e293b' }}>Enkel orderhantering</h3>
+              <p style={{ color: '#64748b' }}>
+                Skapa en orderupplevelse och automatisera återkommande processer genom att schemalägga uppföljningar.
               </p>
             </div>
 
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto">
-                <Building2 className="h-8 w-8 text-teal-400" />
+            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                backgroundColor: '#f8fafc',
+                borderRadius: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto'
+              }}>
+                <span style={{ fontSize: '32px' }}>🏢</span>
               </div>
-              <h3 className="text-xl font-semibold text-slate-800">Flera konton</h3>
-              <p className="text-gray-600">
-                Kör dina operationer med kontanter från ditt konto och generera årslånga fonder lagrade i ditt konto.
+              <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1e293b' }}>Kundregister</h3>
+              <p style={{ color: '#64748b' }}>
+                Hantera dina kunder med kontaktinformation och generera långsiktiga relationer lagrade i ditt system.
               </p>
             </div>
 
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto">
-                <Shield className="h-8 w-8 text-teal-400" />
+            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                backgroundColor: '#f8fafc',
+                borderRadius: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto'
+              }}>
+                <span style={{ fontSize: '32px' }}>🔒</span>
               </div>
-              <h3 className="text-xl font-semibold text-slate-800">Oöverträffad säkerhet</h3>
-              <p className="text-gray-600">
-                Hantera säkert dina finanser med din organisation-wide MFA, kortlåsning och avancerade säkerhetskontroller.
+              <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1e293b' }}>Säker datahantering</h3>
+              <p style={{ color: '#64748b' }}>
+                Hantera säkert dina data med avancerade säkerhetskontroller och GDPR-efterlevnad.
               </p>
             </div>
           </div>
@@ -252,415 +361,473 @@ const LandingPage = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 lg:py-24 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <Badge className="bg-teal-400/10 text-teal-600 border-0 mb-4 px-4 py-2 rounded-full font-medium">
+      <section style={{ padding: '64px 0', backgroundColor: '#f8fafc' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+            <div style={{
+              backgroundColor: 'rgba(45, 212, 191, 0.1)',
+              color: '#2dd4bf',
+              padding: '8px 16px',
+              borderRadius: '20px',
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'inline-block',
+              marginBottom: '16px'
+            }}>
               VARFÖR OSS
-            </Badge>
-            <h2 className="text-4xl font-bold text-slate-800 mb-6">Varför de föredrar BizPal</h2>
+            </div>
+            <h2 className="finpay-heading">Varför de föredrar BizPal</h2>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-            <div className="text-center space-y-4">
-              <div className="text-5xl font-black text-teal-400 leading-none">3k+</div>
-              <div className="text-sm text-slate-500 font-medium">Företag som redan kör på BizPal</div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '48px'
+          }}>
+            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className="finpay-stats-number" style={{ color: '#2dd4bf' }}>3k+</div>
+              <div className="finpay-stats-label">Företag som redan kör på BizPal</div>
             </div>
 
-            <div className="text-center space-y-4">
-              <div className="text-5xl font-black text-slate-800 leading-none">24%</div>
-              <div className="text-sm text-slate-500 font-medium">Intäktsföretag</div>
+            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className="finpay-stats-number">24%</div>
+              <div className="finpay-stats-label">Intäktsförbättring</div>
             </div>
 
-            <div className="text-center space-y-4">
-              <div className="text-5xl font-black text-slate-800 leading-none">180K</div>
-              <div className="text-sm text-slate-500 font-medium">I årlig intäkt</div>
+            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className="finpay-stats-number">180K</div>
+              <div className="finpay-stats-label">I årlig intäkt</div>
             </div>
 
-            <div className="text-center space-y-4">
-              <div className="text-5xl font-black text-slate-800 leading-none">10+</div>
-              <div className="text-sm text-slate-500 font-medium">Månader av landningsbana</div>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-12 mt-16 items-center">
-            <div className="space-y-6">
-              <h3 className="text-3xl font-bold text-slate-800">Omedelbar uttag av dina medel när som helst</h3>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-teal-400 rounded-xl flex items-center justify-center">
-                  <Zap className="h-6 w-6 text-white" />
-                </div>
-                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
-                  <Building2 className="h-6 w-6 text-gray-400" />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <h3 className="text-3xl font-bold text-slate-800">Ingen tillgångsvolatilitet</h3>
-              <p className="text-gray-600">
-                Generera avkastning på dina kassareserver utan att göra några investeringar.
-              </p>
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-lg p-6">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">Översikt</span>
-                    <Badge className="bg-green-100 text-green-800 border-0">+12%</Badge>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <div className="text-2xl font-bold text-slate-800">47</div>
-                      <div className="text-sm text-gray-500">Ordrar</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-green-600">23,450 kr</div>
-                      <div className="text-sm text-gray-500">Intäkt</div>
-                    </div>
-                  </div>
-
-                  <div className="h-24 bg-gradient-to-r from-teal-400/10 to-teal-400/5 rounded-lg flex items-end p-4">
-                    <div className="w-full h-12 bg-teal-400/30 rounded"></div>
-                  </div>
-                </div>
-              </div>
+            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className="finpay-stats-number">10+</div>
+              <div className="finpay-stats-label">Månader av tillväxt</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Pricing Section */}
-      <section id="priser" className="py-16 lg:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <Badge className="bg-teal-400/10 text-teal-600 border-0 mb-4 px-4 py-2 rounded-full font-medium">
+      <section id="priser" style={{ padding: '64px 0', backgroundColor: 'white' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+            <div style={{
+              backgroundColor: 'rgba(45, 212, 191, 0.1)',
+              color: '#2dd4bf',
+              padding: '8px 16px',
+              borderRadius: '20px',
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'inline-block',
+              marginBottom: '16px'
+            }}>
               VÄLJ PLAN
-            </Badge>
-            <h2 className="text-4xl font-bold text-slate-800 mb-6">
+            </div>
+            <h2 className="finpay-heading" style={{ marginBottom: '24px' }}>
               Vi har hjälpt
               <br />
               innovativa företag
             </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className="finpay-subheading" style={{ maxWidth: '600px', margin: '0 auto' }}>
               Hundratals av alla storlekar och inom alla branscher har gjort stora förbättringar med oss.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '32px',
+            maxWidth: '800px',
+            margin: '0 auto'
+          }}>
             {/* Free Plan */}
-            <Card className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 p-8 relative">
-              <CardHeader className="p-0 mb-6">
-                <CardTitle className="text-2xl font-bold text-slate-800">Gratis</CardTitle>
-                <CardDescription className="text-lg">
-                  Perfekt för att komma igång
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-0 space-y-6">
-                <div className="space-y-2">
-                  <div className="text-4xl font-black text-slate-800">0 kr</div>
-                  <div className="text-gray-500">/månad</div>
-                </div>
-                
-                <ul className="space-y-3">
-                  <li className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span>Upp till 10 ordrar/månad</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span>Grundläggande kundhantering</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span>Produktkatalog</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span>E-postsupport</span>
-                  </li>
-                </ul>
-
-                <Button 
-                  onClick={handleGetStarted}
-                  className="w-full bg-white border border-gray-200 hover:bg-gray-50 text-slate-800 h-12 rounded-xl font-semibold transition-all duration-200"
-                >
-                  Kom igång gratis
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Pro Plan */}
-            <Card className="bg-white rounded-2xl border-2 border-teal-400 shadow-xl p-8 relative">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-teal-400 text-white border-0 px-4 py-2 rounded-full font-semibold">
-                  POPULÄR
-                </Badge>
+            <div className="finpay-card" style={{ padding: '32px' }}>
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>Gratis</h3>
+                <p style={{ color: '#64748b', fontSize: '18px' }}>Perfekt för att komma igång</p>
               </div>
               
-              <CardHeader className="p-0 mb-6">
-                <CardTitle className="text-2xl font-bold text-slate-800">Pro</CardTitle>
-                <CardDescription className="text-lg">
-                  För växande företag
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-0 space-y-6">
-                <div className="space-y-2">
-                  <div className="text-4xl font-black text-slate-800">99 kr</div>
-                  <div className="text-gray-500">/månad</div>
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{ fontSize: '48px', fontWeight: '900', color: '#1e293b' }}>0 kr</div>
+                <div style={{ color: '#64748b' }}>/månad</div>
+              </div>
+              
+              <div style={{ marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ color: '#22c55e' }}>✓</span>
+                  <span>Upp till 10 ordrar/månad</span>
                 </div>
-                
-                <ul className="space-y-3">
-                  <li className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span>Obegränsade ordrar</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span>Avancerad kundhantering</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span>Rapporter och analys</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span>Prioriterad support</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span>API-åtkomst</span>
-                  </li>
-                </ul>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ color: '#22c55e' }}>✓</span>
+                  <span>Grundläggande kundhantering</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ color: '#22c55e' }}>✓</span>
+                  <span>Produktkatalog</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ color: '#22c55e' }}>✓</span>
+                  <span>E-postsupport</span>
+                </div>
+              </div>
 
-                <Button 
-                  onClick={() => navigate('/pricing')}
-                  className="w-full bg-teal-400 hover:bg-teal-500 text-white h-12 rounded-xl font-semibold transition-all duration-200"
-                >
-                  Uppgradera till Pro
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
+              <button 
+                onClick={handleGetStarted}
+                className="finpay-button-secondary"
+                style={{ width: '100%' }}
+              >
+                Kom igång gratis
+              </button>
+            </div>
+
+            {/* Pro Plan */}
+            <div className="finpay-card" style={{ 
+              padding: '32px', 
+              border: '2px solid #2dd4bf',
+              position: 'relative'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '-12px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                backgroundColor: '#2dd4bf',
+                color: 'white',
+                padding: '8px 16px',
+                borderRadius: '20px',
+                fontSize: '12px',
+                fontWeight: '600'
+              }}>
+                POPULÄR
+              </div>
+              
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>Pro</h3>
+                <p style={{ color: '#64748b', fontSize: '18px' }}>För växande företag</p>
+              </div>
+              
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{ fontSize: '48px', fontWeight: '900', color: '#1e293b' }}>99 kr</div>
+                <div style={{ color: '#64748b' }}>/månad</div>
+              </div>
+              
+              <div style={{ marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ color: '#22c55e' }}>✓</span>
+                  <span>Obegränsade ordrar</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ color: '#22c55e' }}>✓</span>
+                  <span>Avancerad kundhantering</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ color: '#22c55e' }}>✓</span>
+                  <span>Rapporter och analys</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ color: '#22c55e' }}>✓</span>
+                  <span>Prioriterad support</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ color: '#22c55e' }}>✓</span>
+                  <span>API-åtkomst</span>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => navigate('/pricing')}
+                className="finpay-button-primary"
+                style={{ width: '100%' }}
+              >
+                Uppgradera till Pro →
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 lg:py-24 bg-gradient-to-r from-teal-400 to-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="max-w-3xl mx-auto space-y-8">
-            <Badge className="bg-white/20 text-white border-0 mb-4">
+      <section className="finpay-gradient" style={{ padding: '64px 0' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px', textAlign: 'center' }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            <div style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              color: 'white',
+              padding: '8px 16px',
+              borderRadius: '20px',
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'inline-block',
+              margin: '0 auto'
+            }}>
               REDO ATT KOMMA IGÅNG
-            </Badge>
-            <h2 className="text-4xl font-bold text-white mb-6">
+            </div>
+            <h2 style={{ fontSize: '48px', fontWeight: 'bold', color: 'white', marginBottom: '24px' }}>
               Redo att höja nivån på din
               <br />
-              betalningsprocess?
+              orderprocess?
             </h2>
-            <p className="text-xl text-white/90 mb-8">
-              Stöd små företag med enkla faktureringsverktyg, kraftfulla integrationer och verktyg för kassaflödeshantering.
+            <p style={{ fontSize: '20px', color: 'rgba(255, 255, 255, 0.9)', marginBottom: '32px' }}>
+              Stöd små företag med enkla orderverktyg, kraftfulla integrationer och verktyg för kassaflödeshantering.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
+            <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+              <button 
                 onClick={handleGetStarted}
-                className="bg-white text-slate-800 hover:bg-gray-100 h-12 px-8 rounded-xl font-semibold"
+                style={{
+                  backgroundColor: 'white',
+                  color: '#1e293b',
+                  fontWeight: '600',
+                  padding: '12px 32px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
               >
                 Kom igång nu
-              </Button>
-              <Button 
-                variant="outline"
-                className="border-white text-white hover:bg-white/10 h-12 px-8 rounded-xl font-semibold"
+              </button>
+              <button 
                 onClick={() => scrollToSection('om-oss')}
+                style={{
+                  backgroundColor: 'transparent',
+                  color: 'white',
+                  fontWeight: '600',
+                  padding: '12px 32px',
+                  borderRadius: '12px',
+                  border: '1px solid white',
+                  cursor: 'pointer'
+                }}
               >
-                Läs mer
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+                Läs mer →
+              </button>
             </div>
           </div>
         </div>
       </section>
 
       {/* About Section */}
-      <section id="om-oss" className="py-16 lg:py-24 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <div className="space-y-6">
-                <Badge className="bg-teal-400/10 text-teal-600 border-0 px-4 py-2 rounded-full font-medium">
+      <section id="om-oss" style={{ padding: '64px 0', backgroundColor: '#f8fafc' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '48px',
+            alignItems: 'center'
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div style={{
+                  backgroundColor: 'rgba(45, 212, 191, 0.1)',
+                  color: '#2dd4bf',
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  display: 'inline-block',
+                  width: 'fit-content'
+                }}>
                   OM BIZPAL
-                </Badge>
-                <h2 className="text-4xl font-bold text-slate-800">
+                </div>
+                <h2 className="finpay-heading">
                   Byggt för svenska
                   <br />
                   småföretag
                 </h2>
-                <p className="text-xl text-slate-600">
+                <p className="finpay-subheading">
                   Vi förstår utmaningarna som svenska småföretag står inför. BizPal är designat för att förenkla din orderhantering och hjälpa dig fokusera på det du gör bäst.
                 </p>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-teal-400/10 rounded-lg flex items-center justify-center mt-1">
-                    <Package className="h-4 w-4 text-teal-400" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    backgroundColor: 'rgba(45, 212, 191, 0.1)',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: '4px'
+                  }}>
+                    <span style={{ color: '#2dd4bf' }}>📦</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-1 text-slate-800">Enkel orderhantering</h4>
-                    <p className="text-gray-600">Håll koll på alla dina ordrar från beställning till leverans</p>
+                    <h4 style={{ fontWeight: '600', marginBottom: '4px', color: '#1e293b' }}>Enkel orderhantering</h4>
+                    <p style={{ color: '#64748b' }}>Håll koll på alla dina ordrar från beställning till leverans</p>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-teal-400/10 rounded-lg flex items-center justify-center mt-1">
-                    <Users className="h-4 w-4 text-teal-400" />
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    backgroundColor: 'rgba(45, 212, 191, 0.1)',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: '4px'
+                  }}>
+                    <span style={{ color: '#2dd4bf' }}>👥</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-1 text-slate-800">Kundregister</h4>
-                    <p className="text-gray-600">Organisera och hantera alla dina kundkontakter på ett ställe</p>
+                    <h4 style={{ fontWeight: '600', marginBottom: '4px', color: '#1e293b' }}>Kundregister</h4>
+                    <p style={{ color: '#64748b' }}>Organisera och hantera alla dina kundkontakter på ett ställe</p>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-teal-400/10 rounded-lg flex items-center justify-center mt-1">
-                    <BarChart3 className="h-4 w-4 text-teal-400" />
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    backgroundColor: 'rgba(45, 212, 191, 0.1)',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: '4px'
+                  }}>
+                    <span style={{ color: '#2dd4bf' }}>📊</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-1 text-slate-800">Insikter och rapporter</h4>
-                    <p className="text-gray-600">Få värdefulla insikter om din verksamhet med enkla rapporter</p>
+                    <h4 style={{ fontWeight: '600', marginBottom: '4px', color: '#1e293b' }}>Insikter och rapporter</h4>
+                    <p style={{ color: '#64748b' }}>Få värdefulla insikter om din verksamhet med enkla rapporter</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="relative">
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-lg p-8">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-semibold text-slate-800">Månadens översikt</h4>
-                    <Badge className="bg-green-100 text-green-800 border-0">+12%</Badge>
+            <div style={{ position: 'relative' }}>
+              <div className="finpay-card" style={{ padding: '32px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h4 style={{ fontWeight: '600', color: '#1e293b' }}>Månadens översikt</h4>
+                    <span style={{
+                      backgroundColor: '#dcfce7',
+                      color: '#166534',
+                      padding: '4px 12px',
+                      borderRadius: '20px',
+                      fontSize: '12px',
+                      fontWeight: '500'
+                    }}>
+                      +12%
+                    </span>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-6">
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '24px'
+                  }}>
                     <div>
-                      <div className="text-2xl font-bold text-slate-800">47</div>
-                      <div className="text-sm text-gray-500">Ordrar</div>
+                      <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#1e293b' }}>47</div>
+                      <div style={{ fontSize: '14px', color: '#64748b' }}>Ordrar</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-green-600">23,450 kr</div>
-                      <div className="text-sm text-gray-500">Intäkt</div>
+                      <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#22c55e' }}>23,450 kr</div>
+                      <div style={{ fontSize: '14px', color: '#64748b' }}>Intäkt</div>
                     </div>
                   </div>
 
-                  <div className="h-24 bg-gradient-to-r from-teal-400/10 to-teal-400/5 rounded-lg flex items-end p-4">
-                    <div className="w-full h-12 bg-teal-400/30 rounded"></div>
+                  <div style={{
+                    height: '96px',
+                    background: 'linear-gradient(to right, rgba(45, 212, 191, 0.1), rgba(45, 212, 191, 0.05))',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    padding: '16px'
+                  }}>
+                    <div style={{
+                      width: '100%',
+                      height: '48px',
+                      background: 'rgba(45, 212, 191, 0.3)',
+                      borderRadius: '4px'
+                    }}></div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section id="faq" className="py-16 lg:py-24 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-slate-800 mb-6">Vanliga frågor</h2>
-            <p className="text-xl text-slate-600">
-              Allt du behöver veta om BizPal
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            {[
-              {
-                question: "Hur snabbt kan jag komma igång?",
-                answer: "Du kan skapa ditt konto och börja använda BizPal på mindre än 5 minuter. Ingen installation eller komplicerad setup krävs."
-              },
-              {
-                question: "Är mina data säkra?",
-                answer: "Ja, vi använder bankstandard säkerhet med SSL-kryptering och följer GDPR. Dina data lagras säkert i Sverige."
-              },
-              {
-                question: "Kan jag avbryta när som helst?",
-                answer: "Absolut! Du kan avbryta din prenumeration när som helst utan bindningstid eller avgifter."
-              },
-              {
-                question: "Får jag support på svenska?",
-                answer: "Ja, vi erbjuder fullständig support på svenska via e-post och chat under kontorstid."
-              }
-            ].map((faq, index) => (
-              <Card key={index} className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-6">
-                  <details className="group">
-                    <summary className="flex justify-between items-center cursor-pointer list-none">
-                      <h4 className="font-semibold text-lg text-slate-800">{faq.question}</h4>
-                      <ChevronDown className="h-5 w-5 text-gray-400 group-open:rotate-180 transition-transform" />
-                    </summary>
-                    <p className="mt-4 text-gray-600 leading-relaxed">{faq.answer}</p>
-                  </details>
-                </CardContent>
-              </Card>
-            ))}
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 bg-slate-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <Building2 className="h-8 w-8 text-teal-400" />
-                <span className="ml-2 text-xl font-bold">BizPal</span>
+      <footer style={{ padding: '48px 0', backgroundColor: '#1e293b', color: 'white' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '32px'
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  backgroundColor: '#2dd4bf',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: '8px'
+                }}>
+                  <span style={{ color: 'white', fontWeight: 'bold' }}>B</span>
+                </div>
+                <span style={{ fontSize: '20px', fontWeight: 'bold' }}>BizPal</span>
               </div>
-              <p className="text-gray-400">
+              <p style={{ color: '#94a3b8' }}>
                 Enkel orderhantering för svenska småföretag
               </p>
             </div>
 
-            <div className="space-y-4">
-              <h5 className="font-semibold">Lösningar</h5>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Småföretag</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Frilansare</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">E-handel</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Tjänster</a></li>
-              </ul>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <h5 style={{ fontWeight: '600' }}>Lösningar</h5>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: '#94a3b8' }}>
+                <a href="#" style={{ color: '#94a3b8', textDecoration: 'none' }}>Småföretag</a>
+                <a href="#" style={{ color: '#94a3b8', textDecoration: 'none' }}>Frilansare</a>
+                <a href="#" style={{ color: '#94a3b8', textDecoration: 'none' }}>E-handel</a>
+                <a href="#" style={{ color: '#94a3b8', textDecoration: 'none' }}>Tjänster</a>
+              </div>
             </div>
 
-            <div className="space-y-4">
-              <h5 className="font-semibold">Företag</h5>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Om oss</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Karriär</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Kontakt</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Press</a></li>
-              </ul>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <h5 style={{ fontWeight: '600' }}>Företag</h5>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: '#94a3b8' }}>
+                <a href="#" style={{ color: '#94a3b8', textDecoration: 'none' }}>Om oss</a>
+                <a href="#" style={{ color: '#94a3b8', textDecoration: 'none' }}>Karriär</a>
+                <a href="#" style={{ color: '#94a3b8', textDecoration: 'none' }}>Kontakt</a>
+                <a href="#" style={{ color: '#94a3b8', textDecoration: 'none' }}>Press</a>
+              </div>
             </div>
 
-            <div className="space-y-4">
-              <h5 className="font-semibold">Lär dig</h5>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Blogg</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Guider</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">API</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Mallar</a></li>
-              </ul>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <h5 style={{ fontWeight: '600' }}>Lär dig</h5>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: '#94a3b8' }}>
+                <a href="#" style={{ color: '#94a3b8', textDecoration: 'none' }}>Blogg</a>
+                <a href="#" style={{ color: '#94a3b8', textDecoration: 'none' }}>Guider</a>
+                <a href="#" style={{ color: '#94a3b8', textDecoration: 'none' }}>API</a>
+                <a href="#" style={{ color: '#94a3b8', textDecoration: 'none' }}>Mallar</a>
+              </div>
             </div>
           </div>
 
-          <div className="border-t border-gray-700 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">
+          <div style={{
+            borderTop: '1px solid #475569',
+            marginTop: '48px',
+            paddingTop: '32px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <p style={{ color: '#94a3b8', fontSize: '14px' }}>
               © 2024 BizPal. Alla rättigheter förbehållna.
             </p>
-            <div className="flex items-center space-x-6 mt-4 md:mt-0">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+              <a href="#" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '14px' }}>
                 Integritetspolicy
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+              <a href="#" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '14px' }}>
                 Användarvillkor
               </a>
             </div>

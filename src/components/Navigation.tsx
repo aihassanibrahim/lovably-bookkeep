@@ -1,72 +1,67 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { 
-  Package, 
-  ShoppingBag, 
-  Users, 
-  Home,
-  LogOut,
-  Settings,
-  Building2
-} from 'lucide-react';
 
 const navigationItems = [
   {
     name: 'Dashboard',
     href: '/',
-    icon: Home,
+    icon: '🏠',
     description: 'Översikt'
   },
   {
     name: 'Ordrar',
     href: '/orders',
-    icon: Package,
+    icon: '📦',
     description: 'Hantera beställningar'
   },
   {
     name: 'Produkter',
     href: '/products',
-    icon: ShoppingBag,
+    icon: '🛍️',
     description: 'Produktkatalog'
   },
   {
     name: 'Kunder',
     href: '/customers',
-    icon: Users,
+    icon: '👥',
     description: 'Kundregister'
   },
   {
     name: 'Inställningar',
     href: '/settings',
-    icon: Settings,
+    icon: '⚙️',
     description: 'Applikationsinställningar'
   }
 ];
 
 const NavigationItem = ({ item, isActive }: { item: any, isActive: boolean }) => {
-  const Icon = item.icon;
-  
   return (
     <Link
       to={item.href}
-      className={`group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-        isActive
-          ? 'bg-teal-400/10 text-teal-600 shadow-sm'
-          : 'text-gray-600 hover:bg-gray-50 hover:text-slate-800'
-      }`}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        padding: '12px 16px',
+        fontSize: '14px',
+        fontWeight: '500',
+        borderRadius: '12px',
+        textDecoration: 'none',
+        transition: 'all 0.2s ease',
+        backgroundColor: isActive ? 'rgba(45, 212, 191, 0.1)' : 'transparent',
+        color: isActive ? '#2dd4bf' : '#64748b'
+      }}
     >
-      <Icon
-        className={`flex-shrink-0 h-5 w-5 mr-3 ${
-          isActive 
-            ? 'text-teal-400' 
-            : 'text-gray-400 group-hover:text-slate-800'
-        }`}
-      />
-      <div className="flex-1">
-        <div className="font-medium">{item.name}</div>
-        <div className="text-xs text-gray-500 mt-0.5">{item.description}</div>
+      <span style={{ 
+        fontSize: '20px', 
+        marginRight: '12px',
+        color: isActive ? '#2dd4bf' : '#94a3b8'
+      }}>
+        {item.icon}
+      </span>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontWeight: '500' }}>{item.name}</div>
+        <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>{item.description}</div>
       </div>
     </Link>
   );
@@ -74,31 +69,46 @@ const NavigationItem = ({ item, isActive }: { item: any, isActive: boolean }) =>
 
 const UserProfile = ({ user, signOut }: { user: any, signOut: () => void }) => {
   return (
-    <div className="flex-shrink-0 border-t border-gray-100 p-6">
-      <div className="flex items-center mb-3">
-        <div className="flex-shrink-0">
-          <div className="h-10 w-10 rounded-full bg-teal-400 flex items-center justify-center">
-            <span className="text-white text-sm font-medium">
-              {user?.email?.charAt(0).toUpperCase()}
-            </span>
-          </div>
+    <div style={{
+      borderTop: '1px solid #e2e8f0',
+      padding: '24px',
+      flexShrink: 0
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+        <div style={{
+          width: '40px',
+          height: '40px',
+          borderRadius: '50%',
+          backgroundColor: '#2dd4bf',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0
+        }}>
+          <span style={{ color: 'white', fontSize: '14px', fontWeight: '500' }}>
+            {user?.email?.charAt(0).toUpperCase()}
+          </span>
         </div>
-        <div className="ml-3 flex-1 min-w-0">
-          <p className="text-sm font-medium text-slate-800 truncate">
+        <div style={{ marginLeft: '12px', flex: 1, minWidth: 0 }}>
+          <p style={{ fontSize: '14px', fontWeight: '500', color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {user?.email || 'Användare'}
           </p>
-          <p className="text-xs text-gray-500">BizPal</p>
+          <p style={{ fontSize: '12px', color: '#64748b' }}>BizPal</p>
         </div>
       </div>
-      <Button
-        variant="outline"
-        size="sm"
+      <button
         onClick={signOut}
-        className="w-full justify-start finpay-button-secondary"
+        className="finpay-button-secondary"
+        style={{ 
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-start'
+        }}
       >
-        <LogOut className="h-4 w-4 mr-2" />
+        <span style={{ marginRight: '8px' }}>🚪</span>
         Logga ut
-      </Button>
+      </button>
     </div>
   );
 };
@@ -117,18 +127,64 @@ const Navigation = () => {
   return (
     <>
       {/* Desktop Navigation */}
-      <nav className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:bg-white lg:z-40 lg:shadow-sm">
+      <nav style={{
+        display: 'flex',
+        flexDirection: 'column',
+        width: '256px',
+        position: 'fixed',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        borderRight: '1px solid #e2e8f0',
+        backgroundColor: 'white',
+        zIndex: 40,
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+      }}>
         {/* Logo and Header */}
-        <div className="flex items-center justify-between flex-shrink-0 px-6 py-6 border-b border-gray-100">
-          <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
-            <Building2 className="h-8 w-8 text-teal-400" />
-            <span className="ml-2 text-xl font-bold text-slate-800">BizPal</span>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '24px',
+          borderBottom: '1px solid #e2e8f0',
+          flexShrink: 0
+        }}>
+          <Link to="/" style={{
+            display: 'flex',
+            alignItems: 'center',
+            textDecoration: 'none',
+            transition: 'opacity 0.2s ease'
+          }}>
+            <div style={{
+              width: '32px',
+              height: '32px',
+              backgroundColor: '#2dd4bf',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: '8px'
+            }}>
+              <span style={{ color: 'white', fontWeight: 'bold' }}>B</span>
+            </div>
+            <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#1e293b' }}>BizPal</span>
           </Link>
         </div>
 
         {/* Navigation Content */}
-        <div className="flex-1 flex flex-col overflow-y-auto">
-          <nav className="flex-1 px-4 py-6 space-y-2">
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          overflowY: 'auto'
+        }}>
+          <nav style={{
+            flex: 1,
+            padding: '16px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+          }}>
             {navigationItems.map((item) => (
               <NavigationItem
                 key={item.name}
@@ -144,47 +200,55 @@ const Navigation = () => {
       </nav>
 
       {/* Mobile Header */}
-      <div className="lg:hidden">
-        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
-          <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
-            <Building2 className="h-6 w-6 text-teal-400" />
-            <span className="ml-2 text-lg font-bold text-slate-800">BizPal</span>
+      <div style={{ display: 'none' }}>
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(12px)',
+          borderBottom: '1px solid #e2e8f0',
+          padding: '0 16px',
+          height: '48px'
+        }}>
+          <Link to="/" style={{
+            display: 'flex',
+            alignItems: 'center',
+            textDecoration: 'none',
+            transition: 'opacity 0.2s ease'
+          }}>
+            <div style={{
+              width: '24px',
+              height: '24px',
+              backgroundColor: '#2dd4bf',
+              borderRadius: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: '8px'
+            }}>
+              <span style={{ color: 'white', fontWeight: 'bold', fontSize: '12px' }}>B</span>
+            </div>
+            <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#1e293b' }}>BizPal</span>
           </Link>
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             onClick={signOut}
-            className="hover:bg-gray-100"
+            style={{
+              background: 'none',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              padding: '8px',
+              cursor: 'pointer'
+            }}
           >
-            <LogOut className="h-4 w-4" />
-          </Button>
+            🚪
+          </button>
         </div>
-        
-        {/* Mobile Bottom Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 shadow-lg">
-          <div className="flex justify-around items-center px-2 py-3">
-            {navigationItems.slice(0, 4).map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded-xl transition-all duration-200 ${
-                    isActive(item.href)
-                      ? 'text-teal-400 bg-teal-400/10'
-                      : 'text-gray-600 hover:text-teal-400 hover:bg-gray-50'
-                  }`}
-                >
-                  <Icon className="h-6 w-6 mb-1" />
-                  <span className="text-xs font-medium leading-tight">{item.name}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-        
-        {/* Bottom padding for mobile content */}
-        <div className="h-16" />
       </div>
     </>
   );
