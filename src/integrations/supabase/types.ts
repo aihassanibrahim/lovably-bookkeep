@@ -9,70 +9,81 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      simple_orders: {
+      orders: {
         Row: {
           id: string
-          user_id: string
-          order_number: string
-          customer_name: string
+          user_id: string | null
+          order_number: string | null
+          customer_name: string | null
+          customer_social_media: string | null
           customer_phone: string | null
           customer_address: string | null
-          product_name: string
-          quantity: number
-          price: number
-          status: string
-          order_date: string
-          estimated_delivery: string | null
+          product_name: string | null
+          product_details: string | null
+          product_customizations: string | null
+          price: number | null
+          status: string | null
+          order_date: string | null
+          estimated_completion: string | null
           notes: string | null
-          created_at: string
-          updated_at: string
+          created_at: string | null
         }
         Insert: {
           id?: string
-          user_id: string
-          order_number: string
-          customer_name: string
+          user_id?: string | null
+          order_number?: string | null
+          customer_name?: string | null
+          customer_social_media?: string | null
           customer_phone?: string | null
           customer_address?: string | null
-          product_name: string
-          quantity?: number
-          price: number
-          status?: string
-          order_date?: string
-          estimated_delivery?: string | null
+          product_name?: string | null
+          product_details?: string | null
+          product_customizations?: string | null
+          price?: number | null
+          status?: string | null
+          order_date?: string | null
+          estimated_completion?: string | null
           notes?: string | null
-          created_at?: string
-          updated_at?: string
+          created_at?: string | null
         }
         Update: {
           id?: string
-          user_id?: string
-          order_number?: string
-          customer_name?: string
+          user_id?: string | null
+          order_number?: string | null
+          customer_name?: string | null
+          customer_social_media?: string | null
           customer_phone?: string | null
           customer_address?: string | null
-          product_name?: string
-          quantity?: number
-          price?: number
-          status?: string
-          order_date?: string
-          estimated_delivery?: string | null
+          product_name?: string | null
+          product_details?: string | null
+          product_customizations?: string | null
+          price?: number | null
+          status?: string | null
+          order_date?: string | null
+          estimated_completion?: string | null
           notes?: string | null
-          created_at?: string
-          updated_at?: string
+          created_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
-      simple_products: {
+      products: {
         Row: {
           id: string
           user_id: string
+          product_number: string
           name: string
+          description: string | null
           category: string | null
           price: number
-          cost: number | null
-          description: string | null
-          sku: string | null
+          cost: number
           is_active: boolean
           created_at: string
           updated_at: string
@@ -80,12 +91,12 @@ export type Database = {
         Insert: {
           id?: string
           user_id: string
+          product_number: string
           name: string
+          description?: string | null
           category?: string | null
           price?: number
-          cost?: number | null
-          description?: string | null
-          sku?: string | null
+          cost?: number
           is_active?: boolean
           created_at?: string
           updated_at?: string
@@ -93,28 +104,37 @@ export type Database = {
         Update: {
           id?: string
           user_id?: string
+          product_number?: string
           name?: string
+          description?: string | null
           category?: string | null
           price?: number
-          cost?: number | null
-          description?: string | null
-          sku?: string | null
+          cost?: number
           is_active?: boolean
           created_at?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
-      simple_customers: {
+      customers: {
         Row: {
           id: string
           user_id: string
+          customer_number: string
           company_name: string
           contact_person: string | null
           email: string | null
           phone: string | null
           address: string | null
-          customer_number: string | null
+          org_number: string | null
           is_active: boolean
           created_at: string
           updated_at: string
@@ -122,12 +142,13 @@ export type Database = {
         Insert: {
           id?: string
           user_id: string
+          customer_number: string
           company_name: string
           contact_person?: string | null
           email?: string | null
           phone?: string | null
           address?: string | null
-          customer_number?: string | null
+          org_number?: string | null
           is_active?: boolean
           created_at?: string
           updated_at?: string
@@ -135,56 +156,26 @@ export type Database = {
         Update: {
           id?: string
           user_id?: string
+          customer_number?: string
           company_name?: string
           contact_person?: string | null
           email?: string | null
           phone?: string | null
           address?: string | null
-          customer_number?: string | null
+          org_number?: string | null
           is_active?: boolean
           created_at?: string
           updated_at?: string
         }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          id: string
-          user_id: string
-          company_name: string | null
-          contact_person: string | null
-          company_email: string | null
-          company_phone: string | null
-          company_address: string | null
-          onboarding_completed: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          company_name?: string | null
-          contact_person?: string | null
-          company_email?: string | null
-          company_phone?: string | null
-          company_address?: string | null
-          onboarding_completed?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          company_name?: string | null
-          contact_person?: string | null
-          company_email?: string | null
-          company_phone?: string | null
-          company_address?: string | null
-          onboarding_completed?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "customers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {

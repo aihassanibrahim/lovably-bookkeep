@@ -25,14 +25,16 @@ const Orders = () => {
   const [newOrder, setNewOrder] = useState({
     order_number: '',
     customer_name: '',
+    customer_social_media: '',
     customer_phone: '',
     customer_address: '',
     product_name: '',
-    quantity: 1,
+    product_details: '',
+    product_customizations: '',
     price: '',
     status: 'Beställd',
     order_date: new Date().toISOString().split('T')[0],
-    estimated_delivery: '',
+    estimated_completion: '',
     notes: ''
   });
 
@@ -75,8 +77,7 @@ const Orders = () => {
       const orderData = {
         ...newOrder,
         order_number: newOrder.order_number || generateOrderNumber(),
-        price: parseFloat(newOrder.price),
-        quantity: parseInt(newOrder.quantity) || 1
+        price: parseFloat(newOrder.price)
       };
 
       if (editingOrder) {
@@ -99,14 +100,16 @@ const Orders = () => {
     setNewOrder({
       order_number: order.order_number || '',
       customer_name: order.customer_name || '',
+      customer_social_media: order.customer_social_media || '',
       customer_phone: order.customer_phone || '',
       customer_address: order.customer_address || '',
       product_name: order.product_name || '',
-      quantity: order.quantity || 1,
+      product_details: order.product_details || '',
+      product_customizations: order.product_customizations || '',
       price: order.price?.toString() || '',
       status: order.status || 'Beställd',
       order_date: order.order_date || new Date().toISOString().split('T')[0],
-      estimated_delivery: order.estimated_completion || '',
+      estimated_completion: order.estimated_completion || '',
       notes: order.notes || ''
     });
     setEditingOrder(order);
@@ -125,14 +128,16 @@ const Orders = () => {
     setNewOrder({
       order_number: '',
       customer_name: '',
+      customer_social_media: '',
       customer_phone: '',
       customer_address: '',
       product_name: '',
-      quantity: 1,
+      product_details: '',
+      product_customizations: '',
       price: '',
       status: 'Beställd',
       order_date: new Date().toISOString().split('T')[0],
-      estimated_delivery: '',
+      estimated_completion: '',
       notes: ''
     });
     setEditingOrder(null);
@@ -242,6 +247,15 @@ const Orders = () => {
                     />
                   </div>
                   <div>
+                    <Label htmlFor="customer_social_media">Sociala medier</Label>
+                    <Input
+                      id="customer_social_media"
+                      value={newOrder.customer_social_media}
+                      onChange={(e) => setNewOrder({...newOrder, customer_social_media: e.target.value})}
+                      placeholder="@annaandersson, Facebook: Anna Andersson"
+                    />
+                  </div>
+                  <div>
                     <Label htmlFor="customer_phone">Telefon</Label>
                     <Input
                       id="customer_phone"
@@ -266,7 +280,7 @@ const Orders = () => {
               {/* Product Info */}
               <div className="space-y-4">
                 <h3 className="font-medium">Produktinformation</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
                     <Label htmlFor="product_name">Produkt *</Label>
                     <Input
@@ -278,16 +292,27 @@ const Orders = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="quantity">Antal</Label>
-                    <Input
-                      id="quantity"
-                      type="number"
-                      min="1"
-                      value={newOrder.quantity}
-                      onChange={(e) => setNewOrder({...newOrder, quantity: parseInt(e.target.value) || 1})}
-                      placeholder="1"
+                    <Label htmlFor="product_details">Produktdetaljer</Label>
+                    <Textarea
+                      id="product_details"
+                      value={newOrder.product_details}
+                      onChange={(e) => setNewOrder({...newOrder, product_details: e.target.value})}
+                      placeholder="Storlek, färg, material..."
+                      rows={2}
                     />
                   </div>
+                  <div>
+                    <Label htmlFor="product_customizations">Anpassningar</Label>
+                    <Textarea
+                      id="product_customizations"
+                      value={newOrder.product_customizations}
+                      onChange={(e) => setNewOrder({...newOrder, product_customizations: e.target.value})}
+                      placeholder="Speciella önskemål, personalisering..."
+                      rows={2}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="price">Pris (SEK) *</Label>
                     <Input
@@ -324,12 +349,12 @@ const Orders = () => {
               {/* Additional Info */}
               <div className="grid grid-cols-1 gap-4">
                 <div>
-                  <Label htmlFor="estimated_delivery">Beräknad leverans</Label>
+                  <Label htmlFor="estimated_completion">Beräknad leverans</Label>
                   <Input
-                    id="estimated_delivery"
+                    id="estimated_completion"
                     type="date"
-                    value={newOrder.estimated_delivery}
-                    onChange={(e) => setNewOrder({...newOrder, estimated_delivery: e.target.value})}
+                    value={newOrder.estimated_completion}
+                    onChange={(e) => setNewOrder({...newOrder, estimated_completion: e.target.value})}
                   />
                 </div>
                 <div>
@@ -479,12 +504,21 @@ const Orders = () => {
                       <div className="flex items-center gap-2">
                         <Package className="h-4 w-4" />
                         <span>{order.product_name}</span>
-                        {order.quantity > 1 && <span>× {order.quantity}</span>}
                       </div>
+                      {order.product_details && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs">Detaljer: {order.product_details}</span>
+                        </div>
+                      )}
                       {order.customer_phone && (
                         <div className="flex items-center gap-2">
                           <Phone className="h-4 w-4" />
                           <span>{order.customer_phone}</span>
+                        </div>
+                      )}
+                      {order.customer_social_media && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs">Social: {order.customer_social_media}</span>
                         </div>
                       )}
                       {order.customer_address && (

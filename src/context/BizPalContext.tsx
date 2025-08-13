@@ -157,7 +157,7 @@ export const BizPalProvider = ({ children }) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
 
-      // Load orders with simplified structure
+      // Load orders from existing orders table
       const { data: orders, error: ordersError } = await supabase
         .from('orders')
         .select('*')
@@ -191,6 +191,7 @@ export const BizPalProvider = ({ children }) => {
         .from('products')
         .select('*')
         .eq('user_id', user.id)
+        .eq('is_active', true)
         .order('name');
 
       if (productsError) {
