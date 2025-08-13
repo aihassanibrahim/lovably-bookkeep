@@ -1,9 +1,4 @@
 import React, { useState } from 'react';
-/**
- * MAJOR CHANGE: Simplified Products page to work with existing 'products' table
- * - Uses existing schema with product_number, price, cost, is_active
- * - Removed complex inventory management features
- */
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

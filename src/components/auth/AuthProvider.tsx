@@ -36,7 +36,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const appUrl = (import.meta.env.VITE_PUBLIC_APP_URL || import.meta.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')) as string;
 
   useEffect(() => {
-    // Check for demo mode first
     const demoMode = localStorage.getItem('bizpal-demo-mode');
     const demoSession = localStorage.getItem('bizpal-demo-session');
     
@@ -45,15 +44,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const demoData = JSON.parse(demoSession);
         const now = Date.now();
         
-        // Check if demo session is still valid (24 hours)
         if (demoData.expires_at > now) {
           setUser(demoData.user as User);
           setSession(demoData as Session);
-          setIsEmailVerified(true); // Demo users are considered verified
+          setIsEmailVerified(true);
           setLoading(false);
           return;
         } else {
-          // Demo session expired, clear it
           localStorage.removeItem('bizpal-demo-mode');
           localStorage.removeItem('bizpal-demo-session');
         }
@@ -64,7 +61,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    // Get initial session from Supabase
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -72,7 +68,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {

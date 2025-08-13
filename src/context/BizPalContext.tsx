@@ -1,14 +1,8 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
-/**
- * MAJOR CHANGE: Simplified BizPalContext to work with existing database tables
- * - Removed complex features like inventory, invoices, expenses, production tasks
- * - Focused on core order management functionality for small businesses
- */
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { toast } from 'sonner';
 
-// Simplified state structure for core business functions
 const initialState = {
   orders: [],
   products: [],
@@ -16,7 +10,6 @@ const initialState = {
   loading: false
 };
 
-// Action types for simplified operations
 const actionTypes = {
   SET_ORDERS: 'SET_ORDERS',
   ADD_ORDER: 'ADD_ORDER',
@@ -37,7 +30,6 @@ const actionTypes = {
   CLEAR_ALL_DATA: 'CLEAR_ALL_DATA'
 };
 
-// Simplified reducer
 const bizPalReducer = (state, action) => {
   switch (action.type) {
     case actionTypes.SET_ORDERS:
@@ -102,51 +94,22 @@ const bizPalReducer = (state, action) => {
   }
 };
 
-// Create context with default value
 const BizPalContext = createContext(null);
 
-// Custom hook to use BizPal context
 export const useBizPal = () => {
   const context = useContext(BizPalContext);
   if (!context) {
-    // Return default values instead of throwing error for better UX
-    return {
-      orders: [],
-      products: [],
-      customers: [],
-      loading: false,
-      stats: { orders: { total: 0, active: 0, completed: 0, revenue: 0 } },
-      addOrder: () => Promise.resolve(),
-      updateOrder: () => Promise.resolve(),
-      deleteOrder: () => Promise.resolve(),
-      addProduct: () => Promise.resolve(),
-      updateProduct: () => Promise.resolve(),
-      deleteProduct: () => Promise.resolve(),
-      addCustomer: () => Promise.resolve(),
-      updateCustomer: () => Promise.resolve(),
-      deleteCustomer: () => Promise.resolve(),
-      refreshData: () => Promise.resolve()
-    };
+    throw new Error('useBizPal must be used within a BizPalProvider');
   }
   return context;
 };
 
-// Provider component
 export const BizPalProvider = ({ children }) => {
   const [state, dispatch] = useReducer(bizPalReducer, { ...initialState, loading: true });
   const [error, setError] = useState(null);
   
-  // Get auth with error handling
-  let user = null;
-  try {
-    const auth = useAuth();
-    user = auth?.user;
-  } catch (err) {
-    console.error('Error in BizPalProvider dependencies:', err);
-    setError(err);
-  }
+  const { user } = useAuth();
 
-  // Load all data from Supabase when user changes
   useEffect(() => {
     if (user) {
       loadAllData();
@@ -162,7 +125,6 @@ export const BizPalProvider = ({ children }) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
 
-      // Load orders from existing orders table
       const { data: orders, error: ordersError } = await supabase
         .from('orders')
         .select('*')
@@ -176,7 +138,6 @@ export const BizPalProvider = ({ children }) => {
         dispatch({ type: actionTypes.SET_ORDERS, payload: orders || [] });
       }
 
-      // Load customers
       const { data: customers, error: customersError } = await supabase
         .from('customers')
         .select('*')
@@ -191,7 +152,6 @@ export const BizPalProvider = ({ children }) => {
         dispatch({ type: actionTypes.SET_CUSTOMERS, payload: customers || [] });
       }
 
-      // Load products
       const { data: products, error: productsError } = await supabase
         .from('products')
         .select('*')
@@ -214,7 +174,6 @@ export const BizPalProvider = ({ children }) => {
     }
   };
 
-  // Helper function to calculate stats
   const getStats = () => {
     const orders = state.orders || [];
     
@@ -240,9 +199,7 @@ export const BizPalProvider = ({ children }) => {
     };
   };
 
-  // Simplified action creators
   const actions = {
-    // Orders
     addOrder: async (orderData) => {
       if (!user) return;
       
@@ -318,7 +275,6 @@ export const BizPalProvider = ({ children }) => {
       }
     },
 
-    // Products
     addProduct: async (productData) => {
       if (!user) return;
       
@@ -394,7 +350,6 @@ export const BizPalProvider = ({ children }) => {
       }
     },
 
-    // Customers
     addCustomer: async (customerData) => {
       if (!user) return;
       
@@ -469,26 +424,19 @@ export const BizPalProvider = ({ children }) => {
       }
     },
 
-    // Data management
     refreshData: loadAllData,
     clearAllData: () => dispatch({ type: actionTypes.CLEAR_ALL_DATA })
   };
 
   const value = {
-    // State
     orders: state.orders || [],
     products: state.products || [],
     customers: state.customers || [],
     loading: state.loading,
-    
-    // Computed stats
     stats: getStats(),
-    
-    // Actions
     ...actions
   };
 
-  // Show error fallback if provider failed to initialize
   if (error) {
     console.error('BizPalProvider error:', error);
     return (
