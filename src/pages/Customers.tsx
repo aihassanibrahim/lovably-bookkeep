@@ -47,11 +47,24 @@ const Customers = () => {
       return;
     }
     
+    // Validate email format if provided
+    if (newCustomer.email && newCustomer.email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(newCustomer.email.trim())) {
+        toast.error('Ogiltig e-postadress');
+        return;
+      }
+    }
+    
     setSubmitting(true);
     
     try {
       const customerData = {
-        ...newCustomer,
+        company_name: newCustomer.company_name.trim(),
+        contact_person: newCustomer.contact_person?.trim() || '',
+        email: newCustomer.email?.trim() || '',
+        phone: newCustomer.phone?.trim() || '',
+        address: newCustomer.address?.trim() || '',
         customer_number: `KUND-${Date.now()}`
       };
 

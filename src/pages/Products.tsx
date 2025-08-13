@@ -41,8 +41,16 @@ const Products = () => {
       return;
     }
     
-    if (!newProduct.price || parseFloat(newProduct.price) < 0) {
-      toast.error('Giltigt pris krävs');
+    const price = parseFloat(newProduct.price);
+    const cost = parseFloat(newProduct.cost);
+    
+    if (isNaN(price) || price < 0) {
+      toast.error('Giltigt pris krävs (minst 0 SEK)');
+      return;
+    }
+    
+    if (newProduct.cost && (isNaN(cost) || cost < 0)) {
+      toast.error('Kostnad kan inte vara negativ');
       return;
     }
 
@@ -51,9 +59,12 @@ const Products = () => {
     try {
       const productData = {
         ...newProduct,
-        price: parseFloat(newProduct.price) || 0,
-        cost: parseFloat(newProduct.cost) || 0,
-        product_number: newProduct.sku || `PROD-${Date.now()}`
+        name: newProduct.name.trim(),
+        price: price,
+        cost: cost || 0,
+        product_number: newProduct.sku || `PROD-${Date.now()}`,
+        category: newProduct.category || '',
+        description: newProduct.description || ''
       };
 
       if (editingProduct) {

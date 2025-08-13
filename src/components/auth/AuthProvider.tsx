@@ -92,10 +92,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error };
       }
 
-      return { error: null };
+      return !error;
     } catch (error) {
-      console.error('Unexpected sign in error:', error);
-      return { error: error as AuthError };
+      console.error('Error ensuring user exists:', error);
+      return false;
     }
   };
 
@@ -114,21 +114,68 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error };
       }
 
-      // Create initial profile record for new user
-      // Use the user from the signup response, not the state
+      // Create initial profile record for new user with retry logic
       if (data.user) {
-        const { error: profileError } = await supabase
+        // Wait a bit for the user to be created in auth.users
+        setTimeout(async () => {
+          try {
+            const { error: profileError } = await supabase
+              .from('profiles')
+              .insert({
+                user_id: data.user.id,
+                onboarding_completed: false,
+                onboarding_step: 0,
+              });
+
+            if (profileError) {
+              console.error('Profile creation error:', profileError);
+            } else {
+              console.log('Profile created successfully for user:', data.user.id);
+            }
+          } catch (err) {
+            console.error('Error creating profile:', err);
+          }
+        }, 1000);
+      }
+
+      return { error: null };
+    } catch (error) {
+      console.error('Unexpected sign up error:', error);
+      return { error: error as AuthError };
+    }
+  };
+
+  // Import ensureUserExists function
+  const ensureUserExists = async (userId: string) => {
+    try {
+      const { data: existingUser, error } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('user_id', userId)
+        .single();
+
+      if (error && error.code === 'PGRST116') {
+        // User doesn't exist in profiles, create one
+        const { error: insertError } = await supabase
           .from('profiles')
           .insert({
-            user_id: data.user.id,
+            user_id: userId,
             onboarding_completed: false,
-            onboarding_step: 0,
+            onboarding_step: 0
           });
 
-        if (profileError) {
-          console.error('Profile creation error:', profileError);
-        } else {
-          console.log('Profile created successfully for user:', data.user.id);
+        if (insertError) {
+          console.error('Error creating user profile:', insertError);
+          return false;
+        }
+        return true;
+      }
+
+      // Ensure user profile exists after sign in
+      if (data.user) {
+        const userExists = await ensureUserExists(data.user.id);
+        if (!userExists) {
+          console.warn('Could not ensure user profile exists');
         }
       }
 

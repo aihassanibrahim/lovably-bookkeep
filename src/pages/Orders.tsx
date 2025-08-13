@@ -66,8 +66,9 @@ const Orders = () => {
       return;
     }
     
-    if (!newOrder.price || parseFloat(newOrder.price) <= 0) {
-      toast.error('Giltigt pris krävs');
+    const price = parseFloat(newOrder.price);
+    if (isNaN(price) || price < 0) {
+      toast.error('Giltigt pris krävs (minst 0 SEK)');
       return;
     }
     
@@ -77,7 +78,15 @@ const Orders = () => {
       const orderData = {
         ...newOrder,
         order_number: newOrder.order_number || generateOrderNumber(),
-        price: parseFloat(newOrder.price)
+        price: price,
+        // Ensure all required fields have default values
+        customer_social_media: newOrder.customer_social_media || '',
+        customer_phone: newOrder.customer_phone || '',
+        customer_address: newOrder.customer_address || '',
+        product_details: newOrder.product_details || '',
+        product_customizations: newOrder.product_customizations || '',
+        notes: newOrder.notes || '',
+        estimated_completion: newOrder.estimated_completion || null
       };
 
       if (editingOrder) {
@@ -147,6 +156,13 @@ const Orders = () => {
     const orderToUpdate = orders.find(order => order.id === orderId);
     if (orderToUpdate) {
       try {
+        // Validate status
+        const validStatuses = ['Beställd', 'I produktion', 'Klar', 'Levererad', 'Avbruten'];
+        if (!validStatuses.includes(newStatus)) {
+          toast.error('Ogiltig status');
+          return;
+        }
+
         await updateOrder({ ...orderToUpdate, status: newStatus });
       } catch (error) {
         console.error('Error updating order status:', error);

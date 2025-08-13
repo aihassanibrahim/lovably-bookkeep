@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, ensureUserExists } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { toast } from 'sonner';
 
@@ -203,14 +203,32 @@ export const BizPalProvider = ({ children }) => {
     addOrder: async (orderData) => {
       if (!user) return;
       
+      // Ensure user exists in database before creating order
+      const userExists = await ensureUserExists(user.id);
+      if (!userExists) {
+        toast.error('Kunde inte verifiera användare');
+        return;
+      }
+      
       try {
         const orderWithDefaults = {
           ...orderData,
           price: parseFloat(orderData.price) || 0,
           user_id: user.id,
           order_number: orderData.order_number || `ORD-${Date.now()}`,
-          status: orderData.status || 'Beställd'
+          status: orderData.status || 'Beställd',
+          order_date: orderData.order_date || new Date().toISOString().split('T')[0]
         };
+
+        // Validate required fields
+        if (!orderWithDefaults.customer_name?.trim()) {
+          toast.error('Kundnamn krävs');
+          return;
+        }
+        if (!orderWithDefaults.product_name?.trim()) {
+          toast.error('Produktnamn krävs');
+          return;
+        }
 
         const { data, error } = await supabase
           .from('orders')
@@ -234,6 +252,16 @@ export const BizPalProvider = ({ children }) => {
       if (!user) return;
       
       try {
+        // Validate required fields
+        if (!orderData.customer_name?.trim()) {
+          toast.error('Kundnamn krävs');
+          return;
+        }
+        if (!orderData.product_name?.trim()) {
+          toast.error('Produktnamn krävs');
+          return;
+        }
+
         const { data, error } = await supabase
           .from('orders')
           .update(orderData)
@@ -278,13 +306,31 @@ export const BizPalProvider = ({ children }) => {
     addProduct: async (productData) => {
       if (!user) return;
       
+      // Ensure user exists in database before creating product
+      const userExists = await ensureUserExists(user.id);
+      if (!userExists) {
+        toast.error('Kunde inte verifiera användare');
+        return;
+      }
+      
       try {
+        // Validate required fields
+        if (!productData.name?.trim()) {
+          toast.error('Produktnamn krävs');
+          return;
+        }
+        if (productData.price && parseFloat(productData.price) < 0) {
+          toast.error('Priset kan inte vara negativt');
+          return;
+        }
+
         const productWithDefaults = {
           ...productData,
           price: parseFloat(productData.price) || 0,
           cost: parseFloat(productData.cost) || 0,
           user_id: user.id,
-          is_active: true
+          is_active: true,
+          product_number: productData.product_number || `PROD-${Date.now()}`
         };
 
         const { data, error } = await supabase
@@ -309,6 +355,16 @@ export const BizPalProvider = ({ children }) => {
       if (!user) return;
       
       try {
+        // Validate required fields
+        if (!productData.name?.trim()) {
+          toast.error('Produktnamn krävs');
+          return;
+        }
+        if (productData.price && parseFloat(productData.price) < 0) {
+          toast.error('Priset kan inte vara negativt');
+          return;
+        }
+
         const { data, error } = await supabase
           .from('products')
           .update(productData)
@@ -353,7 +409,20 @@ export const BizPalProvider = ({ children }) => {
     addCustomer: async (customerData) => {
       if (!user) return;
       
+      // Ensure user exists in database before creating customer
+      const userExists = await ensureUserExists(user.id);
+      if (!userExists) {
+        toast.error('Kunde inte verifiera användare');
+        return;
+      }
+      
       try {
+        // Validate required fields
+        if (!customerData.company_name?.trim()) {
+          toast.error('Företagsnamn krävs');
+          return;
+        }
+
         const customerWithDefaults = {
           ...customerData,
           user_id: user.id,
@@ -383,6 +452,12 @@ export const BizPalProvider = ({ children }) => {
       if (!user) return;
       
       try {
+        // Validate required fields
+        if (!customerData.company_name?.trim()) {
+          toast.error('Företagsnamn krävs');
+          return;
+        }
+
         const { data, error } = await supabase
           .from('customers')
           .update(customerData)
