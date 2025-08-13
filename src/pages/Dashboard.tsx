@@ -12,11 +12,9 @@ import {
   ArrowUpRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useBizPal } from "@/context/BizPalContext";
 import { useNavigate } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
 import { SubscriptionStatus } from "@/components/SubscriptionStatus";
 
 export default function Dashboard() {
@@ -35,12 +33,10 @@ export default function Dashboard() {
     return new Date(dateString).toLocaleDateString('sv-SE');
   };
 
-  // Get recent orders for display
   const recentOrders = orders
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 5);
 
-  // Get orders by status
   const ordersByStatus = {
     'Beställd': orders.filter(o => o.status === 'Beställd').length,
     'I produktion': orders.filter(o => o.status === 'I produktion').length,
@@ -50,11 +46,11 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="space-y-6 p-6 lg:space-y-8 lg:p-8 bg-[hsl(var(--light-gray))] min-h-screen">
+      <div className="space-y-6 p-6 lg:space-y-8 lg:p-8 bg-gray-50 min-h-screen">
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
           <div className="space-y-2">
-            <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-[hsl(var(--dark-navy))]">Dashboard</h1>
-            <p className="text-gray-600 text-base lg:text-lg">Laddar data...</p>
+            <h1 className="text-4xl font-black text-slate-800">Dashboard</h1>
+            <p className="text-gray-600 text-lg">Laddar data...</p>
           </div>
         </div>
         <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -76,19 +72,19 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6 p-6 lg:space-y-8 lg:p-8 bg-[hsl(var(--light-gray))] min-h-screen">
+    <div className="space-y-6 p-6 lg:space-y-8 lg:p-8 bg-gray-50 min-h-screen">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
         <div className="space-y-2">
-          <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-[#1E293B]">Dashboard</h1>
-          <p className="text-gray-600 text-base lg:text-lg">
+          <h1 className="text-5xl font-black text-slate-800 tracking-tight">Dashboard</h1>
+          <p className="text-gray-600 text-lg">
             Översikt av din verksamhet - {new Date().toLocaleDateString('sv-SE')}
           </p>
         </div>
         <div className="flex flex-wrap gap-2 lg:gap-3">
           <Button 
             onClick={() => navigate('/orders')}
-            className="bg-[#2DD4BF] hover:bg-[#0D9488] text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200"
+            className="bg-teal-400 hover:bg-teal-500 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200"
           >
             <Plus className="h-4 w-4 mr-2" />
             Ny Order
@@ -98,22 +94,22 @@ export default function Dashboard() {
 
       {/* Quick Stats */}
       <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300">
+        <Card className="finpay-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Aktiva Ordrar</CardTitle>
-            <Package className="h-5 w-5 text-[#2DD4BF]" />
+            <CardTitle className="text-sm font-medium text-gray-600">Aktiva Ordrar</CardTitle>
+            <Package className="h-5 w-5 text-teal-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black text-[#1E293B]">{stats.orders.active}</div>
+            <div className="text-3xl font-black text-slate-800">{stats.orders.active}</div>
             <p className="text-xs text-gray-600">
               {stats.orders.total} totalt
             </p>
           </CardContent>
         </Card>
         
-        <Card className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300">
+        <Card className="finpay-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Månadens Intäkter</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Månadens Intäkter</CardTitle>
             <TrendingUp className="h-5 w-5 text-green-600" />
           </CardHeader>
           <CardContent>
@@ -126,26 +122,26 @@ export default function Dashboard() {
           </CardContent>
         </Card>
         
-        <Card className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300">
+        <Card className="finpay-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Produkter</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Produkter</CardTitle>
             <ShoppingBag className="h-5 w-5 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black text-[#1E293B]">{products.length}</div>
+            <div className="text-3xl font-black text-slate-800">{products.length}</div>
             <p className="text-xs text-gray-600">
               I katalogen
             </p>
           </CardContent>
         </Card>
         
-        <Card className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300">
+        <Card className="finpay-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Kunder</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Kunder</CardTitle>
             <Users className="h-5 w-5 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black text-[#1E293B]">{customers.length}</div>
+            <div className="text-3xl font-black text-slate-800">{customers.length}</div>
             <p className="text-xs text-gray-600">
               Registrerade
             </p>
@@ -157,41 +153,41 @@ export default function Dashboard() {
       <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card className="finpay-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Beställda</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Beställda</CardTitle>
             <AlertCircle className="h-5 w-5 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-600">{ordersByStatus['Beställd']}</div>
+            <div className="text-3xl font-black text-blue-600">{ordersByStatus['Beställd']}</div>
           </CardContent>
         </Card>
         
         <Card className="finpay-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">I Produktion</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">I Produktion</CardTitle>
             <Clock className="h-5 w-5 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-orange-600">{ordersByStatus['I produktion']}</div>
+            <div className="text-3xl font-black text-orange-600">{ordersByStatus['I produktion']}</div>
           </CardContent>
         </Card>
         
         <Card className="finpay-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Klara</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Klara</CardTitle>
             <CheckCircle className="h-5 w-5 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-purple-600">{ordersByStatus['Klar']}</div>
+            <div className="text-3xl font-black text-purple-600">{ordersByStatus['Klar']}</div>
           </CardContent>
         </Card>
         
         <Card className="finpay-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Levererade</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Levererade</CardTitle>
             <CheckCircle className="h-5 w-5 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-600">{ordersByStatus['Levererad']}</div>
+            <div className="text-3xl font-black text-green-600">{ordersByStatus['Levererad']}</div>
           </CardContent>
         </Card>
       </div>
@@ -203,7 +199,7 @@ export default function Dashboard() {
       <Card className="finpay-card">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-xl font-bold text-slate-800">
               <Package className="h-5 w-5" />
               Senaste Ordrar
             </CardTitle>
@@ -236,23 +232,23 @@ export default function Dashboard() {
               {recentOrders.map((order) => (
                 <div key={order.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center justify-center w-10 h-10 bg-[hsl(var(--teal-primary))]/10 rounded-xl">
-                      <Package className="h-5 w-5 text-[hsl(var(--teal-primary))]" />
+                    <div className="flex items-center justify-center w-10 h-10 bg-teal-400/10 rounded-xl">
+                      <Package className="h-5 w-5 text-teal-400" />
                     </div>
                     <div>
-                      <h4 className="font-medium">{order.order_number}</h4>
+                      <h4 className="font-medium text-slate-800">{order.order_number}</h4>
                       <p className="text-sm text-gray-600">{order.customer_name}</p>
                       <p className="text-xs text-gray-500">{order.product_name}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-medium">{formatCurrency(order.price || 0)}</div>
+                    <div className="font-medium text-slate-800">{formatCurrency(order.price || 0)}</div>
                     <Badge 
                       className={
-                        order.status === 'Levererad' ? 'bg-green-100 text-green-800' :
-                        order.status === 'Klar' ? 'bg-purple-100 text-purple-800' :
-                        order.status === 'I produktion' ? 'bg-orange-100 text-orange-800' :
-                        'bg-blue-100 text-blue-800'
+                        order.status === 'Levererad' ? 'bg-green-100 text-green-800 border-0' :
+                        order.status === 'Klar' ? 'bg-purple-100 text-purple-800 border-0' :
+                        order.status === 'I produktion' ? 'bg-orange-100 text-orange-800 border-0' :
+                        'bg-blue-100 text-blue-800 border-0'
                       }
                     >
                       {order.status}
@@ -268,14 +264,14 @@ export default function Dashboard() {
       {/* Quick Actions */}
       <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card 
-          className="finpay-card hover:shadow-lg transition-all duration-300 cursor-pointer border-[hsl(var(--teal-primary))]/20 hover:border-[hsl(var(--teal-primary))]/40" 
+          className="finpay-card hover:shadow-lg transition-all duration-300 cursor-pointer border-teal-200 hover:border-teal-400" 
           onClick={() => navigate('/orders')}
         >
           <CardContent className="p-6">
-            <div className="flex items-center justify-center w-12 h-12 bg-[hsl(var(--teal-primary))]/10 rounded-xl mb-4">
-              <Plus className="h-6 w-6 text-[hsl(var(--teal-primary))]" />
+            <div className="flex items-center justify-center w-12 h-12 bg-teal-400/10 rounded-xl mb-4">
+              <Plus className="h-6 w-6 text-teal-400" />
             </div>
-            <h3 className="font-semibold text-lg mb-2">Ny Order</h3>
+            <h3 className="font-semibold text-lg mb-2 text-slate-800">Ny Order</h3>
             <p className="text-sm text-gray-600">Lägg till ny beställning</p>
           </CardContent>
         </Card>
@@ -288,7 +284,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-xl mb-4">
               <ShoppingBag className="h-6 w-6 text-green-600" />
             </div>
-            <h3 className="font-semibold text-lg mb-2">Hantera Produkter</h3>
+            <h3 className="font-semibold text-lg mb-2 text-slate-800">Hantera Produkter</h3>
             <p className="text-sm text-gray-600">Uppdatera produktkatalog</p>
           </CardContent>
         </Card>
@@ -301,7 +297,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-xl mb-4">
               <Users className="h-6 w-6 text-purple-600" />
             </div>
-            <h3 className="font-semibold text-lg mb-2">Kundregister</h3>
+            <h3 className="font-semibold text-lg mb-2 text-slate-800">Kundregister</h3>
             <p className="text-sm text-gray-600">Hantera kunder</p>
           </CardContent>
         </Card>

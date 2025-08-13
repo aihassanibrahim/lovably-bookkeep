@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { 
   Package, 
@@ -13,7 +12,6 @@ import {
   Building2
 } from 'lucide-react';
 
-// Simplified navigation for core business functions
 const navigationItems = [
   {
     name: 'Dashboard',
@@ -47,8 +45,7 @@ const navigationItems = [
   }
 ];
 
-// Navigation Item Component
-const NavigationItem = ({ item, isActive }) => {
+const NavigationItem = ({ item, isActive }: { item: any, isActive: boolean }) => {
   const Icon = item.icon;
   
   return (
@@ -56,15 +53,15 @@ const NavigationItem = ({ item, isActive }) => {
       to={item.href}
       className={`group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
         isActive
-          ? 'bg-[hsl(var(--teal-primary))]/10 text-[hsl(var(--teal-primary))] shadow-sm'
-          : 'text-gray-600 hover:bg-gray-50 hover:text-[hsl(var(--dark-navy))]'
+          ? 'bg-teal-400/10 text-teal-600 shadow-sm'
+          : 'text-gray-600 hover:bg-gray-50 hover:text-slate-800'
       }`}
     >
       <Icon
         className={`flex-shrink-0 h-5 w-5 mr-3 ${
           isActive 
-            ? 'text-[hsl(var(--teal-primary))]' 
-            : 'text-gray-400 group-hover:text-[hsl(var(--dark-navy))]'
+            ? 'text-teal-400' 
+            : 'text-gray-400 group-hover:text-slate-800'
         }`}
       />
       <div className="flex-1">
@@ -75,20 +72,19 @@ const NavigationItem = ({ item, isActive }) => {
   );
 };
 
-// User Profile Component
-const UserProfile = ({ user, signOut }) => {
+const UserProfile = ({ user, signOut }: { user: any, signOut: () => void }) => {
   return (
     <div className="flex-shrink-0 border-t border-gray-100 p-6">
       <div className="flex items-center mb-3">
         <div className="flex-shrink-0">
-          <div className="h-10 w-10 rounded-full bg-[hsl(var(--teal-primary))] flex items-center justify-center">
+          <div className="h-10 w-10 rounded-full bg-teal-400 flex items-center justify-center">
             <span className="text-white text-sm font-medium">
               {user?.email?.charAt(0).toUpperCase()}
             </span>
           </div>
         </div>
         <div className="ml-3 flex-1 min-w-0">
-          <p className="text-sm font-medium text-[hsl(var(--dark-navy))] truncate">
+          <p className="text-sm font-medium text-slate-800 truncate">
             {user?.email || 'Användare'}
           </p>
           <p className="text-xs text-gray-500">BizPal</p>
@@ -111,7 +107,7 @@ const Navigation = () => {
   const { signOut, user } = useAuth();
   const location = useLocation();
 
-  const isActive = (href) => {
+  const isActive = (href: string) => {
     if (href === '/') {
       return location.pathname === '/';
     }
@@ -125,8 +121,8 @@ const Navigation = () => {
         {/* Logo and Header */}
         <div className="flex items-center justify-between flex-shrink-0 px-6 py-6 border-b border-gray-100">
           <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
-            <Building2 className="h-8 w-8 text-[#2DD4BF]" />
-            <span className="ml-2 text-xl font-bold text-[#1E293B]">BizPal</span>
+            <Building2 className="h-8 w-8 text-teal-400" />
+            <span className="ml-2 text-xl font-bold text-slate-800">BizPal</span>
           </Link>
         </div>
 
@@ -151,8 +147,8 @@ const Navigation = () => {
       <div className="lg:hidden">
         <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
           <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
-            <Building2 className="h-6 w-6 text-[#2DD4BF]" />
-            <span className="ml-2 text-lg font-bold text-[#1E293B]">BizPal</span>
+            <Building2 className="h-6 w-6 text-teal-400" />
+            <span className="ml-2 text-lg font-bold text-slate-800">BizPal</span>
           </Link>
           <Button
             variant="outline"
@@ -175,8 +171,8 @@ const Navigation = () => {
                   to={item.href}
                   className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded-xl transition-all duration-200 ${
                     isActive(item.href)
-                      ? 'text-[#2DD4BF] bg-[#2DD4BF]/10'
-                      : 'text-gray-600 hover:text-[#2DD4BF] hover:bg-gray-50'
+                      ? 'text-teal-400 bg-teal-400/10'
+                      : 'text-gray-600 hover:text-teal-400 hover:bg-gray-50'
                   }`}
                 >
                   <Icon className="h-6 w-6 mb-1" />

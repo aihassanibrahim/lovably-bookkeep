@@ -1,4 +1,4 @@
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -23,7 +23,7 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       retryDelay: 1000,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
     },
   },
 });
@@ -33,10 +33,10 @@ const AppContent = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Laddar...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400 mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Laddar BizPal...</p>
         </div>
       </div>
     );
@@ -47,6 +47,7 @@ const AppContent = () => {
       <Routes>
         <Route path="/login" element={<LoginForm />} />
         <Route path="/pricing" element={<Pricing />} />
+        <Route path="/success" element={<Success />} />
         <Route path="*" element={<LandingPage />} />
       </Routes>
     );
@@ -57,7 +58,6 @@ const AppContent = () => {
       <div className="min-h-screen bg-gray-50">
         <Navigation />
         
-        {/* Main content area */}
         <div className="lg:pl-64 pt-12 lg:pt-0">
           <main className="min-h-screen">
             <Routes>
@@ -86,8 +86,8 @@ const App = () => (
           <AuthProvider>
             <BizPalProvider>
               <TooltipProvider>
-                <Sonner />
                 <AppContent />
+                <Toaster />
               </TooltipProvider>
             </BizPalProvider>
           </AuthProvider>

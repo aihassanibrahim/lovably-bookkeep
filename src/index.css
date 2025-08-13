@@ -25,12 +25,19 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
-    
-    /* Finpay brand colors */
-    --teal-primary: 174 100% 47%;
-    --teal-secondary: 174 100% 35%;
-    --dark-navy: 215 25% 27%;
-    --light-gray: 210 20% 98%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 10.6% 64.9%;
   }
 
   .dark {
@@ -53,6 +60,19 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 94.1%;
+    --sidebar-primary-foreground: 220.9 39.3% 11%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 10.6% 64.9%;
   }
 }
 
@@ -65,80 +85,65 @@
     @apply bg-background text-foreground;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-    font-variation-settings: normal;
-  }
-  
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Inter', sans-serif;
-    color: #334155;
-    letter-spacing: -0.025em;
-  }
-  
-  h1 {
-    font-size: 3.5rem;
-    line-height: 1.1;
-    font-weight: 800;
-  }
-  
-  h2 {
-    font-size: 2.5rem;
-    line-height: 1.2;
-    font-weight: 700;
-  }
-  
-  h3 {
-    font-size: 1.875rem;
-    line-height: 1.3;
-    font-weight: 600;
-  }
-  
-  p {
-    font-size: 1.125rem;
-    line-height: 1.6;
-    color: #64748B;
   }
 }
 
-@layer components {
-  .finpay-card {
-    @apply bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300;
-  }
-  
-  .finpay-button-primary {
-    @apply bg-teal-400 hover:bg-teal-500 text-white transition-all duration-200 rounded-xl font-semibold px-6 py-3;
-  }
-  
-  .finpay-button-secondary {
-    @apply bg-white border border-gray-200 hover:bg-gray-50 transition-all duration-200 rounded-xl font-semibold px-6 py-3 text-slate-700;
-  }
-  
-  .finpay-gradient {
-    background: linear-gradient(135deg, #2DD4BF 0%, #334155 100%);
-  }
-  
-  .finpay-hero-gradient {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  }
-  
-  .finpay-stats-number {
-    @apply text-5xl font-black text-slate-700 leading-none;
-  }
-  
-  .finpay-stats-label {
-    @apply text-sm text-slate-500 font-medium;
-  }
+/* Finpay-inspired design system */
+.finpay-hero {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-  
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
+.finpay-gradient {
+  background: linear-gradient(135deg, #2dd4bf 0%, #334155 100%);
+}
+
+.finpay-card {
+  @apply bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300;
+}
+
+.finpay-button-primary {
+  @apply bg-teal-400 hover:bg-teal-500 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200;
+}
+
+.finpay-button-secondary {
+  @apply bg-white border border-gray-200 hover:bg-gray-50 text-slate-700 font-semibold px-6 py-3 rounded-xl transition-all duration-200;
+}
+
+.finpay-stats-number {
+  @apply text-5xl font-black text-slate-700 leading-none;
+}
+
+.finpay-stats-label {
+  @apply text-sm text-slate-500 font-medium;
+}
+
+/* Typography */
+h1 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: -0.025em;
+}
+
+h3 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  color: #475569;
+}
+
+p {
+  color: #64748b;
+  line-height: 1.6;
+}
+
+/* Utilities */
+.text-balance {
+  text-wrap: balance;
 }
