@@ -80,7 +80,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
         <div className="space-y-2">
-          <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-finpay-navy">Dashboard</h1>
+          <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-[#1E293B]">Dashboard</h1>
           <p className="text-gray-600 text-base lg:text-lg">
             Översikt av din verksamhet - {new Date().toLocaleDateString('sv-SE')}
           </p>
@@ -88,7 +88,7 @@ export default function Dashboard() {
         <div className="flex flex-wrap gap-2 lg:gap-3">
           <Button 
             onClick={() => navigate('/orders')}
-            className="bg-finpay-teal hover:bg-finpay-teal-dark text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200"
+            className="bg-[#2DD4BF] hover:bg-[#0D9488] text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200"
           >
             <Plus className="h-4 w-4 mr-2" />
             Ny Order
@@ -101,10 +101,10 @@ export default function Dashboard() {
         <Card className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Aktiva Ordrar</CardTitle>
-            <Package className="h-5 w-5 text-finpay-teal" />
+            <Package className="h-5 w-5 text-[#2DD4BF]" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black text-finpay-navy">{stats.orders.active}</div>
+            <div className="text-3xl font-black text-[#1E293B]">{stats.orders.active}</div>
             <p className="text-xs text-gray-600">
               {stats.orders.total} totalt
             </p>
@@ -132,7 +132,7 @@ export default function Dashboard() {
             <ShoppingBag className="h-5 w-5 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black text-finpay-navy">{products.length}</div>
+            <div className="text-3xl font-black text-[#1E293B]">{products.length}</div>
             <p className="text-xs text-gray-600">
               I katalogen
             </p>
@@ -145,7 +145,7 @@ export default function Dashboard() {
             <Users className="h-5 w-5 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black text-finpay-navy">{customers.length}</div>
+            <div className="text-3xl font-black text-[#1E293B]">{customers.length}</div>
             <p className="text-xs text-gray-600">
               Registrerade
             </p>

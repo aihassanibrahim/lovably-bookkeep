@@ -99,11 +99,11 @@
   }
   
   .finpay-button-primary {
-    @apply bg-teal-primary hover:bg-teal-secondary text-white transition-all duration-200 rounded-xl font-semibold px-6 py-3;
+    @apply bg-finpay-teal hover:bg-finpay-teal-dark text-white transition-all duration-200 rounded-xl font-semibold px-6 py-3;
   }
   
   .finpay-button-secondary {
-    @apply bg-white border border-gray-200 hover:bg-gray-50 transition-all duration-200 rounded-xl font-semibold px-6 py-3 text-dark-navy;
+    @apply bg-white border border-gray-200 hover:bg-gray-50 transition-all duration-200 rounded-xl font-semibold px-6 py-3 text-finpay-navy;
   }
   
   .finpay-gradient {
@@ -115,11 +115,11 @@
   }
   
   .finpay-stats-number {
-    @apply text-5xl font-black text-dark-navy leading-none;
+    @apply text-5xl font-black text-finpay-navy leading-none;
   }
   
   .finpay-stats-label {
-    @apply text-sm text-medium-gray font-medium;
+    @apply text-sm text-finpay-gray-medium font-medium;
   }
 }
 

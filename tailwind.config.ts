@@ -11,12 +11,12 @@ export default {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
-        // Finpay brand colors
-        'teal-primary': '#2DD4BF',
-        'teal-secondary': '#0D9488',
-        'dark-navy': '#1E293B',
-        'light-gray': '#F8FAFC',
-        'medium-gray': '#64748B',
+        // Finpay brand colors - direct hex values
+        'finpay-teal': '#2DD4BF',
+        'finpay-teal-dark': '#0D9488',
+        'finpay-navy': '#1E293B',
+        'finpay-gray-light': '#F8FAFC',
+        'finpay-gray-medium': '#64748B',
         
         // Shadcn colors
         border: "hsl(var(--border))",

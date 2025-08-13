@@ -15,9 +15,7 @@ import {
   CreditCard,
   Building2,
   Star,
-  ChevronDown,
-  Menu,
-  X
+  ChevronDown
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MobileNav } from '@/components/ui/mobile-nav';
@@ -25,7 +23,6 @@ import { MobileNav } from '@/components/ui/mobile-nav';
 const LandingPage = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -50,33 +47,33 @@ const LandingPage = () => {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <Building2 className="h-8 w-8 text-[hsl(var(--teal-primary))]" />
-              <span className="ml-2 text-xl font-bold text-[hsl(var(--dark-navy))]">BizPal</span>
+              <Building2 className="h-8 w-8 text-finpay-teal" />
+              <span className="ml-2 text-xl font-bold text-finpay-navy">BizPal</span>
             </div>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
               <button 
                 onClick={() => scrollToSection('funktioner')}
-                className="text-gray-600 hover:text-[hsl(var(--dark-navy))] transition-colors font-medium"
+                className="text-gray-600 hover:text-finpay-navy transition-colors font-medium"
               >
                 Funktioner
               </button>
               <button 
                 onClick={() => scrollToSection('priser')}
-                className="text-gray-600 hover:text-[hsl(var(--dark-navy))] transition-colors font-medium"
+                className="text-gray-600 hover:text-finpay-navy transition-colors font-medium"
               >
                 Priser
               </button>
               <button 
                 onClick={() => scrollToSection('om-oss')}
-                className="text-gray-600 hover:text-[hsl(var(--dark-navy))] transition-colors font-medium"
+                className="text-gray-600 hover:text-finpay-navy transition-colors font-medium"
               >
                 Om oss
               </button>
               <button 
                 onClick={() => scrollToSection('faq')}
-                className="text-gray-600 hover:text-[hsl(var(--dark-navy))] transition-colors font-medium"
+                className="text-gray-600 hover:text-finpay-navy transition-colors font-medium"
               >
                 FAQ
               </button>
@@ -87,13 +84,13 @@ const LandingPage = () => {
               <Button 
                 variant="ghost" 
                 onClick={handleLoginClick}
-                className="text-gray-600 hover:text-[hsl(var(--dark-navy))] hover:bg-gray-50"
+                className="text-gray-600 hover:text-finpay-navy hover:bg-gray-50"
               >
                 Logga in
               </Button>
               <Button 
                 onClick={handleGetStarted}
-                className="finpay-button-primary px-6 py-2"
+                className="bg-finpay-teal hover:bg-finpay-teal-dark text-white px-6 py-2 rounded-xl font-semibold"
               >
                 Kom igång gratis
               </Button>
@@ -110,19 +107,19 @@ const LandingPage = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-24 pb-16 lg:pt-32 lg:pb-24 finpay-hero-gradient">
+      <section className="pt-24 pb-16 lg:pt-32 lg:pb-24 bg-gradient-to-br from-finpay-gray-light to-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
               <div className="space-y-6">
-                <h1 className="text-5xl lg:text-6xl font-black text-dark-navy leading-tight tracking-tight">
+                <h1 className="text-5xl lg:text-6xl font-black text-finpay-navy leading-tight tracking-tight">
                   Hantera ordrar enkelt,
                   <br />
-                  <span className="text-teal-primary">spara tid automatiskt</span>
+                  <span className="text-finpay-teal">spara tid automatiskt</span>
                   <br />
                   för ditt företag.
                 </h1>
-                <p className="text-xl text-medium-gray max-w-lg leading-relaxed">
+                <p className="text-xl text-finpay-gray-medium max-w-lg leading-relaxed">
                   Stöd små företag med enkel orderhantering, kraftfulla integrationer och verktyg för kassaflödeshantering.
                 </p>
               </div>
@@ -133,11 +130,11 @@ const LandingPage = () => {
                   placeholder="Din företags-email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 h-12 rounded-xl border-gray-200 focus:border-[hsl(var(--teal-primary))] focus:ring-[hsl(var(--teal-primary))]"
+                  className="flex-1 h-12 rounded-xl border-gray-200 focus:border-finpay-teal focus:ring-finpay-teal"
                 />
                 <Button 
                   onClick={handleGetStarted}
-                  className="finpay-button-primary h-12 px-8 whitespace-nowrap"
+                  className="bg-finpay-teal hover:bg-finpay-teal-dark text-white h-12 px-8 whitespace-nowrap rounded-xl font-semibold"
                 >
                   Kom igång
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -163,11 +160,11 @@ const LandingPage = () => {
 
             {/* Hero Visual */}
             <div className="relative">
-              <div className="finpay-card p-8 max-w-sm mx-auto lg:mx-0 shadow-xl">
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-xl p-8 max-w-sm mx-auto lg:mx-0">
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-teal-primary rounded-lg flex items-center justify-center">
+                      <div className="w-8 h-8 bg-finpay-teal rounded-lg flex items-center justify-center">
                         <Package className="h-4 w-4 text-white" />
                       </div>
                       <span className="font-medium text-gray-600">Dina ordrar</span>
@@ -176,10 +173,10 @@ const LandingPage = () => {
                   </div>
                   
                   <div className="space-y-4">
-                    <div className="finpay-stats-number">
+                    <div className="text-5xl font-black text-finpay-navy leading-none">
                       234 ordrar
                     </div>
-                    <div className="text-sm text-gray-500">April 2024</div>
+                    <div className="text-sm text-finpay-gray-medium font-medium">April 2024</div>
                   </div>
 
                   <div className="space-y-3">
@@ -193,7 +190,7 @@ const LandingPage = () => {
                     </div>
                   </div>
 
-                  <Button className="w-full finpay-button-primary h-12">
+                  <Button className="w-full bg-finpay-teal hover:bg-finpay-teal-dark text-white h-12 rounded-xl font-semibold">
                     Hantera
                   </Button>
                 </div>
@@ -207,45 +204,45 @@ const LandingPage = () => {
       <section id="funktioner" className="py-16 lg:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <Badge className="bg-teal-primary/10 text-teal-primary border-0 mb-4 px-4 py-2 rounded-full font-medium">
+            <Badge className="bg-finpay-teal/10 text-finpay-teal border-0 mb-4 px-4 py-2 rounded-full font-medium">
               FRAMTIDA BETALNING
             </Badge>
-            <h2 className="text-4xl font-bold text-dark-navy mb-6 leading-tight">
+            <h2 className="text-4xl font-bold text-finpay-navy mb-6 leading-tight">
               Upplevelse som växer
               <br />
               med din skala.
             </h2>
-            <p className="text-xl text-medium-gray max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-finpay-gray-medium max-w-2xl mx-auto leading-relaxed">
               Designa ett finansiellt operativsystem som fungerar för ditt företag och strömlinjeforma kassaflödeshantering
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
             <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-light-gray rounded-2xl flex items-center justify-center mx-auto">
-                <CreditCard className="h-8 w-8 text-teal-primary" />
+              <div className="w-16 h-16 bg-finpay-gray-light rounded-2xl flex items-center justify-center mx-auto">
+                <CreditCard className="h-8 w-8 text-finpay-teal" />
               </div>
-              <h3 className="text-xl font-semibold text-dark-navy">Gratis överföringar</h3>
+              <h3 className="text-xl font-semibold text-finpay-navy">Gratis överföringar</h3>
               <p className="text-gray-600">
                 Skapa en finansiell upplevelse och automatisera återkommande inköp genom att schemalägga återkommande betalningar.
               </p>
             </div>
 
             <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-light-gray rounded-2xl flex items-center justify-center mx-auto">
-                <Building2 className="h-8 w-8 text-teal-primary" />
+              <div className="w-16 h-16 bg-finpay-gray-light rounded-2xl flex items-center justify-center mx-auto">
+                <Building2 className="h-8 w-8 text-finpay-teal" />
               </div>
-              <h3 className="text-xl font-semibold text-dark-navy">Flera konton</h3>
+              <h3 className="text-xl font-semibold text-finpay-navy">Flera konton</h3>
               <p className="text-gray-600">
                 Kör dina operationer med kontanter från ditt konto och generera årslånga fonder lagrade i ditt konto.
               </p>
             </div>
 
             <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-light-gray rounded-2xl flex items-center justify-center mx-auto">
-                <Shield className="h-8 w-8 text-teal-primary" />
+              <div className="w-16 h-16 bg-finpay-gray-light rounded-2xl flex items-center justify-center mx-auto">
+                <Shield className="h-8 w-8 text-finpay-teal" />
               </div>
-              <h3 className="text-xl font-semibold text-dark-navy">Oöverträffad säkerhet</h3>
+              <h3 className="text-xl font-semibold text-finpay-navy">Oöverträffad säkerhet</h3>
               <p className="text-gray-600">
                 Hantera säkert dina finanser med din organisation-wide MFA, kortlåsning och avancerade säkerhetskontroller.
               </p>
@@ -255,42 +252,42 @@ const LandingPage = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 lg:py-24 bg-light-gray">
+      <section className="py-16 lg:py-24 bg-finpay-gray-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <Badge className="bg-teal-primary/10 text-teal-primary border-0 mb-4 px-4 py-2 rounded-full font-medium">
+            <Badge className="bg-finpay-teal/10 text-finpay-teal border-0 mb-4 px-4 py-2 rounded-full font-medium">
               VARFÖR OSS
             </Badge>
-            <h2 className="text-4xl font-bold text-dark-navy mb-6">Varför de föredrar BizPal</h2>
+            <h2 className="text-4xl font-bold text-finpay-navy mb-6">Varför de föredrar BizPal</h2>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
             <div className="text-center space-y-4">
-              <div className="finpay-stats-number text-teal-primary">3k+</div>
-              <div className="finpay-stats-label">Företag som redan kör på BizPal</div>
+              <div className="text-5xl font-black text-finpay-teal leading-none">3k+</div>
+              <div className="text-sm text-finpay-gray-medium font-medium">Företag som redan kör på BizPal</div>
             </div>
 
             <div className="text-center space-y-4">
-              <div className="finpay-stats-number">24%</div>
-              <div className="finpay-stats-label">Intäktsföretag</div>
+              <div className="text-5xl font-black text-finpay-navy leading-none">24%</div>
+              <div className="text-sm text-finpay-gray-medium font-medium">Intäktsföretag</div>
             </div>
 
             <div className="text-center space-y-4">
-              <div className="finpay-stats-number">180K</div>
-              <div className="finpay-stats-label">I årlig intäkt</div>
+              <div className="text-5xl font-black text-finpay-navy leading-none">180K</div>
+              <div className="text-sm text-finpay-gray-medium font-medium">I årlig intäkt</div>
             </div>
 
             <div className="text-center space-y-4">
-              <div className="finpay-stats-number">10+</div>
-              <div className="finpay-stats-label">Månader av landningsbana</div>
+              <div className="text-5xl font-black text-finpay-navy leading-none">10+</div>
+              <div className="text-sm text-finpay-gray-medium font-medium">Månader av landningsbana</div>
             </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-12 mt-16 items-center">
             <div className="space-y-6">
-              <h3 className="text-3xl font-bold text-dark-navy">Omedelbar uttag av dina medel när som helst</h3>
+              <h3 className="text-3xl font-bold text-finpay-navy">Omedelbar uttag av dina medel när som helst</h3>
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-teal-primary rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-finpay-teal rounded-xl flex items-center justify-center">
                   <Zap className="h-6 w-6 text-white" />
                 </div>
                 <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
@@ -300,17 +297,17 @@ const LandingPage = () => {
             </div>
 
             <div className="space-y-6">
-              <h3 className="text-3xl font-bold text-dark-navy">Ingen tillgångsvolatilitet</h3>
+              <h3 className="text-3xl font-bold text-finpay-navy">Ingen tillgångsvolatilitet</h3>
               <p className="text-gray-600">
                 Generera avkastning på dina kassareserver utan att göra några investeringar.
               </p>
-              <div className="finpay-card p-6 shadow-lg">
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-lg p-6">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-500">Översikt</span>
                     <span className="text-sm text-gray-500">6 Månader</span>
                   </div>
-                  <div className="text-2xl font-bold text-dark-navy">1,876,580 kr</div>
+                  <div className="text-2xl font-bold text-finpay-navy">1,876,580 kr</div>
                   <div className="h-32 bg-gradient-to-r from-finpay-teal/20 to-finpay-teal/5 rounded-lg flex items-end">
                     <div className="w-full h-16 bg-finpay-teal/30 rounded-lg"></div>
                   </div>
@@ -438,7 +435,7 @@ const LandingPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 lg:py-24 finpay-gradient">
+      <section className="py-16 lg:py-24 bg-gradient-to-r from-finpay-teal to-finpay-navy">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-3xl mx-auto space-y-8">
             <Badge className="bg-white/20 text-white border-0 mb-4">
@@ -456,7 +453,7 @@ const LandingPage = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 onClick={handleGetStarted}
-                className="bg-white text-dark-navy hover:bg-gray-100 h-12 px-8 rounded-xl font-semibold"
+                className="bg-white text-finpay-navy hover:bg-gray-100 h-12 px-8 rounded-xl font-semibold"
               >
                 Kom igång nu
               </Button>
@@ -535,7 +532,7 @@ const LandingPage = () => {
                   
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <div className="text-2xl font-bold text-dark-navy">47</div>
+                      <div className="text-2xl font-bold text-finpay-navy">47</div>
                       <div className="text-sm text-gray-500">Ordrar</div>
                     </div>
                     <div>
@@ -544,8 +541,8 @@ const LandingPage = () => {
                     </div>
                   </div>
 
-                  <div className="h-24 bg-gradient-to-r from-teal-primary/10 to-teal-primary/5 rounded-lg flex items-end p-4">
-                    <div className="w-full h-12 bg-teal-primary/30 rounded"></div>
+                  <div className="h-24 bg-gradient-to-r from-finpay-teal/10 to-finpay-teal/5 rounded-lg flex items-end p-4">
+                    <div className="w-full h-12 bg-finpay-teal/30 rounded"></div>
                   </div>
                 </div>
               </div>
@@ -600,12 +597,12 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 bg-dark-navy text-white">
+      <footer className="py-12 bg-finpay-navy text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div className="space-y-4">
               <div className="flex items-center">
-                <Building2 className="h-8 w-8 text-teal-primary" />
+                <Building2 className="h-8 w-8 text-finpay-teal" />
                 <span className="ml-2 text-xl font-bold">BizPal</span>
               </div>
               <p className="text-gray-400">
