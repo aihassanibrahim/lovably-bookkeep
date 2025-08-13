@@ -2,6 +2,7 @@ import React, { createContext, useContext, useReducer, useEffect, useState } fro
 import { supabase, ensureUserExists } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { toast } from 'sonner';
+import { validateOrderData, validateProductData, validateCustomerData, sanitizeOrderData, sanitizeProductData, sanitizeCustomerData } from '@/lib/validation';
 
 const initialState = {
   orders: [],
@@ -211,24 +212,20 @@ export const BizPalProvider = ({ children }) => {
       }
       
       try {
-        const orderWithDefaults = {
-          ...orderData,
-          price: parseFloat(orderData.price) || 0,
-          user_id: user.id,
-          order_number: orderData.order_number || `ORD-${Date.now()}`,
-          status: orderData.status || 'Beställd',
-          order_date: orderData.order_date || new Date().toISOString().split('T')[0]
-        };
+        // Validate data
+        const validation = validateOrderData(orderData);
+        if (!validation.isValid) {
+          toast.error(validation.errors[0]);
+          return;
+        }
 
-        // Validate required fields
-        if (!orderWithDefaults.customer_name?.trim()) {
-          toast.error('Kundnamn krävs');
-          return;
-        }
-        if (!orderWithDefaults.product_name?.trim()) {
-          toast.error('Produktnamn krävs');
-          return;
-        }
+        // Sanitize and prepare data
+        const sanitizedData = sanitizeOrderData(orderData);
+        const orderWithDefaults = {
+          ...sanitizedData,
+          user_id: user.id,
+          order_number: orderData.order_number || `ORD-${Date.now()}`
+        };
 
         const { data, error } = await supabase
           .from('orders')
@@ -252,13 +249,10 @@ export const BizPalProvider = ({ children }) => {
       if (!user) return;
       
       try {
-        // Validate required fields
-        if (!orderData.customer_name?.trim()) {
-          toast.error('Kundnamn krävs');
-          return;
-        }
-        if (!orderData.product_name?.trim()) {
-          toast.error('Produktnamn krävs');
+        // Validate data
+        const validation = validateOrderData(orderData);
+        if (!validation.isValid) {
+          toast.error(validation.errors[0]);
           return;
         }
 
@@ -314,23 +308,19 @@ export const BizPalProvider = ({ children }) => {
       }
       
       try {
-        // Validate required fields
-        if (!productData.name?.trim()) {
-          toast.error('Produktnamn krävs');
-          return;
-        }
-        if (productData.price && parseFloat(productData.price) < 0) {
-          toast.error('Priset kan inte vara negativt');
+        // Validate data
+        const validation = validateProductData(productData);
+        if (!validation.isValid) {
+          toast.error(validation.errors[0]);
           return;
         }
 
+        // Sanitize and prepare data
+        const sanitizedData = sanitizeProductData(productData);
         const productWithDefaults = {
-          ...productData,
-          price: parseFloat(productData.price) || 0,
-          cost: parseFloat(productData.cost) || 0,
+          ...sanitizedData,
           user_id: user.id,
-          is_active: true,
-          product_number: productData.product_number || `PROD-${Date.now()}`
+          is_active: true
         };
 
         const { data, error } = await supabase
@@ -355,13 +345,10 @@ export const BizPalProvider = ({ children }) => {
       if (!user) return;
       
       try {
-        // Validate required fields
-        if (!productData.name?.trim()) {
-          toast.error('Produktnamn krävs');
-          return;
-        }
-        if (productData.price && parseFloat(productData.price) < 0) {
-          toast.error('Priset kan inte vara negativt');
+        // Validate data
+        const validation = validateProductData(productData);
+        if (!validation.isValid) {
+          toast.error(validation.errors[0]);
           return;
         }
 
@@ -417,17 +404,20 @@ export const BizPalProvider = ({ children }) => {
       }
       
       try {
-        // Validate required fields
-        if (!customerData.company_name?.trim()) {
-          toast.error('Företagsnamn krävs');
+        // Validate data
+        const validation = validateCustomerData(customerData);
+        if (!validation.isValid) {
+          toast.error(validation.errors[0]);
           return;
         }
 
+        // Sanitize and prepare data
+        const sanitizedData = sanitizeCustomerData(customerData);
         const customerWithDefaults = {
-          ...customerData,
+          ...sanitizedData,
           user_id: user.id,
           is_active: true,
-          customer_number: customerData.customer_number || `KUND-${Date.now()}`
+          customer_number: `KUND-${Date.now()}`
         };
 
         const { data, error } = await supabase
@@ -452,9 +442,10 @@ export const BizPalProvider = ({ children }) => {
       if (!user) return;
       
       try {
-        // Validate required fields
-        if (!customerData.company_name?.trim()) {
-          toast.error('Företagsnamn krävs');
+        // Validate data
+        const validation = validateCustomerData(customerData);
+        if (!validation.isValid) {
+          toast.error(validation.errors[0]);
           return;
         }
 

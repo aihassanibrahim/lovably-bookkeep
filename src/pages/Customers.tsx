@@ -20,6 +20,7 @@ import {
 import { useBizPal } from "@/context/BizPalContext";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { toast } from 'sonner';
+import { validateCustomerData } from '@/lib/validation';
 
 const Customers = () => {
   const { customers, addCustomer, updateCustomer, deleteCustomer, loading } = useBizPal();
@@ -41,32 +42,17 @@ const Customers = () => {
   const handleAddOrEditCustomer = async () => {
     if (!user) return;
     
-    // Validation
-    if (!newCustomer.company_name.trim()) {
-      toast.error('Företagsnamn krävs');
+    // Validate using centralized validation
+    const validation = validateCustomerData(newCustomer);
+    if (!validation.isValid) {
+      toast.error(validation.errors[0]);
       return;
-    }
-    
-    // Validate email format if provided
-    if (newCustomer.email && newCustomer.email.trim()) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(newCustomer.email.trim())) {
-        toast.error('Ogiltig e-postadress');
-        return;
-      }
     }
     
     setSubmitting(true);
     
     try {
-      const customerData = {
-        company_name: newCustomer.company_name.trim(),
-        contact_person: newCustomer.contact_person?.trim() || '',
-        email: newCustomer.email?.trim() || '',
-        phone: newCustomer.phone?.trim() || '',
-        address: newCustomer.address?.trim() || '',
-        customer_number: `KUND-${Date.now()}`
-      };
+      const customerData = newCustomer;
 
       if (editingCustomer) {
         await updateCustomer({

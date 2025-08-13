@@ -12,6 +12,7 @@ import { Package, User, DollarSign, Phone, MapPin, Clock, Trash2, Edit, Plus } f
 import { useBizPal } from "@/context/BizPalContext";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { toast } from 'sonner';
+import { validateOrderData } from '@/lib/validation';
 
 const Orders = () => {
   const { orders, addOrder, updateOrder, deleteOrder, customers, products, stats, loading } = useBizPal();
@@ -55,20 +56,14 @@ const Orders = () => {
   const handleAddOrEditOrder = async () => {
     if (!user) return;
     
-    // Validation
-    if (!newOrder.customer_name.trim()) {
-      toast.error('Kundnamn krävs');
-      return;
-    }
+    // Validate using centralized validation
+    const validation = validateOrderData({
+      ...newOrder,
+      price: parseFloat(newOrder.price)
+    });
     
-    if (!newOrder.product_name.trim()) {
-      toast.error('Produktnamn krävs');
-      return;
-    }
-    
-    const price = parseFloat(newOrder.price);
-    if (isNaN(price) || price < 0) {
-      toast.error('Giltigt pris krävs (minst 0 SEK)');
+    if (!validation.isValid) {
+      toast.error(validation.errors[0]);
       return;
     }
     
@@ -78,15 +73,7 @@ const Orders = () => {
       const orderData = {
         ...newOrder,
         order_number: newOrder.order_number || generateOrderNumber(),
-        price: price,
-        // Ensure all required fields have default values
-        customer_social_media: newOrder.customer_social_media || '',
-        customer_phone: newOrder.customer_phone || '',
-        customer_address: newOrder.customer_address || '',
-        product_details: newOrder.product_details || '',
-        product_customizations: newOrder.product_customizations || '',
-        notes: newOrder.notes || '',
-        estimated_completion: newOrder.estimated_completion || null
+        price: parseFloat(newOrder.price)
       };
 
       if (editingOrder) {

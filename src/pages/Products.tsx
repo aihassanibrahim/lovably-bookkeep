@@ -11,6 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Plus, Edit, Trash2, Package, DollarSign, Tag } from 'lucide-react';
 import { useBizPal } from "@/context/BizPalContext";
 import { toast } from 'sonner';
+import { validateProductData } from '@/lib/validation';
 
 const Products = () => {
   const { products, addProduct, updateProduct, deleteProduct, loading } = useBizPal();
@@ -35,22 +36,15 @@ const Products = () => {
   ];
 
   const handleAddOrEditProduct = async () => {
-    // Validation
-    if (!newProduct.name.trim()) {
-      toast.error('Produktnamn krävs');
-      return;
-    }
+    // Validate using centralized validation
+    const validation = validateProductData({
+      ...newProduct,
+      price: parseFloat(newProduct.price),
+      cost: parseFloat(newProduct.cost)
+    });
     
-    const price = parseFloat(newProduct.price);
-    const cost = parseFloat(newProduct.cost);
-    
-    if (isNaN(price) || price < 0) {
-      toast.error('Giltigt pris krävs (minst 0 SEK)');
-      return;
-    }
-    
-    if (newProduct.cost && (isNaN(cost) || cost < 0)) {
-      toast.error('Kostnad kan inte vara negativ');
+    if (!validation.isValid) {
+      toast.error(validation.errors[0]);
       return;
     }
 
@@ -58,13 +52,12 @@ const Products = () => {
     
     try {
       const productData = {
-        ...newProduct,
-        name: newProduct.name.trim(),
-        price: price,
-        cost: cost || 0,
-        product_number: newProduct.sku || `PROD-${Date.now()}`,
-        category: newProduct.category || '',
-        description: newProduct.description || ''
+        name: newProduct.name,
+        category: newProduct.category,
+        price: parseFloat(newProduct.price),
+        cost: parseFloat(newProduct.cost) || 0,
+        description: newProduct.description,
+        product_number: newProduct.sku
       };
 
       if (editingProduct) {
