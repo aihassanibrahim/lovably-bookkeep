@@ -25,13 +25,6 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 171 100% 41%;
     --radius: 0.75rem;
-    
-    /* Finpay brand colors */
-    --finpay-teal: #2DD4BF;
-    --finpay-teal-dark: #0D9488;
-    --finpay-navy: #1E293B;
-    --finpay-gray-light: #F8FAFC;
-    --finpay-gray-medium: #64748B;
   }
 
   .dark {
@@ -69,11 +62,9 @@
     font-variation-settings: normal;
   }
   
-  /* Finpay typography */
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Inter', sans-serif;
-    font-weight: 700;
-    color: var(--finpay-navy);
+    color: #1E293B;
     letter-spacing: -0.025em;
   }
   
@@ -98,56 +89,37 @@
   p {
     font-size: 1.125rem;
     line-height: 1.6;
-    color: var(--finpay-gray-medium);
+    color: #64748B;
   }
 }
 
 @layer components {
-  /* Finpay-inspired components */
   .finpay-card {
     @apply bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300;
   }
   
   .finpay-button-primary {
-    background-color: var(--finpay-teal);
-    color: white;
-    @apply hover:opacity-90 transition-all duration-200 rounded-xl font-semibold px-6 py-3;
-  }
-  
-  .finpay-button-primary:hover {
-    background-color: var(--finpay-teal-dark);
+    @apply bg-teal-primary hover:bg-teal-secondary text-white transition-all duration-200 rounded-xl font-semibold px-6 py-3;
   }
   
   .finpay-button-secondary {
-    @apply bg-white border border-gray-200 hover:bg-gray-50 transition-all duration-200 rounded-xl font-semibold px-6 py-3;
-    color: var(--finpay-navy);
+    @apply bg-white border border-gray-200 hover:bg-gray-50 transition-all duration-200 rounded-xl font-semibold px-6 py-3 text-dark-navy;
   }
   
   .finpay-gradient {
-    background: linear-gradient(135deg, var(--finpay-teal) 0%, var(--finpay-navy) 100%);
+    background: linear-gradient(135deg, #2DD4BF 0%, #1E293B 100%);
   }
   
   .finpay-hero-gradient {
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   }
   
-  .finpay-text-large {
-    font-size: 1.25rem;
-    line-height: 1.6;
-    color: var(--finpay-gray-medium);
-  }
-  
   .finpay-stats-number {
-    font-size: 3rem;
-    font-weight: 800;
-    color: var(--finpay-navy);
-    line-height: 1;
+    @apply text-5xl font-black text-dark-navy leading-none;
   }
   
   .finpay-stats-label {
-    font-size: 0.875rem;
-    color: var(--finpay-gray-medium);
-    font-weight: 500;
+    @apply text-sm text-medium-gray font-medium;
   }
 }
 

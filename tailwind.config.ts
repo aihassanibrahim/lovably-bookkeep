@@ -11,11 +11,14 @@ export default {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
-        'finpay-teal': '#2DD4BF',
-        'finpay-teal-dark': '#0D9488',
-        'finpay-navy': '#1E293B',
-        'finpay-gray-light': '#F8FAFC',
-        'finpay-gray-medium': '#64748B',
+        // Finpay brand colors
+        'teal-primary': '#2DD4BF',
+        'teal-secondary': '#0D9488',
+        'dark-navy': '#1E293B',
+        'light-gray': '#F8FAFC',
+        'medium-gray': '#64748B',
+        
+        // Shadcn colors
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -23,7 +26,7 @@ export default {
         foreground: "hsl(var(--foreground))",
         primary: {
           DEFAULT: "#2DD4BF",
-          foreground: "hsl(var(--primary-foreground))",
+          foreground: "#FFFFFF",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
