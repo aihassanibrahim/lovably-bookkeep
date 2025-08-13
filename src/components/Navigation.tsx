@@ -125,8 +125,8 @@ const Navigation = () => {
         {/* Logo and Header */}
         <div className="flex items-center justify-between flex-shrink-0 px-6 py-6 border-b border-gray-100">
           <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
-            <Building2 className="h-8 w-8 text-[hsl(var(--teal-primary))]" />
-            <span className="ml-2 text-xl font-bold text-[hsl(var(--dark-navy))]">BizPal</span>
+            <Building2 className="h-8 w-8 text-finpay-teal" />
+            <span className="ml-2 text-xl font-bold text-finpay-navy">BizPal</span>
           </Link>
         </div>
 
@@ -151,8 +151,8 @@ const Navigation = () => {
       <div className="lg:hidden">
         <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
           <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
-            <Building2 className="h-6 w-6 text-[hsl(var(--teal-primary))]" />
-            <span className="ml-2 text-lg font-bold text-[hsl(var(--dark-navy))]">BizPal</span>
+            <Building2 className="h-6 w-6 text-finpay-teal" />
+            <span className="ml-2 text-lg font-bold text-finpay-navy">BizPal</span>
           </Link>
           <Button
             variant="outline"
@@ -175,8 +175,8 @@ const Navigation = () => {
                   to={item.href}
                   className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded-lg transition-all duration-200 ${
                     isActive(item.href)
-                      ? 'text-[hsl(var(--teal-primary))] bg-[hsl(var(--teal-primary))]/10'
-                      : 'text-gray-600 hover:text-[hsl(var(--teal-primary))] hover:bg-gray-50'
+                      ? 'text-finpay-teal bg-finpay-teal/10'
+                      : 'text-gray-600 hover:text-finpay-teal hover:bg-gray-50'
                   }`}
                 >
                   <Icon className="h-6 w-6 mb-1" />

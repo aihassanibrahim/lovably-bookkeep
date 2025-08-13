@@ -7,14 +7,22 @@ export default {
   darkMode: ['class'],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
       colors: {
+        'finpay-teal': '#2DD4BF',
+        'finpay-teal-dark': '#0D9488',
+        'finpay-navy': '#1E293B',
+        'finpay-gray-light': '#F8FAFC',
+        'finpay-gray-medium': '#64748B',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT: "#2DD4BF",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
@@ -46,6 +54,8 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        xl: "0.75rem",
+        "2xl": "1rem",
       },
       keyframes: {
         "accordion-down": {
