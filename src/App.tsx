@@ -5,33 +5,15 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/components/auth/AuthProvider";
 import LandingPage from "@/pages/LandingPage";
 import { BizPalProvider } from "@/context/BizPalContext";
-import { NavigationProvider } from "@/context/NavigationContext";
 import { ThemeProvider } from "@/components/theme-provider";
-import { DemoProvider } from "@/context/DemoContext";
 import Navigation from "@/components/Navigation";
-import MobileNavigation from "@/components/MobileNavigation";
-import SupportButton from "@/components/SupportButton";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
-import Error500 from "./pages/500";
-import Accounts from "./pages/Accounts";
-import Transactions from "./pages/Transactions";
-import Customers from "./pages/Customers";
-import Suppliers from "./pages/Suppliers";
-import Reports from "./pages/Reports";
-import Settings from "./pages/Settings";
-import Expenses from "./pages/Expenses";
-// NYA SIDOR FÖR BIZPAL
 import Orders from "./pages/Orders";
 import Products from "./pages/Products";
-import Production from "./pages/Production";
-import Inventory from "./pages/Inventory";
-import Receipts from "./pages/Receipts";
-import Invoices from "./pages/Invoices";
-// NYA SUPPORT-SIDOR
-import FAQ from "./pages/FAQ";
-import About from "./pages/About";
+import Customers from "./pages/Customers";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,10 +30,10 @@ const AppContent = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-landing">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
-          <p className="text-landing-secondary">Laddar...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Laddar...</p>
         </div>
       </div>
     );
@@ -63,53 +45,22 @@ const AppContent = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-landing">
+      <div className="min-h-screen bg-gray-50">
         <Navigation />
         
         {/* Main content area */}
-        <div className="lg:pl-64 pt-12 lg:pt-0 pb-24 lg:pb-0">
+        <div className="lg:pl-64 pt-12 lg:pt-0">
           <main className="min-h-screen">
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              
-              {/* BIZPAL - HUVUDFUNKTIONER */}
               <Route path="/orders" element={<Orders />} />
-              <Route path="/invoices" element={<Invoices />} />
-              <Route path="/production" element={<Production />} />
               <Route path="/products" element={<Products />} />
-              <Route path="/inventory" element={<Inventory />} />
-              <Route path="/receipts" element={<Receipts />} />
-              
-              {/* BOKFÖRING & EKONOMI */}
-              <Route path="/transactions" element={<Transactions />} />
-              <Route path="/accounts" element={<Accounts />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/expenses" element={<Expenses />} />
-              
-              {/* KUNDER & LEVERANTÖRER */}
               <Route path="/customers" element={<Customers />} />
-              <Route path="/suppliers" element={<Suppliers />} />
-                
-                {/* INSTÄLLNINGAR & SUPPORT */}
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/faq" element={<FAQ />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/om-oss" element={<About />} />
-                
-                {/* ERROR PAGES */}
-                <Route path="/500" element={<Error500 />} />
-                
-                {/* CATCH-ALL ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-          
-          {/* Mobile Navigation */}
-          <MobileNavigation />
-          
-          {/* Support Button */}
-          <SupportButton />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
         </div>
       </div>
     </ErrorBoundary>
@@ -122,16 +73,12 @@ const App = () => (
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme="light" storageKey="bizpal-ui-theme">
           <AuthProvider>
-            <DemoProvider>
-              <BizPalProvider>
-                <NavigationProvider>
-                  <TooltipProvider>
-                    <Sonner />
-                    <AppContent />
-                  </TooltipProvider>
-                </NavigationProvider>
-              </BizPalProvider>
-            </DemoProvider>
+            <BizPalProvider>
+              <TooltipProvider>
+                <Sonner />
+                <AppContent />
+              </TooltipProvider>
+            </BizPalProvider>
           </AuthProvider>
         </ThemeProvider>
       </QueryClientProvider>

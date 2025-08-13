@@ -57,52 +57,28 @@
     @apply bg-background text-foreground antialiased;
   }
   
-  /* Modern typography */
+  /* Clean, modern typography */
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold tracking-tight;
   }
   
-  /* Improved spacing and shadows */
+  /* Improved card styling */
   .card-modern {
-    @apply bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200;
-  }
-  
-  .button-modern {
-    @apply rounded-lg font-medium transition-all duration-200;
+    @apply bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200;
   }
   
   /* Clean input styling */
   input, textarea, select {
-    @apply rounded-lg border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200;
+    @apply rounded-lg border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
   }
   
-  /* Landing page inspired design system */
-  .bg-landing {
-    @apply bg-white dark:bg-gray-900 text-black dark:text-white;
+  /* Button improvements */
+  .button-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700 transition-colors;
   }
   
-  .bg-landing-dark {
-    @apply bg-gray-50 dark:bg-gray-800;
-  }
-  
-  .text-landing-primary {
-    @apply text-black dark:text-white;
-  }
-  
-  .text-landing-secondary {
-    @apply text-gray-600 dark:text-gray-400;
-  }
-  
-  .border-landing {
-    @apply border-gray-200 dark:border-gray-700;
-  }
-  
-  .button-landing-primary {
-    @apply bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors;
-  }
-  
-  .button-landing-secondary {
-    @apply bg-white dark:bg-gray-800 text-black dark:text-white border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors;
+  .button-secondary {
+    @apply bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors;
   }
 }
 
@@ -115,4 +91,3 @@
     display: none;
   }
 }
-

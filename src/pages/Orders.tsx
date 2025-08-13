@@ -8,73 +8,82 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Calendar, Package, User, DollarSign, Instagram, Phone, MapPin, Clock, Trash2, Edit } from 'lucide-react';
+import { Package, User, DollarSign, Phone, MapPin, Clock, Trash2, Edit, Plus } from 'lucide-react';
 import { useBizPal } from "@/context/BizPalContext";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { toast } from 'sonner';
 
 const Orders = () => {
-  // Use global state instead of local state
-  const { orders, addOrder, updateOrder, deleteOrder, stats, loading } = useBizPal();
+  const { orders, addOrder, updateOrder, deleteOrder, customers, products, stats, loading } = useBizPal();
   const { user } = useAuth();
   
   const [showNewOrderDialog, setShowNewOrderDialog] = useState(false);
   const [editingOrder, setEditingOrder] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
+  
   const [newOrder, setNewOrder] = useState({
     order_number: '',
     customer_name: '',
-    customer_social_media: '',
     customer_phone: '',
     customer_address: '',
     product_name: '',
-    product_details: '',
-    product_customizations: '',
+    quantity: 1,
     price: '',
     status: 'Beställd',
     order_date: new Date().toISOString().split('T')[0],
-    estimated_completion: '',
+    estimated_delivery: '',
     notes: ''
   });
 
-  const statusColors = {
-    "Beställd": "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300",
-    "Pågående": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300",
-    "Klar": "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300",
-    "Skickad": "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
-  };
-
+  // Simplified status options for small business
   const statusOptions = [
-    { value: "Beställd", label: "Beställd" },
-    { value: "Pågående", label: "Pågående" },
-    { value: "Klar", label: "Klar" },
-    { value: "Skickad", label: "Skickad" }
+    { value: "Beställd", label: "Beställd", color: "bg-blue-100 text-blue-800" },
+    { value: "I produktion", label: "I produktion", color: "bg-orange-100 text-orange-800" },
+    { value: "Klar", label: "Klar", color: "bg-purple-100 text-purple-800" },
+    { value: "Levererad", label: "Levererad", color: "bg-green-100 text-green-800" },
+    { value: "Avbruten", label: "Avbruten", color: "bg-gray-100 text-gray-800" }
   ];
 
-  const updateOrderStatus = async (orderId, newStatus) => {
-    const orderToUpdate = orders.find(order => order.id === orderId);
-    if (orderToUpdate) {
-      try {
-        await updateOrder({ ...orderToUpdate, status: newStatus });
-      } catch (error) {
-        console.error('Error updating order status:', error);
-      }
-    }
+  const generateOrderNumber = () => {
+    const timestamp = Date.now();
+    return `ORD-${timestamp}`;
   };
 
   const handleAddOrEditOrder = async () => {
     if (!user) return;
     
+    // Validation
+    if (!newOrder.customer_name.trim()) {
+      toast.error('Kundnamn krävs');
+      return;
+    }
+    
+    if (!newOrder.product_name.trim()) {
+      toast.error('Produktnamn krävs');
+      return;
+    }
+    
+    if (!newOrder.price || parseFloat(newOrder.price) <= 0) {
+      toast.error('Giltigt pris krävs');
+      return;
+    }
+    
     setSubmitting(true);
     
     try {
+      const orderData = {
+        ...newOrder,
+        order_number: newOrder.order_number || generateOrderNumber(),
+        price: parseFloat(newOrder.price),
+        quantity: parseInt(newOrder.quantity) || 1
+      };
+
       if (editingOrder) {
-        await updateOrder({
-          ...newOrder,
-          id: editingOrder.id
-        });
+        await updateOrder({ ...orderData, id: editingOrder.id });
         setEditingOrder(null);
       } else {
-        await addOrder(newOrder);
+        await addOrder(orderData);
       }
       
       setShowNewOrderDialog(false);
@@ -90,16 +99,14 @@ const Orders = () => {
     setNewOrder({
       order_number: order.order_number || '',
       customer_name: order.customer_name || '',
-      customer_social_media: order.customer_social_media || '',
       customer_phone: order.customer_phone || '',
       customer_address: order.customer_address || '',
       product_name: order.product_name || '',
-      product_details: order.product_details || '',
-      product_customizations: order.product_customizations || '',
+      quantity: order.quantity || 1,
       price: order.price?.toString() || '',
       status: order.status || 'Beställd',
       order_date: order.order_date || new Date().toISOString().split('T')[0],
-      estimated_completion: order.estimated_completion || '',
+      estimated_delivery: order.estimated_completion || '',
       notes: order.notes || ''
     });
     setEditingOrder(order);
@@ -118,22 +125,30 @@ const Orders = () => {
     setNewOrder({
       order_number: '',
       customer_name: '',
-      customer_social_media: '',
       customer_phone: '',
       customer_address: '',
       product_name: '',
-      product_details: '',
-      product_customizations: '',
+      quantity: 1,
       price: '',
       status: 'Beställd',
       order_date: new Date().toISOString().split('T')[0],
-      estimated_completion: '',
+      estimated_delivery: '',
       notes: ''
     });
+    setEditingOrder(null);
   };
 
-  // Filter options
-  const [statusFilter, setStatusFilter] = useState("all");
+  const updateOrderStatus = async (orderId, newStatus) => {
+    const orderToUpdate = orders.find(order => order.id === orderId);
+    if (orderToUpdate) {
+      try {
+        await updateOrder({ ...orderToUpdate, status: newStatus });
+      } catch (error) {
+        console.error('Error updating order status:', error);
+      }
+    }
+  };
+
   const filteredOrders = statusFilter === "all" 
     ? orders 
     : orders.filter(order => order.status === statusFilter);
@@ -154,8 +169,8 @@ const Orders = () => {
       <div className="p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Laddar orders...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Laddar ordrar...</p>
           </div>
         </div>
       </div>
@@ -167,15 +182,15 @@ const Orders = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Orders</h1>
-          <p className="text-muted-foreground">
-            Hantera dina kundorders och följ upp leveranser
+          <h1 className="text-3xl font-bold tracking-tight">Ordrar</h1>
+          <p className="text-gray-600">
+            Hantera dina kundordrar och följ upp leveranser
           </p>
         </div>
         <Dialog open={showNewOrderDialog} onOpenChange={setShowNewOrderDialog}>
           <DialogTrigger asChild>
-            <Button>
-              <Package className="mr-2 h-4 w-4" />
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="mr-2 h-4 w-4" />
               Ny Order
             </Button>
           </DialogTrigger>
@@ -198,7 +213,7 @@ const Orders = () => {
                     id="order_number"
                     value={newOrder.order_number}
                     onChange={(e) => setNewOrder({...newOrder, order_number: e.target.value})}
-                    placeholder="ORD-001"
+                    placeholder={generateOrderNumber()}
                   />
                 </div>
                 <div>
@@ -215,23 +230,15 @@ const Orders = () => {
               {/* Customer Info */}
               <div className="space-y-4">
                 <h3 className="font-medium">Kundinformation</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <Label htmlFor="customer_name">Kundnamn</Label>
+                    <Label htmlFor="customer_name">Kundnamn *</Label>
                     <Input
                       id="customer_name"
                       value={newOrder.customer_name}
                       onChange={(e) => setNewOrder({...newOrder, customer_name: e.target.value})}
                       placeholder="Anna Andersson"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="customer_social_media">Sociala medier</Label>
-                    <Input
-                      id="customer_social_media"
-                      value={newOrder.customer_social_media}
-                      onChange={(e) => setNewOrder({...newOrder, customer_social_media: e.target.value})}
-                      placeholder="@anna_style"
+                      required
                     />
                   </div>
                   <div>
@@ -244,12 +251,13 @@ const Orders = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="customer_address">Adress</Label>
-                    <Input
+                    <Label htmlFor="customer_address">Leveransadress</Label>
+                    <Textarea
                       id="customer_address"
                       value={newOrder.customer_address}
                       onChange={(e) => setNewOrder({...newOrder, customer_address: e.target.value})}
-                      placeholder="Storgatan 1, Stockholm"
+                      placeholder="Storgatan 1, 12345 Stockholm"
+                      rows={2}
                     />
                   </div>
                 </div>
@@ -260,16 +268,28 @@ const Orders = () => {
                 <h3 className="font-medium">Produktinformation</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="product_name">Produktnamn</Label>
+                    <Label htmlFor="product_name">Produkt *</Label>
                     <Input
                       id="product_name"
                       value={newOrder.product_name}
                       onChange={(e) => setNewOrder({...newOrder, product_name: e.target.value})}
-                      placeholder="T-shirt, Halsband, etc."
+                      placeholder="Produktnamn"
+                      required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="price">Pris (SEK)</Label>
+                    <Label htmlFor="quantity">Antal</Label>
+                    <Input
+                      id="quantity"
+                      type="number"
+                      min="1"
+                      value={newOrder.quantity}
+                      onChange={(e) => setNewOrder({...newOrder, quantity: parseInt(e.target.value) || 1})}
+                      placeholder="1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="price">Pris (SEK) *</Label>
                     <Input
                       id="price"
                       type="number"
@@ -277,74 +297,59 @@ const Orders = () => {
                       value={newOrder.price}
                       onChange={(e) => setNewOrder({...newOrder, price: e.target.value})}
                       placeholder="250"
+                      required
                     />
                   </div>
-                  <div className="col-span-2">
-                    <Label htmlFor="product_details">Produktdetaljer</Label>
-                    <Input
-                      id="product_details"
-                      value={newOrder.product_details}
-                      onChange={(e) => setNewOrder({...newOrder, product_details: e.target.value})}
-                      placeholder="Storlek, färg, material, etc."
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <Label htmlFor="product_customizations">Anpassningar</Label>
-                    <Input
-                      id="product_customizations"
-                      value={newOrder.product_customizations}
-                      onChange={(e) => setNewOrder({...newOrder, product_customizations: e.target.value})}
-                      placeholder="Personlig gravyr, speciella önskemål..."
-                    />
+                  <div>
+                    <Label htmlFor="status">Status</Label>
+                    <Select 
+                      value={newOrder.status} 
+                      onValueChange={(value) => setNewOrder({...newOrder, status: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Välj status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statusOptions.map((status) => (
+                          <SelectItem key={status.value} value={status.value}>
+                            {status.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
 
-              {/* Order Details */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Additional Info */}
+              <div className="grid grid-cols-1 gap-4">
                 <div>
-                  <Label htmlFor="estimated_completion">Uppskattat klardatum</Label>
+                  <Label htmlFor="estimated_delivery">Beräknad leverans</Label>
                   <Input
-                    id="estimated_completion"
+                    id="estimated_delivery"
                     type="date"
-                    value={newOrder.estimated_completion}
-                    onChange={(e) => setNewOrder({...newOrder, estimated_completion: e.target.value})}
+                    value={newOrder.estimated_delivery}
+                    onChange={(e) => setNewOrder({...newOrder, estimated_delivery: e.target.value})}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="status">Status</Label>
-                  <Select 
-                    value={newOrder.status} 
-                    onValueChange={(value) => setNewOrder({...newOrder, status: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Välj status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {statusOptions.map((status) => (
-                        <SelectItem key={status.value} value={status.value}>
-                          {status.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="notes">Anteckningar</Label>
+                  <Textarea
+                    id="notes"
+                    value={newOrder.notes}
+                    onChange={(e) => setNewOrder({...newOrder, notes: e.target.value})}
+                    placeholder="Speciella önskemål från kunden..."
+                    rows={3}
+                  />
                 </div>
-              </div>
-
-              <div>
-                <Label htmlFor="notes">Anteckningar</Label>
-                <Textarea
-                  id="notes"
-                  value={newOrder.notes}
-                  onChange={(e) => setNewOrder({...newOrder, notes: e.target.value})}
-                  placeholder="Speciella önskemål från kunden..."
-                  rows={3}
-                />
               </div>
             </div>
             
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowNewOrderDialog(false)}>
+              <Button variant="outline" onClick={() => {
+                setShowNewOrderDialog(false);
+                resetForm();
+              }}>
                 Avbryt
               </Button>
               <Button onClick={handleAddOrEditOrder} disabled={submitting}>
@@ -359,13 +364,13 @@ const Orders = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Totalt Orders</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Totalt Ordrar</CardTitle>
+            <Package className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.orders.total}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.orders.active} aktiva, {stats.orders.completed} slutförda
+            <p className="text-xs text-gray-600">
+              {stats.orders.active} aktiva
             </p>
           </CardContent>
         </Card>
@@ -373,38 +378,40 @@ const Orders = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Intäkt</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <DollarSign className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.orders.revenue)}</div>
-            <p className="text-xs text-muted-foreground">
-              Från slutförda orders
+            <div className="text-2xl font-bold text-green-600">
+              {formatCurrency(stats.orders.revenue)}
+            </div>
+            <p className="text-xs text-gray-600">
+              Från levererade ordrar
             </p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Aktiva Orders</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Aktiva Ordrar</CardTitle>
+            <Clock className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.orders.active}</div>
-            <p className="text-xs text-muted-foreground">
-              Väntar på slutförande
+            <div className="text-2xl font-bold text-orange-600">{stats.orders.active}</div>
+            <p className="text-xs text-gray-600">
+              Pågående arbete
             </p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Slutförda</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Levererade</CardTitle>
+            <Package className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.orders.completed}</div>
-            <p className="text-xs text-muted-foreground">
-              Levererade orders
+            <div className="text-2xl font-bold text-green-600">{stats.orders.completed}</div>
+            <p className="text-xs text-gray-600">
+              Slutförda ordrar
             </p>
           </CardContent>
         </Card>
@@ -417,7 +424,7 @@ const Orders = () => {
             <SelectValue placeholder="Filtrera efter status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Alla Orders</SelectItem>
+            <SelectItem value="all">Alla Ordrar</SelectItem>
             {statusOptions.map((status) => (
               <SelectItem key={status.value} value={status.value}>
                 {status.label}
@@ -431,9 +438,24 @@ const Orders = () => {
       <div className="grid gap-4">
         {filteredOrders.length === 0 ? (
           <Card>
-            <CardContent className="flex flex-col items-center justify-center h-32">
-              <Package className="h-8 w-8 text-muted-foreground mb-2" />
-              <p className="text-muted-foreground">Inga orders hittades</p>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <Package className="h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {statusFilter === "all" ? "Inga ordrar än" : "Inga ordrar med denna status"}
+              </h3>
+              <p className="text-gray-600 text-center mb-4">
+                {statusFilter === "all" 
+                  ? "Skapa din första order för att komma igång"
+                  : "Prova att ändra filtret eller skapa en ny order"
+                }
+              </p>
+              <Button 
+                onClick={() => setShowNewOrderDialog(true)} 
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Skapa Order
+              </Button>
             </CardContent>
           </Card>
         ) : (
@@ -443,43 +465,43 @@ const Orders = () => {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-semibold">{order.order_number}</h3>
-                      <Badge className={statusColors[order.status]}>
-                        {statusOptions.find(s => s.value === order.status)?.label || order.status}
+                      <h3 className="font-semibold text-lg">{order.order_number}</h3>
+                      <Badge className={statusOptions.find(s => s.value === order.status)?.color}>
+                        {order.status}
                       </Badge>
                     </div>
                     
-                    <div className="text-sm text-muted-foreground mb-2">
-                      <div className="flex items-center gap-2 mb-1">
-                        <User className="h-3 w-3" />
+                    <div className="space-y-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
                         <span>{order.customer_name}</span>
-                        {order.customer_social_media && (
-                          <>
-                            <Instagram className="h-3 w-3" />
-                            <span>{order.customer_social_media}</span>
-                          </>
-                        )}
                       </div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <Package className="h-3 w-3" />
+                      <div className="flex items-center gap-2">
+                        <Package className="h-4 w-4" />
                         <span>{order.product_name}</span>
+                        {order.quantity > 1 && <span>× {order.quantity}</span>}
                       </div>
+                      {order.customer_phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4" />
+                          <span>{order.customer_phone}</span>
+                        </div>
+                      )}
+                      {order.customer_address && (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4" />
+                          <span>{order.customer_address}</span>
+                        </div>
+                      )}
                     </div>
                     
-                    <div className="flex flex-wrap gap-4 text-sm">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        <span>{formatDate(order.order_date)}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <DollarSign className="h-3 w-3" />
-                        <span>{formatCurrency(order.price)}</span>
-                      </div>
+                    <div className="flex flex-wrap gap-4 text-sm mt-3">
+                      <span>Beställd: {formatDate(order.order_date)}</span>
+                      <span className="font-medium text-green-600">
+                        {formatCurrency(order.price)}
+                      </span>
                       {order.estimated_completion && (
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          <span>Klar: {formatDate(order.estimated_completion)}</span>
-                        </div>
+                        <span>Leverans: {formatDate(order.estimated_completion)}</span>
                       )}
                     </div>
                   </div>
@@ -489,7 +511,7 @@ const Orders = () => {
                       value={order.status} 
                       onValueChange={(newStatus) => updateOrderStatus(order.id, newStatus)}
                     >
-                      <SelectTrigger className="w-[120px]">
+                      <SelectTrigger className="w-[140px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -541,4 +563,4 @@ const Orders = () => {
   );
 };
 
-export default Orders; 
+export default Orders;

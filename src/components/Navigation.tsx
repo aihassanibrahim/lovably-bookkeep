@@ -1,297 +1,96 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { 
   Package, 
   ShoppingBag, 
   Users, 
-  DollarSign, 
-  BarChart3,
-  Clock,
   Home,
-  Building2,
-  FileText,
-  Truck,
   LogOut,
-  HelpCircle,
-  Info,
   Settings,
-  ChevronDown,
-  ChevronRight,
-  Plus,
-  Minus,
-  Receipt,
-  MoreHorizontal,
-  User,
-  CreditCard,
-  TrendingDown,
-  Play
+  Building2
 } from 'lucide-react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-// Navigation sections configuration
-const navigationSections = [
+// Simplified navigation for core business functions
+const navigationItems = [
   {
-    id: 'main',
-    title: 'Huvudmeny',
-    items: [
-      {
-        name: 'Dashboard',
-        href: '/',
-        icon: Home,
-        description: 'Översikt'
-      }
-    ]
+    name: 'Dashboard',
+    href: '/',
+    icon: Home,
+    description: 'Översikt'
   },
   {
-    id: 'business',
-    title: 'Företag',
-    items: [
-      {
-        name: 'Ordrar',
-        href: '/orders',
-        icon: Package,
-        description: 'Hantera beställningar'
-      },
-      {
-        name: 'Fakturor',
-        href: '/invoices',
-        icon: FileText,
-        description: 'Fakturering & betalningar'
-      },
-      {
-        name: 'Produktion',
-        href: '/production',
-        icon: Clock,
-        description: 'Produktionsstatus'
-      },
-      {
-        name: 'Produkter',
-        href: '/products',
-        icon: ShoppingBag,
-        description: 'Produktkatalog'
-      },
-      {
-        name: 'Lager',
-        href: '/inventory',
-        icon: Building2,
-        description: 'Material & komponenter'
-      }
-    ]
+    name: 'Ordrar',
+    href: '/orders',
+    icon: Package,
+    description: 'Hantera beställningar'
   },
   {
-    id: 'contacts',
-    title: 'Kontakter',
-    items: [
-      {
-        name: 'Kunder',
-        href: '/customers',
-        icon: Users,
-        description: 'Kundregister'
-      },
-      {
-        name: 'Leverantörer',
-        href: '/suppliers',
-        icon: Truck,
-        description: 'Leverantörer'
-      }
-    ]
+    name: 'Produkter',
+    href: '/products',
+    icon: ShoppingBag,
+    description: 'Produktkatalog'
   },
   {
-    id: 'finance',
-    title: 'Ekonomi',
-    items: [
-      {
-        name: 'Transaktioner',
-        href: '/transactions',
-        icon: DollarSign,
-        description: 'Ekonomi'
-      },
-      {
-        name: 'Utgifter',
-        href: '/expenses',
-        icon: TrendingDown,
-        description: 'Hantera utgifter'
-      },
-      {
-        name: 'Kvitton',
-        href: '/receipts',
-        icon: Receipt,
-        description: 'Kvittoscanning & moms'
-      },
-      {
-        name: 'Rapporter',
-        href: '/reports',
-        icon: BarChart3,
-        description: 'Statistik & rapporter'
-      }
-    ]
+    name: 'Kunder',
+    href: '/customers',
+    icon: Users,
+    description: 'Kundregister'
   },
   {
-    id: 'more',
-    title: 'Mer',
-    items: [
-      {
-        name: 'Komma igång',
-        href: '#onboarding',
-        icon: Play,
-        description: 'Sätt upp ditt företag',
-        action: 'onboarding'
-      },
-      {
-        name: 'FAQ',
-        href: '/faq',
-        icon: HelpCircle,
-        description: 'Vanliga frågor'
-      },
-      {
-        name: 'Om oss',
-        href: '/about',
-        icon: Info,
-        description: 'Om BizPal'
-      },
-      {
-        name: 'Inställningar',
-        href: '/settings',
-        icon: Settings,
-        description: 'Applikationsinställningar'
-      }
-    ]
+    name: 'Inställningar',
+    href: '/settings',
+    icon: Settings,
+    description: 'Applikationsinställningar'
   }
 ];
 
 // Navigation Item Component
-const NavigationItem = ({ item, isActive, isMobile }) => {
+const NavigationItem = ({ item, isActive }) => {
   const Icon = item.icon;
-  
-  const handleClick = (e) => {
-    if (item.action === 'onboarding') {
-      e.preventDefault();
-      // Dispatch a custom event that the Dashboard can listen to
-      window.dispatchEvent(new CustomEvent('openOnboardingModal'));
-    }
-  };
   
   return (
     <Link
       to={item.href}
-      onClick={handleClick}
       className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
         isActive
-          ? 'bg-primary/10 text-primary border-r-2 border-primary'
-          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+          ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-600'
+          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
       }`}
     >
       <Icon
         className={`flex-shrink-0 h-5 w-5 ${
           isActive 
-            ? 'text-primary' 
-            : 'text-muted-foreground group-hover:text-accent-foreground'
+            ? 'text-blue-600' 
+            : 'text-gray-400 group-hover:text-gray-600'
         }`}
       />
-      {!isMobile && (
-        <div className="ml-3 flex-1">
-          <div className="font-medium">{item.name}</div>
-          <div className="text-xs text-muted-foreground">{item.description}</div>
-        </div>
-      )}
+      <div className="ml-3 flex-1">
+        <div className="font-medium">{item.name}</div>
+        <div className="text-xs text-gray-500">{item.description}</div>
+      </div>
     </Link>
   );
 };
 
-// Navigation Section Component
-const NavigationSection = ({ section, isMobile, expandedSections, toggleSection }) => {
-  const location = useLocation();
-  
-  const isActive = (href) => {
-    if (href === '/') {
-      return location.pathname === '/';
-    }
-    return location.pathname.startsWith(href);
-  };
-
-  const hasActiveItem = section.items.some(item => isActive(item.href));
-  const isExpanded = expandedSections.includes(section.id) || hasActiveItem;
-
-  // Don't show collapsible for main section
-  if (section.id === 'main') {
-    return (
-      <div className="space-y-1">
-        {section.items.map((item) => (
-          <NavigationItem
-            key={item.name}
-            item={item}
-            isActive={isActive(item.href)}
-            isMobile={isMobile}
-          />
-        ))}
-      </div>
-    );
-  }
-
-  return (
-    <Collapsible open={isExpanded} onOpenChange={() => toggleSection(section.id)}>
-      <CollapsibleTrigger asChild>
-        <Button
-          variant="ghost"
-          className={`w-full justify-between px-3 py-2 text-sm font-medium ${
-            hasActiveItem ? 'text-primary bg-primary/5' : 'text-muted-foreground hover:text-accent-foreground'
-          }`}
-        >
-          <div className="flex items-center">
-            {!isMobile && <span>{section.title}</span>}
-          </div>
-          {!isMobile && (
-            isExpanded ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )
-          )}
-        </Button>
-      </CollapsibleTrigger>
-      <CollapsibleContent className="space-y-1">
-        {section.items.map((item) => (
-          <NavigationItem
-            key={item.name}
-            item={item}
-            isActive={isActive(item.href)}
-            isMobile={isMobile}
-          />
-        ))}
-      </CollapsibleContent>
-    </Collapsible>
-  );
-};
-
-
-
 // User Profile Component
 const UserProfile = ({ user, signOut }) => {
-  const isDemoMode = localStorage.getItem('bizpal-demo-mode') === 'true';
-  
   return (
     <div className="flex-shrink-0 border-t p-4">
       <div className="flex items-center mb-3">
         <div className="flex-shrink-0">
-          <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
-            <User className="h-4 w-4 text-primary-foreground" />
+          <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
+            <span className="text-white text-sm font-medium">
+              {user?.email?.charAt(0).toUpperCase()}
+            </span>
           </div>
         </div>
         <div className="ml-3 flex-1 min-w-0">
-          <p className="text-sm font-medium text-foreground truncate">
+          <p className="text-sm font-medium text-gray-900 truncate">
             {user?.email || 'Användare'}
           </p>
-          <div className="flex items-center gap-2">
-            <p className="text-xs text-muted-foreground">BizPal</p>
-            {isDemoMode && (
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                Demo
-              </span>
-            )}
-          </div>
+          <p className="text-xs text-gray-500">BizPal</p>
         </div>
       </div>
       <Button
@@ -301,7 +100,7 @@ const UserProfile = ({ user, signOut }) => {
         className="w-full justify-start"
       >
         <LogOut className="h-4 w-4 mr-2" />
-        {isDemoMode ? 'Avsluta demo' : 'Logga ut'}
+        Logga ut
       </Button>
     </div>
   );
@@ -309,43 +108,35 @@ const UserProfile = ({ user, signOut }) => {
 
 const Navigation = () => {
   const { signOut, user } = useAuth();
-  const [expandedSections, setExpandedSections] = useState(['main']);
+  const location = useLocation();
 
-  const toggleSection = (sectionId) => {
-    setExpandedSections(prev => 
-      prev.includes(sectionId)
-        ? prev.filter(id => id !== sectionId)
-        : [...prev, sectionId]
-    );
+  const isActive = (href) => {
+    if (href === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(href);
   };
 
   return (
     <>
       {/* Desktop Navigation */}
-      <nav className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:bg-background lg:z-40">
-        {/* Logo and Topbar */}
+      <nav className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:bg-white lg:z-40">
+        {/* Logo and Header */}
         <div className="flex items-center justify-between flex-shrink-0 px-6 py-4 border-b">
           <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
-            <Building2 className="h-8 w-8 text-primary" />
-            <span className="ml-2 text-xl font-bold text-foreground">BizPal</span>
+            <Building2 className="h-8 w-8 text-blue-600" />
+            <span className="ml-2 text-xl font-bold text-gray-900">BizPal</span>
           </Link>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-          </div>
         </div>
-
-
 
         {/* Navigation Content */}
         <div className="flex-1 flex flex-col overflow-y-auto">
           <nav className="flex-1 px-3 py-4 space-y-2">
-            {navigationSections.map((section) => (
-              <NavigationSection
-                key={section.id}
-                section={section}
-                isMobile={false}
-                expandedSections={expandedSections}
-                toggleSection={toggleSection}
+            {navigationItems.map((item) => (
+              <NavigationItem
+                key={item.name}
+                item={item}
+                isActive={isActive(item.href)}
               />
             ))}
           </nav>
@@ -357,26 +148,49 @@ const Navigation = () => {
 
       {/* Mobile Header */}
       <div className="lg:hidden">
-        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-4 py-3">
+        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-white border-b px-4 py-3">
           <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
-            <Building2 className="h-6 w-6 text-primary" />
-            <span className="ml-2 text-lg font-bold text-foreground">BizPal</span>
+            <Building2 className="h-6 w-6 text-blue-600" />
+            <span className="ml-2 text-lg font-bold text-gray-900">BizPal</span>
           </Link>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={signOut}
-              className="hover:bg-accent"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={signOut}
+            className="hover:bg-gray-100"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        {/* Mobile Bottom Navigation */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t">
+          <div className="flex justify-around items-center px-2 py-3">
+            {navigationItems.slice(0, 4).map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded-lg transition-all duration-200 ${
+                    isActive(item.href)
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <Icon className="h-6 w-6 mb-1" />
+                  <span className="text-xs font-medium leading-tight">{item.name}</span>
+                </Link>
+              );
+            })}
           </div>
         </div>
+        
+        {/* Bottom padding for mobile content */}
+        <div className="h-16" />
       </div>
     </>
   );
 };
 
-export default Navigation; 
+export default Navigation;
