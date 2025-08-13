@@ -6,36 +6,42 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 210 11% 15%;
+    --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
-    --card-foreground: 210 11% 15%;
+    --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 210 11% 15%;
-    --primary: 171 100% 41%;
-    --primary-foreground: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96%;
-    --secondary-foreground: 210 11% 15%;
+    --secondary-foreground: 222.2 84% 4.9%;
     --muted: 210 40% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
     --accent: 210 40% 96%;
-    --accent-foreground: 210 11% 15%;
+    --accent-foreground: 222.2 84% 4.9%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 171 100% 41%;
-    --radius: 0.75rem;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    
+    /* Finpay brand colors */
+    --teal-primary: 174 100% 47%;
+    --teal-secondary: 174 100% 35%;
+    --dark-navy: 215 25% 27%;
+    --light-gray: 210 20% 98%;
   }
 
   .dark {
-    --background: 210 100% 12%;
+    --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-    --card: 210 100% 12%;
+    --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
-    --popover: 210 100% 12%;
+    --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 171 100% 41%;
-    --primary-foreground: 210 100% 12%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
@@ -46,7 +52,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 171 100% 41%;
+    --ring: 212.7 26.8% 83.9%;
   }
 }
 
@@ -56,7 +62,7 @@
   }
   
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     font-variation-settings: normal;
@@ -64,7 +70,7 @@
   
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Inter', sans-serif;
-    color: #1E293B;
+    color: #334155;
     letter-spacing: -0.025em;
   }
   
@@ -99,15 +105,15 @@
   }
   
   .finpay-button-primary {
-    @apply bg-finpay-teal hover:bg-finpay-teal-dark text-white transition-all duration-200 rounded-xl font-semibold px-6 py-3;
+    @apply bg-teal-400 hover:bg-teal-500 text-white transition-all duration-200 rounded-xl font-semibold px-6 py-3;
   }
   
   .finpay-button-secondary {
-    @apply bg-white border border-gray-200 hover:bg-gray-50 transition-all duration-200 rounded-xl font-semibold px-6 py-3 text-finpay-navy;
+    @apply bg-white border border-gray-200 hover:bg-gray-50 transition-all duration-200 rounded-xl font-semibold px-6 py-3 text-slate-700;
   }
   
   .finpay-gradient {
-    background: linear-gradient(135deg, #2DD4BF 0%, #1E293B 100%);
+    background: linear-gradient(135deg, #2DD4BF 0%, #334155 100%);
   }
   
   .finpay-hero-gradient {
@@ -115,11 +121,11 @@
   }
   
   .finpay-stats-number {
-    @apply text-5xl font-black text-finpay-navy leading-none;
+    @apply text-5xl font-black text-slate-700 leading-none;
   }
   
   .finpay-stats-label {
-    @apply text-sm text-finpay-gray-medium font-medium;
+    @apply text-sm text-slate-500 font-medium;
   }
 }
 
