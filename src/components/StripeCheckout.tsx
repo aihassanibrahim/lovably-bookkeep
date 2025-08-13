@@ -122,23 +122,6 @@ export const StripeCheckout: React.FC<StripeCheckoutProps> = ({ className }) => 
                   <span>Prioriterad support</span>
                 </li>
               </ul>
-                <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                  <span className="text-sm">Obegränsade ordrar</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                  <span className="text-sm">Kundhantering</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                  <span className="text-sm">Produktkatalog</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                  <span className="text-sm">Rapporter och statistik</span>
-                </div>
-              </div>
 
               <Button
                 onClick={() => handleCheckout(product.priceId, product.mode)}
@@ -155,27 +138,6 @@ export const StripeCheckout: React.FC<StripeCheckoutProps> = ({ className }) => 
                     <Zap className="mr-2 h-4 w-4" />
                     Uppgradera till Pro
                   </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-};
-              <Button
-                onClick={() => handleCheckout(product.priceId, product.mode)}
-                disabled={loadingProductId === product.priceId}
-                className="w-full"
-              >
-                {loadingProductId === product.priceId ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Laddar...
-                  </>
-                ) : (
-                  `Köp ${product.name}`
                 )}
               </Button>
             </CardContent>
