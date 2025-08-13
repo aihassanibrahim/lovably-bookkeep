@@ -122,6 +122,8 @@ export default function Landing() {
       console.error('CTA error:', error);
       toast.error('Något gick fel', {
         description: 'Kunde inte starta betalningsprocessen. Försök igen.'
+      });
+    }
     navigate("/pricing");
   };
 
@@ -245,6 +247,8 @@ export default function Landing() {
       console.error('Upgrade error:', error);
       toast.error('Något gick fel', {
         description: 'Kunde inte starta uppgraderingen. Försök igen.'
+      });
+    }
     navigate("/login");
   };
 
@@ -545,15 +549,15 @@ export default function Landing() {
                   Allt ditt företag behöver
                   <br />
                   <span className="font-light">i ett system</span>
-          </h1>
+                </h1>
                 <p
                   className="text-xl text-gray-600 leading-relaxed max-w-lg"
                   data-testid="text-hero-subtitle"
                 >
                   Från order till leverans. Hantera kunder, lager och ekonomi
                   enkelt.
-          </p>
-        </div>
+                </p>
+              </div>
 
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row gap-4">
@@ -635,8 +639,8 @@ export default function Landing() {
                       >
                         93
                       </div>
-            </CardContent>
-          </Card>
+                    </CardContent>
+                  </Card>
                 </div>
                 <div className="space-y-2">
                   <Card className="bg-white border border-gray-200 p-3">
@@ -919,8 +923,8 @@ export default function Landing() {
                 <p className="text-gray-600">
                   Samla all kontaktinfo och orderhistorik på ett ställe.
                 </p>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
             <Card className="border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
               <CardContent className="p-0 space-y-4">
