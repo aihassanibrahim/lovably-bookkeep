@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/components/auth/AuthProvider";
 import LandingPage from "@/pages/LandingPage";
+import { LoginForm } from "@/components/auth/LoginForm";
 import { BizPalProvider } from "@/context/BizPalContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import Navigation from "@/components/Navigation";
@@ -14,6 +15,8 @@ import Orders from "./pages/Orders";
 import Products from "./pages/Products";
 import Customers from "./pages/Customers";
 import Settings from "./pages/Settings";
+import Pricing from "./pages/Pricing";
+import Success from "./pages/Success";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,7 +43,13 @@ const AppContent = () => {
   }
 
   if (!user) {
-    return <LandingPage />;
+    return (
+      <Routes>
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="*" element={<LandingPage />} />
+      </Routes>
+    );
   }
 
   return (
@@ -58,6 +67,8 @@ const AppContent = () => {
               <Route path="/products" element={<Products />} />
               <Route path="/customers" element={<Customers />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/success" element={<Success />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

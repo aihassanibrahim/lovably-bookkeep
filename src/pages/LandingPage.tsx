@@ -9,6 +9,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { MobileNav } from "@/components/ui/mobile-nav";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +36,8 @@ import {
 } from "lucide-react";
 
 export default function Landing() {
+  const navigate = useNavigate();
+
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(true);
@@ -119,8 +122,7 @@ export default function Landing() {
       console.error('CTA error:', error);
       toast.error('Något gick fel', {
         description: 'Kunde inte starta betalningsprocessen. Försök igen.'
-      });
-    }
+    navigate("/pricing");
   };
 
   const handleLoginClick = () => {
@@ -243,8 +245,7 @@ export default function Landing() {
       console.error('Upgrade error:', error);
       toast.error('Något gick fel', {
         description: 'Kunde inte starta uppgraderingen. Försök igen.'
-      });
-    }
+    navigate("/login");
   };
 
   return (

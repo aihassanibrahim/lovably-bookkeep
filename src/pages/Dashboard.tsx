@@ -15,6 +15,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useBizPal } from "@/context/BizPalContext";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { SubscriptionStatus } from "@/components/SubscriptionStatus";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -192,6 +193,9 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Subscription Status */}
+      <SubscriptionStatus />
 
       {/* Recent Orders */}
       <Card>
