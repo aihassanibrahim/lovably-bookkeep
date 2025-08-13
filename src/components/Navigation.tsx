@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { 
   Package, 
@@ -53,22 +54,22 @@ const NavigationItem = ({ item, isActive }) => {
   return (
     <Link
       to={item.href}
-      className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+      className={`group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
         isActive
-          ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-600'
-          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+          ? 'bg-[hsl(var(--teal-primary))]/10 text-[hsl(var(--teal-primary))] shadow-sm'
+          : 'text-gray-600 hover:bg-gray-50 hover:text-[hsl(var(--dark-navy))]'
       }`}
     >
       <Icon
-        className={`flex-shrink-0 h-5 w-5 ${
+        className={`flex-shrink-0 h-5 w-5 mr-3 ${
           isActive 
-            ? 'text-blue-600' 
-            : 'text-gray-400 group-hover:text-gray-600'
+            ? 'text-[hsl(var(--teal-primary))]' 
+            : 'text-gray-400 group-hover:text-[hsl(var(--dark-navy))]'
         }`}
       />
-      <div className="ml-3 flex-1">
+      <div className="flex-1">
         <div className="font-medium">{item.name}</div>
-        <div className="text-xs text-gray-500">{item.description}</div>
+        <div className="text-xs text-gray-500 mt-0.5">{item.description}</div>
       </div>
     </Link>
   );
@@ -77,17 +78,17 @@ const NavigationItem = ({ item, isActive }) => {
 // User Profile Component
 const UserProfile = ({ user, signOut }) => {
   return (
-    <div className="flex-shrink-0 border-t p-4">
+    <div className="flex-shrink-0 border-t border-gray-100 p-6">
       <div className="flex items-center mb-3">
         <div className="flex-shrink-0">
-          <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
+          <div className="h-10 w-10 rounded-full bg-[hsl(var(--teal-primary))] flex items-center justify-center">
             <span className="text-white text-sm font-medium">
               {user?.email?.charAt(0).toUpperCase()}
             </span>
           </div>
         </div>
         <div className="ml-3 flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-900 truncate">
+          <p className="text-sm font-medium text-[hsl(var(--dark-navy))] truncate">
             {user?.email || 'Användare'}
           </p>
           <p className="text-xs text-gray-500">BizPal</p>
@@ -97,7 +98,7 @@ const UserProfile = ({ user, signOut }) => {
         variant="outline"
         size="sm"
         onClick={signOut}
-        className="w-full justify-start"
+        className="w-full justify-start finpay-button-secondary"
       >
         <LogOut className="h-4 w-4 mr-2" />
         Logga ut
@@ -120,18 +121,18 @@ const Navigation = () => {
   return (
     <>
       {/* Desktop Navigation */}
-      <nav className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:bg-white lg:z-40">
+      <nav className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:bg-white lg:z-40 lg:shadow-sm">
         {/* Logo and Header */}
-        <div className="flex items-center justify-between flex-shrink-0 px-6 py-4 border-b">
+        <div className="flex items-center justify-between flex-shrink-0 px-6 py-6 border-b border-gray-100">
           <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
-            <Building2 className="h-8 w-8 text-blue-600" />
-            <span className="ml-2 text-xl font-bold text-gray-900">BizPal</span>
+            <Building2 className="h-8 w-8 text-[hsl(var(--teal-primary))]" />
+            <span className="ml-2 text-xl font-bold text-[hsl(var(--dark-navy))]">BizPal</span>
           </Link>
         </div>
 
         {/* Navigation Content */}
         <div className="flex-1 flex flex-col overflow-y-auto">
-          <nav className="flex-1 px-3 py-4 space-y-2">
+          <nav className="flex-1 px-4 py-6 space-y-2">
             {navigationItems.map((item) => (
               <NavigationItem
                 key={item.name}
@@ -148,10 +149,10 @@ const Navigation = () => {
 
       {/* Mobile Header */}
       <div className="lg:hidden">
-        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-white border-b px-4 py-3">
+        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
           <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
-            <Building2 className="h-6 w-6 text-blue-600" />
-            <span className="ml-2 text-lg font-bold text-gray-900">BizPal</span>
+            <Building2 className="h-6 w-6 text-[hsl(var(--teal-primary))]" />
+            <span className="ml-2 text-lg font-bold text-[hsl(var(--dark-navy))]">BizPal</span>
           </Link>
           <Button
             variant="outline"
@@ -164,7 +165,7 @@ const Navigation = () => {
         </div>
         
         {/* Mobile Bottom Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 shadow-lg">
           <div className="flex justify-around items-center px-2 py-3">
             {navigationItems.slice(0, 4).map((item) => {
               const Icon = item.icon;
@@ -174,8 +175,8 @@ const Navigation = () => {
                   to={item.href}
                   className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded-lg transition-all duration-200 ${
                     isActive(item.href)
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                      ? 'text-[hsl(var(--teal-primary))] bg-[hsl(var(--teal-primary))]/10'
+                      : 'text-gray-600 hover:text-[hsl(var(--teal-primary))] hover:bg-gray-50'
                   }`}
                 >
                   <Icon className="h-6 w-6 mb-1" />

@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { 
   TrendingUp, 
   Package, 
@@ -7,7 +8,8 @@ import {
   Plus,
   Clock,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  ArrowUpRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
@@ -48,16 +50,16 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="space-y-6 p-4 lg:space-y-8 lg:p-6">
+      <div className="space-y-6 p-6 lg:space-y-8 lg:p-8 bg-[hsl(var(--light-gray))] min-h-screen">
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
           <div className="space-y-2">
-            <h1 className="text-3xl lg:text-4xl font-bold tracking-tight">Dashboard</h1>
+            <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-[hsl(var(--dark-navy))]">Dashboard</h1>
             <p className="text-gray-600 text-base lg:text-lg">Laddar data...</p>
           </div>
         </div>
         <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
+            <Card key={i} className="finpay-card animate-pulse">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <div className="h-4 w-24 bg-gray-200 rounded" />
                 <div className="h-8 w-8 bg-gray-200 rounded-lg" />
@@ -74,11 +76,11 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6 p-4 lg:space-y-8 lg:p-6">
+    <div className="space-y-6 p-6 lg:space-y-8 lg:p-8 bg-[hsl(var(--light-gray))] min-h-screen">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
         <div className="space-y-2">
-          <h1 className="text-3xl lg:text-4xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-[hsl(var(--dark-navy))]">Dashboard</h1>
           <p className="text-gray-600 text-base lg:text-lg">
             Översikt av din verksamhet - {new Date().toLocaleDateString('sv-SE')}
           </p>
@@ -86,7 +88,7 @@ export default function Dashboard() {
         <div className="flex flex-wrap gap-2 lg:gap-3">
           <Button 
             onClick={() => navigate('/orders')}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="finpay-button-primary"
           >
             <Plus className="h-4 w-4 mr-2" />
             Ny Order
@@ -96,26 +98,26 @@ export default function Dashboard() {
 
       {/* Quick Stats */}
       <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="finpay-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Aktiva Ordrar</CardTitle>
-            <Package className="h-4 w-4 text-gray-500" />
+            <Package className="h-5 w-5 text-[hsl(var(--teal-primary))]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.orders.active}</div>
+            <div className="text-3xl font-bold text-[hsl(var(--dark-navy))]">{stats.orders.active}</div>
             <p className="text-xs text-gray-600">
               {stats.orders.total} totalt
             </p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="finpay-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Månadens Intäkter</CardTitle>
-            <TrendingUp className="h-4 w-4 text-gray-500" />
+            <TrendingUp className="h-5 w-5 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-3xl font-bold text-green-600">
               {formatCurrency(stats.orders.revenue)}
             </div>
             <p className="text-xs text-gray-600">
@@ -124,26 +126,26 @@ export default function Dashboard() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="finpay-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Produkter</CardTitle>
-            <ShoppingBag className="h-4 w-4 text-gray-500" />
+            <ShoppingBag className="h-5 w-5 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{products.length}</div>
+            <div className="text-3xl font-bold text-[hsl(var(--dark-navy))]">{products.length}</div>
             <p className="text-xs text-gray-600">
               I katalogen
             </p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="finpay-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Kunder</CardTitle>
-            <Users className="h-4 w-4 text-gray-500" />
+            <Users className="h-5 w-5 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{customers.length}</div>
+            <div className="text-3xl font-bold text-[hsl(var(--dark-navy))]">{customers.length}</div>
             <p className="text-xs text-gray-600">
               Registrerade
             </p>
@@ -153,43 +155,43 @@ export default function Dashboard() {
 
       {/* Order Status Overview */}
       <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="finpay-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Beställda</CardTitle>
-            <AlertCircle className="h-4 w-4 text-blue-500" />
+            <AlertCircle className="h-5 w-5 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{ordersByStatus['Beställd']}</div>
+            <div className="text-3xl font-bold text-blue-600">{ordersByStatus['Beställd']}</div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="finpay-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">I Produktion</CardTitle>
-            <Clock className="h-4 w-4 text-orange-500" />
+            <Clock className="h-5 w-5 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{ordersByStatus['I produktion']}</div>
+            <div className="text-3xl font-bold text-orange-600">{ordersByStatus['I produktion']}</div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="finpay-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Klara</CardTitle>
-            <CheckCircle className="h-4 w-4 text-purple-500" />
+            <CheckCircle className="h-5 w-5 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{ordersByStatus['Klar']}</div>
+            <div className="text-3xl font-bold text-purple-600">{ordersByStatus['Klar']}</div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="finpay-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Levererade</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
+            <CheckCircle className="h-5 w-5 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{ordersByStatus['Levererad']}</div>
+            <div className="text-3xl font-bold text-green-600">{ordersByStatus['Levererad']}</div>
           </CardContent>
         </Card>
       </div>
@@ -198,7 +200,7 @@ export default function Dashboard() {
       <SubscriptionStatus />
 
       {/* Recent Orders */}
-      <Card>
+      <Card className="finpay-card">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
@@ -209,8 +211,10 @@ export default function Dashboard() {
               variant="outline" 
               size="sm"
               onClick={() => navigate('/orders')}
+              className="finpay-button-secondary"
             >
               Se alla
+              <ArrowUpRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </CardHeader>
@@ -221,7 +225,7 @@ export default function Dashboard() {
               <p className="text-gray-600 mb-4">Inga ordrar än</p>
               <Button 
                 onClick={() => navigate('/orders')}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="finpay-button-primary"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Skapa första ordern
@@ -230,10 +234,10 @@ export default function Dashboard() {
           ) : (
             <div className="space-y-4">
               {recentOrders.map((order) => (
-                <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                <div key={order.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full">
-                      <Package className="h-5 w-5 text-blue-600" />
+                    <div className="flex items-center justify-center w-10 h-10 bg-[hsl(var(--teal-primary))]/10 rounded-xl">
+                      <Package className="h-5 w-5 text-[hsl(var(--teal-primary))]" />
                     </div>
                     <div>
                       <h4 className="font-medium">{order.order_number}</h4>
@@ -244,7 +248,6 @@ export default function Dashboard() {
                   <div className="text-right">
                     <div className="font-medium">{formatCurrency(order.price || 0)}</div>
                     <Badge 
-                      variant={order.status === 'Levererad' ? 'default' : 'secondary'}
                       className={
                         order.status === 'Levererad' ? 'bg-green-100 text-green-800' :
                         order.status === 'Klar' ? 'bg-purple-100 text-purple-800' :
@@ -265,12 +268,12 @@ export default function Dashboard() {
       {/* Quick Actions */}
       <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card 
-          className="hover:shadow-md transition-shadow cursor-pointer border-blue-200 hover:border-blue-300" 
+          className="finpay-card hover:shadow-lg transition-all duration-300 cursor-pointer border-[hsl(var(--teal-primary))]/20 hover:border-[hsl(var(--teal-primary))]/40" 
           onClick={() => navigate('/orders')}
         >
           <CardContent className="p-6">
-            <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-4">
-              <Plus className="h-6 w-6 text-blue-600" />
+            <div className="flex items-center justify-center w-12 h-12 bg-[hsl(var(--teal-primary))]/10 rounded-xl mb-4">
+              <Plus className="h-6 w-6 text-[hsl(var(--teal-primary))]" />
             </div>
             <h3 className="font-semibold text-lg mb-2">Ny Order</h3>
             <p className="text-sm text-gray-600">Lägg till ny beställning</p>
@@ -278,11 +281,11 @@ export default function Dashboard() {
         </Card>
 
         <Card 
-          className="hover:shadow-md transition-shadow cursor-pointer border-green-200 hover:border-green-300" 
+          className="finpay-card hover:shadow-lg transition-all duration-300 cursor-pointer border-green-200 hover:border-green-400" 
           onClick={() => navigate('/products')}
         >
           <CardContent className="p-6">
-            <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-4">
+            <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-xl mb-4">
               <ShoppingBag className="h-6 w-6 text-green-600" />
             </div>
             <h3 className="font-semibold text-lg mb-2">Hantera Produkter</h3>
@@ -291,11 +294,11 @@ export default function Dashboard() {
         </Card>
 
         <Card 
-          className="hover:shadow-md transition-shadow cursor-pointer border-purple-200 hover:border-purple-300" 
+          className="finpay-card hover:shadow-lg transition-all duration-300 cursor-pointer border-purple-200 hover:border-purple-400" 
           onClick={() => navigate('/customers')}
         >
           <CardContent className="p-6">
-            <div className="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-full mb-4">
+            <div className="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-xl mb-4">
               <Users className="h-6 w-6 text-purple-600" />
             </div>
             <h3 className="font-semibold text-lg mb-2">Kundregister</h3>

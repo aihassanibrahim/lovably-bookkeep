@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useAuth } from './AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
-import { CreditCard } from 'lucide-react';
+import { Building2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const LoginForm: React.FC = () => {
@@ -82,33 +83,33 @@ export const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--light-gray))] py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <Link to="/" className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mb-4">
+          <Link to="/" className="inline-flex items-center text-[hsl(var(--teal-primary))] hover:text-[hsl(var(--teal-secondary))] mb-6 font-medium">
             ← Tillbaka till startsidan
           </Link>
         </div>
         <div className="text-center">
           <div className="flex justify-center">
-            <CreditCard className="h-12 w-12 text-primary" />
+            <Building2 className="h-12 w-12 text-[hsl(var(--teal-primary))]" />
           </div>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">BizPal</h2>
+          <h2 className="mt-6 text-3xl font-bold text-[hsl(var(--dark-navy))]">BizPal</h2>
           <p className="mt-2 text-sm text-gray-600">
             Logga in på ditt BizPal-konto
           </p>
         </div>
 
-        <Card>
+        <Card className="finpay-card">
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-2 bg-gray-100 rounded-xl">
               <TabsTrigger value="signin">Logga in</TabsTrigger>
               <TabsTrigger value="signup">Registrera</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
               <CardHeader>
-                <CardTitle>Logga in</CardTitle>
+                <CardTitle className="text-xl font-semibold">Logga in</CardTitle>
                 <CardDescription>
                   Logga in på ditt befintliga konto
                 </CardDescription>
@@ -124,6 +125,7 @@ export const LoginForm: React.FC = () => {
                       onChange={(e) => setEmail(e.target.value)}
                       required
                       placeholder="din@email.se"
+                      className="rounded-xl border-gray-200 focus:border-[hsl(var(--teal-primary))] focus:ring-[hsl(var(--teal-primary))]"
                     />
                   </div>
                   <div>
@@ -135,9 +137,10 @@ export const LoginForm: React.FC = () => {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       placeholder="••••••••"
+                      className="rounded-xl border-gray-200 focus:border-[hsl(var(--teal-primary))] focus:ring-[hsl(var(--teal-primary))]"
                     />
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="w-full finpay-button-primary h-12" disabled={loading}>
                     {loading ? 'Loggar in...' : 'Logga in'}
                   </Button>
                   
@@ -177,7 +180,7 @@ export const LoginForm: React.FC = () => {
             
             <TabsContent value="signup">
               <CardHeader>
-                <CardTitle>Skapa konto</CardTitle>
+                <CardTitle className="text-xl font-semibold">Skapa konto</CardTitle>
                 <CardDescription>
                   Registrera dig för att komma igång
                 </CardDescription>
@@ -193,6 +196,7 @@ export const LoginForm: React.FC = () => {
                       onChange={(e) => setEmail(e.target.value)}
                       required
                       placeholder="din@email.se"
+                      className="rounded-xl border-gray-200 focus:border-[hsl(var(--teal-primary))] focus:ring-[hsl(var(--teal-primary))]"
                     />
                   </div>
                   <div>
@@ -205,9 +209,10 @@ export const LoginForm: React.FC = () => {
                       required
                       placeholder="••••••••"
                       minLength={6}
+                      className="rounded-xl border-gray-200 focus:border-[hsl(var(--teal-primary))] focus:ring-[hsl(var(--teal-primary))]"
                     />
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="w-full finpay-button-primary h-12" disabled={loading}>
                     {loading ? 'Skapar konto...' : 'Skapa konto'}
                   </Button>
                 </form>
