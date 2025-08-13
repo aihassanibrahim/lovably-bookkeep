@@ -1,4 +1,9 @@
 import React, { useState } from 'react';
+/**
+ * MAJOR CHANGE: Simplified Orders page to work with existing 'orders' table
+ * - Uses all existing fields: customer_social_media, product_details, product_customizations
+ * - Streamlined UI for small business order management
+ */
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

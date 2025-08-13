@@ -1,4 +1,9 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
+/**
+ * MAJOR CHANGE: Simplified BizPalContext to work with existing database tables
+ * - Removed complex features like inventory, invoices, expenses, production tasks
+ * - Focused on core order management functionality for small businesses
+ */
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { toast } from 'sonner';

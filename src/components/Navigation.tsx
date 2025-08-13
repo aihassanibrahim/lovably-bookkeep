@@ -1,4 +1,9 @@
 import React from 'react';
+/**
+ * MAJOR CHANGE: Simplified navigation to 4 core pages only
+ * - Removed complex features like inventory, invoices, expenses, production
+ * - Clean, focused navigation for small business needs
+ */
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/AuthProvider";

@@ -1,4 +1,9 @@
 import React, { useState } from 'react';
+/**
+ * MAJOR CHANGE: Simplified Customers page to work with existing 'customers' table
+ * - Uses existing schema with customer_number, company_name, contact fields
+ * - Streamlined for small business customer management
+ */
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
